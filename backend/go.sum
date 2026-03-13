@@ -2,3 +2,7 @@ github.com/danielgtaylor/huma/v2 v2.37.2 h1:Nf9vjy2sxBJFaupPlthXL/Hy2+LurfVbaKHm
 github.com/danielgtaylor/huma/v2 v2.37.2/go.mod h1:95S04G/lExFRYlBkKaBaZm9lVmxRmqX9f2CgoOZ11AM=
 github.com/go-chi/chi/v5 v5.2.5 h1:Eg4myHZBjyvJmAFjFvWgrqDTXFyOzjj7YIm3L3mu6Ug=
 github.com/go-chi/chi/v5 v5.2.5/go.mod h1:X7Gx4mteadT3eDOMTsXzmI4/rwUpOwBHLpAfupzFJP0=
+github.com/samber/do/v2 v2.0.0 h1:tnunwWaoqSfJ9hxVIaJawIo7JXHQlqT9d9YBXlE9Keg=
+github.com/samber/do/v2 v2.0.0/go.mod h1:ZSBCE7Xr6nTNIOVo4DBrkl2+ydUbIOzJjjdV8En5XO4=
+github.com/samber/go-type-to-string v1.8.0 h1:5z6tDTjtXxkIAoAuHAZYMYR8mkBZjVgeSH7jcSLqc8w=
+github.com/samber/go-type-to-string v1.8.0/go.mod h1:jpU77vIDoIxkahknKDoEx9C8bQ1ADnh2sotZ8I4QqBU=
