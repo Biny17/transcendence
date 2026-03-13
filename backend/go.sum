@@ -1,0 +1,4 @@
+github.com/danielgtaylor/huma/v2 v2.37.2 h1:Nf9vjy2sxBJFaupPlthXL/Hy2+LurfVbaKHmCMEI7xE=
+github.com/danielgtaylor/huma/v2 v2.37.2/go.mod h1:95S04G/lExFRYlBkKaBaZm9lVmxRmqX9f2CgoOZ11AM=
+github.com/go-chi/chi/v5 v5.2.5 h1:Eg4myHZBjyvJmAFjFvWgrqDTXFyOzjj7YIm3L3mu6Ug=
+github.com/go-chi/chi/v5 v5.2.5/go.mod h1:X7Gx4mteadT3eDOMTsXzmI4/rwUpOwBHLpAfupzFJP0=
