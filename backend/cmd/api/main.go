@@ -18,7 +18,7 @@ type Output struct {
 
 func main() {
     router := chi.NewMux()
-    api := humachi.New(router, huma.DefaultConfig("My API", "1.0.0"))
+    api := humachi.New(router, huma.DefaultConfig("API", "1.0.0"))
 
     huma.Register(api, huma.Operation{
         OperationID: "get-hello",
@@ -29,6 +29,6 @@ func main() {
         resp.Body.Message = "Hello, world!"
         return resp, nil
     })
-	fmt.Println("hello");
+	fmt.Println("hello world !");
     http.ListenAndServe(":8080", router)
 }
