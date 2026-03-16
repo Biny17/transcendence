@@ -1,35 +1,46 @@
 package main
 
 import (
-	"context"
-	"net/http"
-
 	"fmt"
-
-	"github.com/danielgtaylor/huma/v2"
-	"github.com/danielgtaylor/huma/v2/adapters/humachi"
-	"github.com/go-chi/chi/v5"
+	"github.com/spf13/viper"
 )
 
-type Output struct {
-	Body struct {
-		Message string `json:"message"`
+type Config struct {
+	Postgres PostgresConfig `mapstructure:"postgres"`
+}
+
+type PostgresConfig struct {
+	User     string `mapstructure:"user"`
+	Password string `mapstructure:"password"`
+	DB       string `mapstructure:"db"`
+}
+
+func LoadConfig() (*Config, error) {
+	viper.SetConfigName("config")
+	viper.AddConfigPath(".")
+
+	if err := viper.ReadInConfig(); err != nil {
+		return nil, fmt.Errorf("fatal error config file: %w", err)
 	}
+
+	var cfg Config
+	if err := viper.Unmarshal(&cfg); err != nil {
+		return nil, fmt.Errorf("unable to decode into struct: %w", err)
+	}
+
+	return &cfg, nil
 }
 
 func main() {
-	router := chi.NewMux()
-	api := humachi.New(router, huma.DefaultConfig("API", "1.0.0"))
+	cfg, err := LoadConfig()
+	if err != nil {
+		panic(err)
+	}
 
-	huma.Register(api, huma.Operation{
-		OperationID: "get-hello",
-		Method:      http.MethodGet,
-		Path:        "/hello",
-	}, func(ctx context.Context, input *struct{}) (*Output, error) {
-		resp := &Output{}
-		resp.Body.Message = "Hello, tristan !"
-		return resp, nil
-	})
-	fmt.Println("mdr hello world !")
-	http.ListenAndServe(":8080", router)
+	fmt.Printf(
+		"db_user: %s, db_pwd: %s, db_name: %s\n",
+		cfg.Postgres.User,
+		cfg.Postgres.Password,
+		cfg.Postgres.DB,
+	)
 }

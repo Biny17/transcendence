@@ -1,0 +1,4 @@
+postgres:
+  user: tgallet
+  password: sguan_is_cute
+  db: app_db
