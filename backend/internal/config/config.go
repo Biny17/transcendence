@@ -9,6 +9,7 @@ import (
 )
 
 type Config struct {
+	DBHost  string `mapstructure:"DB_HOST" validate:"required"`
 	DBUser  string `mapstructure:"DB_USER" validate:"required"`
 	DBPwd   string `mapstructure:"DB_PWD" validate:"required"`
 	DBName  string `mapstructure:"DB_NAME" validate:"required"`
@@ -29,8 +30,7 @@ func automaticBindEnv() {
 	}
 }
 
-func GetConfig() *Config {
-	fmt.Printf("Hello from GetConfig !\n")
+func GetConfig() Config {
 	automaticBindEnv()
 	var cfg Config
 	if err := viper.Unmarshal(&cfg); err != nil {
@@ -39,11 +39,12 @@ func GetConfig() *Config {
 	if err := validator.New().Struct(cfg); err != nil {
 		panic(fmt.Errorf("config validation failed: %w", err))
 	}
-	return &cfg
+	return cfg
 }
 
 func DebugConfig(cfg *Config) {
-	fmt.Printf("db_user: %s\n db_pwd: %s\n db_name: %s\n db_port: %s\n api_port: %s\n",
+	fmt.Printf("db_host: %s\n db_user: %s\n db_pwd: %s\n db_name: %s\n db_port: %s\n api_port: %s\n",
+		cfg.DBHost,
 		cfg.DBUser,
 		cfg.DBPwd,
 		cfg.DBName,
