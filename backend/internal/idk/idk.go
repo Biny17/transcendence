@@ -2,47 +2,44 @@ package idk
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/danielgtaylor/huma/v2"
 )
 
 type Idk struct {
-	Msg string
+	LaTeam string
 }
 
 type GreetInput struct {
-	Name string `path:"name" example:"edouard" doc:"come from path"`
 }
 
 type GreetOutput struct {
 	Body struct {
-		Message string `json:"message" example:"Hello, world!" doc:"Greeting message"`
+		Membres string `json:"membres" example:"Hello, world!"`
+		Goat    string `json:"greatest dev of all time" example:"Tristan"`
 	}
 }
 
 func NewIdk() (idk *Idk) {
-	fmt.Printf("NewIdk\n")
-	ret := &Idk{Msg: "Il fait beau aujourd'hui !"}
+	ret := &Idk{LaTeam: "Edouard Shiyan Alix Julien"}
 	return ret
 }
 
 func (idk *Idk) Greet(ctx context.Context, input *GreetInput) (*GreetOutput, error) {
 	out := &GreetOutput{}
-	fmt.Printf("Greet\n")
-	out.Body.Message = "Hello, " + input.Name + "! " + idk.Msg
+	out.Body.Membres = idk.LaTeam
+	out.Body.Goat = "Tristan"
 	return out, nil
 }
 
 func (idk *Idk) RegisterGreet(api huma.API) {
-	fmt.Printf("register greet\n")
 	huma.Register(api,
 		huma.Operation{
-			OperationID: "greet_test",
+			OperationID: "members",
 			Method:      http.MethodGet,
-			Path:        "/greet/{name}",
-			Summary:     "dumb test to learn how to use Huma",
+			Path:        "/team",
+			Summary:     "membres du groupe",
 		},
 		idk.Greet,
 	)
