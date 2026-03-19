@@ -63,8 +63,8 @@ export class UIExtension implements Extension {
 	}
 
 	dispose(): void {
-		this.ui.hide('hud')
-		this.ui.hide('escape-menu')
-		this.ui.hide('keybinds-menu')
+		this.ui?.hide('hud')
+		this.ui?.hide('escape-menu')
+		this.ui?.hide('keybinds-menu')
 	}
 }
