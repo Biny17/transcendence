@@ -9,10 +9,11 @@ import (
 )
 
 type Config struct {
-	DBUser string `mapstructure:"DB_USER" validate:"required"`
-	DBPwd  string `mapstructure:"DB_PWD" validate:"required"`
-	DBName string `mapstructure:"DB_NAME" validate:"required"`
-	DBPort int    `mapstructure:"DB_PORT" validate:"required"`
+	DBUser  string `mapstructure:"DB_USER" validate:"required"`
+	DBPwd   string `mapstructure:"DB_PWD" validate:"required"`
+	DBName  string `mapstructure:"DB_NAME" validate:"required"`
+	DBPort  string `mapstructure:"DB_PORT" validate:"required"`
+	ApiPort string `mapstructure:"API_PORT" validate:"required"`
 }
 
 func automaticBindEnv() {
@@ -42,10 +43,11 @@ func GetConfig() *Config {
 }
 
 func DebugConfig(cfg *Config) {
-	fmt.Printf("db_user: %s, db_pwd: %s, db_name: %s, db_port: %d\n",
+	fmt.Printf("db_user: %s\n db_pwd: %s\n db_name: %s\n db_port: %s\n api_port: %s\n",
 		cfg.DBUser,
 		cfg.DBPwd,
 		cfg.DBName,
 		cfg.DBPort,
+		cfg.ApiPort,
 	)
 }

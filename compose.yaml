@@ -11,6 +11,7 @@ services:
       - DB_USER=${POSTGRES_USER}
       - DB_PWD=${POSTGRES_PASSWORD}
       - DB_NAME=${POSTGRES_DB}
+      - API_PORT=8080
     volumes:
       - ./backend:/app
     depends_on:

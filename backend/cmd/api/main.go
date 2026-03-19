@@ -1,50 +1,48 @@
 package main
 
 import (
-	"backend/internal/config"
+	"context"
+	"fmt"
+	"net/http"
+
+	"github.com/danielgtaylor/huma/v2"
+	"github.com/danielgtaylor/huma/v2/adapters/humachi"
+	"github.com/go-chi/chi/v5"
 )
 
-func main() {
-	conf := config.GetConfig()
-	config.DebugConfig(conf)
+// func main() {
+// 	router := chi.NewMux()
+// 	log.Printf("START\n")
+// 	api := humachi.New(router, huma.DefaultConfig("transcendence", "1.0.0"))
+// 	// conf := config.GetConfig()
+// 	// config.DebugConfig(conf)
+// 	// idk := idk.NewIdk()
+// 	// huma.AutoRegister(api, idk)
+// 	log.Fatal(http.ListenAndServe("127.0.0.1:8080", router))
+// }
+
+// GreetingOutput represents the greeting operation response.
+type GreetingOutput struct {
+	Body struct {
+		Message string `json:"message" example:"Hello, world!" doc:"Greeting message"`
+	}
 }
 
-// type Config struct {
-// 	Postgres PostgresConfig `mapstructure:"postgres"`
-// }
+func main() {
+	// Create a new router & API.
+	router := chi.NewMux()
+	api := humachi.New(router, huma.DefaultConfig("My API", "1.0.0"))
 
-// type PostgresConfig struct {
-// 	User     string `mapstructure:"user"`
-// 	Password string `mapstructure:"password"`
-// 	DB       string `mapstructure:"db"`
-// }
+	// Register GET /greeting/{name} handler.
+	huma.Get(api, "/greeting/{name}", func(ctx context.Context, input *struct {
+		Name string `path:"name" maxLength:"30" example:"world" doc:"Name to greet"`
+	}) (*GreetingOutput, error) {
+		resp := &GreetingOutput{}
+		resp.Body.Message = fmt.Sprintf("Hello, %s!", input.Name)
+		return resp, nil
+	})
 
-// func LoadConfig() (*Config, error) {
-// 	viper.SetConfigName("config")
-// 	viper.AddConfigPath(".")
-
-// 	if err := viper.ReadInConfig(); err != nil {
-// 		return nil, fmt.Errorf("fatal error config file: %w", err)
-// 	}
-
-// 	var cfg Config
-// 	if err := viper.Unmarshal(&cfg); err != nil {
-// 		return nil, fmt.Errorf("unable to decode into struct: %w", err)
-// 	}
-
-// 	return &cfg, nil
-// }
-
-// func main() {
-// 	cfg, err := LoadConfig()
-// 	if err != nil {
-// 		panic(err)
-// 	}
-
-// 	fmt.Printf(
-// 		"db_user: %s, db_pwd: %s, db_name: %s\n",
-// 		cfg.Postgres.User,
-// 		cfg.Postgres.Password,
-// 		cfg.Postgres.DB,
-// 	)
-// }
+	fmt.Printf("hi\n")
+	// Start the server!
+	http.ListenAndServe("127.0.0.1:8080", router)
+}
