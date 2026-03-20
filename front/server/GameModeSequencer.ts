@@ -1,5 +1,5 @@
-import type { AssetManifest, EnvConfig } from '../shared/types'
-import { createMessage, SERVER_MSG } from '../shared/protocol'
+import type { AssetManifest, EnvConfig } from '@/shared/types'
+import { createMessage, SERVER_MSG } from '@/shared/protocol'
 type BroadcastFn = (msg: string) => void
 type GameModeEntry = {
   modeId: string

@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import type { Extension } from './Extension'
-import type { EngineContext } from '../5.modules/Module'
-import type { InputModule } from '../5.modules/input/InputModule'
+import type { EngineContext } from '@/ThreeWrapper/5.modules/Module'
+import type { InputModule } from '@/ThreeWrapper/5.modules/input/InputModule'
 export type PlayerControlOptions = {
   moveSpeed?: number
   mouseSensitivity?: number

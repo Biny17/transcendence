@@ -1,1 +1,1 @@
-export * from '../../../shared/protocol'
+export * from '@/shared/protocol'

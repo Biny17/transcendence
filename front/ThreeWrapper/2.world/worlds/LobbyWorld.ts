@@ -1,8 +1,8 @@
 import * as THREE from 'three'
 import { World } from '../WorldClass'
-import { ResizeModule } from '../../5.modules/rendering/ResizeModule'
-import type { LobbyStatePayload, LobbyUpdatePayload } from '../../../shared/protocol'
-import { SERVER_MSG } from '../../../shared/protocol'
+import { ResizeModule } from '@/ThreeWrapper/5.modules/rendering/ResizeModule'
+import type { LobbyStatePayload, LobbyUpdatePayload } from '@/shared/protocol'
+import { SERVER_MSG } from '@/shared/protocol'
 import { DefaultEnvironment } from '@/ThreeWrapper/3.environments/envs/DefaultEnvironment'
 export class LobbyWorld extends World {
 	constructor() {

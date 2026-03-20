@@ -1,6 +1,6 @@
 import * as THREE from 'three'
-import { Logger } from '../../1.engine/Logger'
-import type { Module, EngineContext } from '../Module'
+import { Logger } from '@/ThreeWrapper/1.engine/Logger'
+import type { Module, EngineContext } from '@/ThreeWrapper/5.modules/Module'
 import { ManagedObject } from '@/ThreeWrapper/2.world/tools/ObjectManager'
 export interface GravityConfig {
 	acceleration?: number

@@ -1,5 +1,5 @@
 import type * as THREE from 'three'
-import type { Module, EngineContext } from '../Module'
+import type { Module, EngineContext } from '@/ThreeWrapper/5.modules/Module'
 export class ObjectManagerModule implements Module {
   readonly type = 'object-manager'
   private objects: Map<string, THREE.Object3D> = new Map()

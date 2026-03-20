@@ -1,42 +1,61 @@
+# Environment files
 .env
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+.env.local
+.env.*.local
 
-# dependencies
+# Front dependencies
 front/node_modules
 front/.pnp
 front/.pnp.*
+front/bun.lock.bak
+front/server/node_modules
+
+# Front build
+front/.next/
+front/out/
+front/build/
+front/dist/
+
+# Yarn workspace files
 front/.yarn/*
 front/!.yarn/patches
 front/!.yarn/plugins
 front/!.yarn/releases
 front/!.yarn/versions
 
-# testing
+# Testing & coverage
 front/coverage
 
-# next.js
-front/.next/
-front/out/
-
-# production
-front/build
-
-# misc
-front/.DS_Store
-front/*.pem
-
-# debug
+# Logs
 front/npm-debug.log*
 front/yarn-debug.log*
 front/yarn-error.log*
 front/.pnpm-debug.log*
+*.log
 
-# env files (can opt-in for committing if needed)
-front/.env*
+# OS
+front/.DS_Store
+.DS_Store
+front/*.pem
 
-# vercel
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Vercel
 front/.vercel
 
-# typescript
+# TypeScript
 front/*.tsbuildinfo
 front/next-env.d.ts
+front/tsconfig.tsbuildinfo
+
+
+# Docker volumes
+postgres_data/
+
+# Turbo
+.turbo
+.turborepo

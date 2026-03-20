@@ -1,8 +1,8 @@
 'use client'
-import type { LoadWorldPayload, StartWorldPayload } from '../../shared/protocol'
-import { SERVER_MSG } from '../../shared/protocol'
-import type { World } from '../2.world/WorldClass'
-import type { NetworkManager } from './network/NetworkManager'
+import type { LoadWorldPayload, StartWorldPayload } from '@/shared/protocol'
+import { SERVER_MSG } from '@/shared/protocol'
+import type { World } from '@/ThreeWrapper/2.world/WorldClass'
+import type { NetworkManager } from '@/ThreeWrapper/1.engine/network/NetworkManager'
 async function loadWorldById(worldId: string): Promise<World> {
   const name = `${worldId.charAt(0).toUpperCase()}${worldId.slice(1)}World`
   const mod = await import(`../2.world/worlds/${name}`)

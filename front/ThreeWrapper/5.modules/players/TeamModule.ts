@@ -1,5 +1,5 @@
-import type { Module, EngineContext } from '../Module'
-import type { Player } from '../../../shared/types'
+import type { Module, EngineContext } from '@/ThreeWrapper/5.modules/Module'
+import type { Player } from '@/shared/types'
 export type TeamColor = 'red' | 'blue' | 'green' | 'yellow' | string
 export type Team = {
   id: string

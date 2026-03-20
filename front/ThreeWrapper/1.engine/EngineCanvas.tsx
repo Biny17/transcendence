@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useRef } from 'react'
-import type { EngineConfig, KeyBinding } from '../../shared/types'
-import type { World } from '../2.world/WorldClass'
+import type { EngineConfig, KeyBinding } from '@/shared/types'
+import type { World } from '@/ThreeWrapper/2.world/WorldClass'
 import { Engine } from './Engine'
 type EngineCanvasProps = {
 	config: Omit<EngineConfig, 'canvas'>

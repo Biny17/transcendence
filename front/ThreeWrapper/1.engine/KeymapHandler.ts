@@ -1,4 +1,4 @@
-import type { KeyBinding } from '../../shared/types'
+import type { KeyBinding } from '@/shared/types'
 export class KeymapHandler {
   private readonly bindings = new Map<string, KeyBinding>()
   constructor(defaults: KeyBinding[] = []) {

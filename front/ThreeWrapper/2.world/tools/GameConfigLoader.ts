@@ -1,5 +1,5 @@
-import type { EventHandler } from '../../1.engine/EventHandler'
-import type { GameConfig } from '../../../shared/types'
+import type { EventHandler } from '@/ThreeWrapper/1.engine/EventHandler'
+import type { GameConfig } from '@/shared/types'
 export class GameConfigLoader {
 	private _config: GameConfig | null = null
 	get config(): GameConfig | null {
