@@ -1,4 +1,36 @@
 services:
+  web:
+    image: oven/bun:latest
+    working_dir: /app
+    volumes:
+      - ./front:/app
+      - /app/node_modules
+    ports:
+      - "3001:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://api:8080
+      - NODE_ENV=development
+    depends_on:
+      - api
+    entrypoint: sh -c "bun install && bun dev"
+    restart: unless-stopped
+
+  game-server:
+    image: oven/bun:latest
+    working_dir: /app
+    volumes:
+      - ./front:/app
+      - /app/node_modules
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - NODE_ENV=development
+    depends_on:
+      - api
+    entrypoint: sh -c "cd server && bun install && cd .. && bun server/index.ts"
+    restart: unless-stopped
+
   api:
     build:
       context: ./backend
@@ -34,6 +66,19 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
+
+  # Uncomment to test production build
+  # web-prod:
+  #   build:
+  #     context: ./front
+  #     dockerfile: Dockerfile.web
+  #   ports:
+  #     - "3001:3000"
+  #   environment:
+  #     - NEXT_PUBLIC_API_URL=http://api:8080
+  #   depends_on:
+  #     - api
+  #   restart: unless-stopped
 
 volumes:
   postgres_data:

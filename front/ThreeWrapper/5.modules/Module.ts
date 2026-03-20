@@ -1,8 +1,8 @@
 import type * as THREE from 'three'
-import type { EventHandler } from '../1.engine/EventHandler'
-import type { KeymapHandler } from '../1.engine/KeymapHandler'
-import type { Logger } from '../1.engine/Logger'
-import type { NetworkManager } from '../1.engine/network/NetworkManager'
+import type { EventHandler } from '@/ThreeWrapper/1.engine/EventHandler'
+import type { KeymapHandler } from '@/ThreeWrapper/1.engine/KeymapHandler'
+import type { Logger } from '@/ThreeWrapper/1.engine/Logger'
+import type { NetworkManager } from '@/ThreeWrapper/1.engine/network/NetworkManager'
 export type EngineContext = {
   scene: THREE.Scene
   camera: THREE.PerspectiveCamera

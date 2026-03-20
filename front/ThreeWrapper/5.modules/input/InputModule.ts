@@ -1,5 +1,5 @@
-import { Logger } from '../../1.engine/Logger'
-import type { Module, EngineContext } from '../Module'
+import { Logger } from '@/ThreeWrapper/1.engine/Logger'
+import type { Module, EngineContext } from '@/ThreeWrapper/5.modules/Module'
 export interface KeyBinding {
   action: string
   fn?: (delta: number) => void

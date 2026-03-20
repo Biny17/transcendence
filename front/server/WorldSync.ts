@@ -1,5 +1,5 @@
-import type { PlayerState, WorldState, Vec3 } from '../shared/types'
-import type { PlayerInputPayload } from '../shared/protocol'
+import type { PlayerState, WorldState, Vec3 } from '@/shared/types'
+import type { PlayerInputPayload } from '@/shared/protocol'
 const MAX_SPEED = 15 
 const MAX_MESSAGES_PER_SECOND = 30
 export class WorldSync {

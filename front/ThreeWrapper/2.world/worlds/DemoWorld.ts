@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { World } from '../WorldClass'
-import { DefaultEnvironment } from '../../3.environments/envs/DefaultEnvironment'
+import { DefaultEnvironment } from '@/ThreeWrapper/3.environments/envs/DefaultEnvironment'
 import { ObjectManager } from '../tools/ObjectManager'
 import { applyGravity, autoFitCollisionBox, makeCollisionBody, makeCollisionBox } from '@/ThreeWrapper/5.modules'
 import { GeometryFactory } from '../tools/GeometryFactory'

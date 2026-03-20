@@ -115,20 +115,20 @@ export class LightFactory {
 		if (config.name) light.name = config.name
 		light.position.set(config.position.x, config.position.y, config.position.z)
 		light.target.position.set(config.target.x, config.target.y, config.target.z)
-		if (config.castShadow) {
+		if (config.castShadow && config.shadow?.mapSize && config.shadow?.camera) {
 			light.castShadow = true
 			light.shadow.mapSize.width = config.shadow.mapSize.width
 			light.shadow.mapSize.height = config.shadow.mapSize.height
 			const cam = config.shadow.camera
-			light.shadow.camera.left = cam.left
-			light.shadow.camera.right = cam.right
-			light.shadow.camera.top = cam.top
-			light.shadow.camera.bottom = cam.bottom
-			light.shadow.camera.near = cam.near
-			light.shadow.camera.far = cam.far
-			light.shadow.bias = config.shadow.bias
-			light.shadow.normalBias = config.shadow.normalBias
-			light.shadow.radius = config.shadow.radius
+			if (cam.left !== undefined) light.shadow.camera.left = cam.left
+			if (cam.right !== undefined) light.shadow.camera.right = cam.right
+			if (cam.top !== undefined) light.shadow.camera.top = cam.top
+			if (cam.bottom !== undefined) light.shadow.camera.bottom = cam.bottom
+			if (cam.near !== undefined) light.shadow.camera.near = cam.near
+			if (cam.far !== undefined) light.shadow.camera.far = cam.far
+			light.shadow.bias = config.shadow.bias ?? -0.0001
+			light.shadow.normalBias = config.shadow.normalBias ?? 0.02
+			light.shadow.radius = config.shadow.radius ?? 4
 		}
 		return light
 	}
@@ -156,16 +156,16 @@ export class LightFactory {
 		const light = new THREE.PointLight(config.color, config.intensity, config.distance, config.decay)
 		if (config.name) light.name = config.name
 		light.position.set(config.position.x, config.position.y, config.position.z)
-		if (config.castShadow) {
+		if (config.castShadow && config.shadow?.mapSize && config.shadow?.camera) {
 			light.castShadow = true
 			light.shadow.mapSize.width = config.shadow.mapSize.width
 			light.shadow.mapSize.height = config.shadow.mapSize.height
 			const cam = config.shadow.camera
-			light.shadow.camera.near = cam.near
-			light.shadow.camera.far = cam.far
-			light.shadow.bias = config.shadow.bias
-			light.shadow.normalBias = config.shadow.normalBias
-			light.shadow.radius = config.shadow.radius
+			if (cam.near !== undefined) light.shadow.camera.near = cam.near
+			if (cam.far !== undefined) light.shadow.camera.far = cam.far
+			light.shadow.bias = config.shadow.bias ?? -0.0001
+			light.shadow.normalBias = config.shadow.normalBias ?? 0.02
+			light.shadow.radius = config.shadow.radius ?? 4
 		}
 		return light
 	}
@@ -205,17 +205,17 @@ export class LightFactory {
 		if (config.name) light.name = config.name
 		light.position.set(config.position.x, config.position.y, config.position.z)
 		light.target.position.set(config.target.x, config.target.y, config.target.z)
-		if (config.castShadow) {
+		if (config.castShadow && config.shadow?.mapSize && config.shadow?.camera) {
 			light.castShadow = true
 			light.shadow.mapSize.width = config.shadow.mapSize.width
 			light.shadow.mapSize.height = config.shadow.mapSize.height
 			const cam = config.shadow.camera
-			light.shadow.camera.near = cam.near
-			light.shadow.camera.far = cam.far
-			light.shadow.camera.fov = cam.fov
-			light.shadow.bias = config.shadow.bias
-			light.shadow.normalBias = config.shadow.normalBias
-			light.shadow.radius = config.shadow.radius
+			if (cam.near !== undefined) light.shadow.camera.near = cam.near
+			if (cam.far !== undefined) light.shadow.camera.far = cam.far
+			if (cam.fov !== undefined) light.shadow.camera.fov = cam.fov
+			light.shadow.bias = config.shadow.bias ?? -0.0001
+			light.shadow.normalBias = config.shadow.normalBias ?? 0.02
+			light.shadow.radius = config.shadow.radius ?? 4
 		}
 		return light
 	}

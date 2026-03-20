@@ -1,4 +1,4 @@
-import type { GameConfigAction } from '../../shared/types'
+import type { GameConfigAction } from '@/shared/types'
 type EventListener<T = unknown> = (data: T) => void
 export class EventHandler {
   private readonly listeners = new Map<string, EventListener[]>()

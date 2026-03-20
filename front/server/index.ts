@@ -1,8 +1,8 @@
 import { LobbyManager } from './LobbyManager'
 import { GameModeSequencer } from './GameModeSequencer'
 import { WorldSync } from './WorldSync'
-import { createMessage, parseMessage, SERVER_MSG, CLIENT_MSG } from '../shared/protocol'
-import type { WSMessage, PlayerInputPayload } from '../shared/protocol'
+import { createMessage, parseMessage, SERVER_MSG, CLIENT_MSG } from '@/shared/protocol'
+import type { WSMessage, PlayerInputPayload } from '@/shared/protocol'
 import { WorldState } from '@/shared/types'
 const PORT = parseInt(process.env.PORT ?? '3002')
 const lobbyManager = new LobbyManager()
