@@ -1,0 +1,5 @@
+✔ Add JWT_SECRET to env @done (3/20/2026, 4:45:59 PM)
+✔ Look up symmetric encryption @done (3/20/2026, 4:51:21 PM)
+✔ Install jason web token lib @done (3/20/2026, 4:51:22 PM)
+✔ Make notion jason web token documentation @done (3/20/2026, 4:51:23 PM)
+☐ Look up middleware + notion documentation
