@@ -4,7 +4,6 @@ import Image from 'next/image';
 import './Navbar.css';
 import './Background.css';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import logo from "../logo.png";
 import Link from 'next/link'
 import { useRouter } from 'next/navigation';
 

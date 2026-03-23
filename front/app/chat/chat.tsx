@@ -1,7 +1,6 @@
 "use client";
 
-import Groq from "groq-sdk";
-import { useState, useMemo, Fragment } from "react";
+import { useState, Fragment } from "react";
 import {
   CalendarDaysIcon,
   GiftIcon,
@@ -53,14 +52,7 @@ const ASSISTANT_SENDER = {
 };
 
 export default function Chat() {
-  const client = useMemo(
-    () =>
-      new Groq({
-        apiKey: process.env.GROK,
-        dangerouslyAllowBrowser: true,
-      }),
-    []
-  );
+  
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -81,21 +73,22 @@ export default function Chat() {
     setIsLoading(true);
 
     try {
-      const completion = await client.chat.completions.create({
-        model: "llama-3.3-70b-versatile",
-        messages: [...messages, userMessage].map(({ role, content }) => ({
-          role,
-          content,
-        })),
-      });
+      const res = await fetch("/api/chat", {       // 👈 adapte l'URL à ta route
+       method: "POST",
+      headers: { "Content-Type": "application/json" },
+       body: JSON.stringify({
+         messages: [...messages, userMessage].map(({ role, content }) => ({ role, content })),
+       }),
+     });
 
-      const assistantMessage: Message = {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        content: completion.choices[0].message.content ?? "",
-        timestamp: new Date(),
-      };
+     const data = await res.json();
 
+     const assistantMessage: Message = {
+       id: crypto.randomUUID(),
+       role: "assistant",
+       content: data.text ?? "",
+       timestamp: new Date(),
+     };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (err) {
       console.error("Groq error:", err);

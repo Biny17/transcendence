@@ -7,10 +7,25 @@ import { Navbar } from './Navbar.jsx';
 import { Button } from "../animations/Button.jsx"
 import Chat from '../chat/chat';
 import { ChartComponent } from "../charts/chart"
+import { EngineCanvas } from '@/ThreeWrapper/1.engine/EngineCanvas';
+import { DemoWorld } from '@/ThreeWrapper/2.world/worlds/DemoWorld';
 
 export default function Home() {
   const [signInOpen, setSignInOpen] = useState(false);
+//   const testAPI = async () =>{
+// const url = 'http://localhost:8080/hello';
+// const options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
+
+//   try {
+//     const response = await fetch(url, options);
+//     const data = await response.json();
+//     alert(data);
+//   } catch (error) {
+//     console.error(error);
+//   }
+// }
   return (
+    
     <main className="relative min-h-screen">
       <Background />
       <Navbar signInOpen={signInOpen} setSignInOpen={setSignInOpen} />
@@ -22,6 +37,11 @@ export default function Home() {
           animate={{ opacity: signInOpen ? 0 : 1, scale: signInOpen ? 0.8 : 1 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
         >
+          {/* <EngineCanvas
+            config={{ mode: 'standalone' , debug:{enabled:true,logPhases:true,showHitboxes:true, showBounds:true, logRenderState:true, logPhaseDurations:true,logPhysicsState:true}}}
+            world={() => new DemoWorld()}
+            style={{ width: '100vw', height: '100vh' }}
+          /> */}
           <div className="w-[400px] h-[400px] md:w-[600px] md:h-[600px]">
             <DotLottieReact
               src="https://lottie.host/4a6712be-c728-4247-a609-65bd86fe8a84/JYUyKJJZH8.lottie"

@@ -3,7 +3,6 @@ import { useState } from 'react';
 import Image from 'next/image';
 import './Navbar.css';
 import './Background.css';
-import logo from "../logo.png";
 
 export const Navbar = ({ signInOpen, setSignInOpen }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);

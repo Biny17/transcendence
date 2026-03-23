@@ -8,6 +8,7 @@ import (
     "github.com/danielgtaylor/huma/v2/adapters/humachi"
     "github.com/go-chi/chi/v5"
 	"fmt"
+    "github.com/go-chi/cors"
 )
 
 type Output struct {
@@ -18,6 +19,13 @@ type Output struct {
 
 func main() {
     router := chi.NewMux()
+     router.Use(cors.Handler(cors.Options{
+        AllowedOrigins:   []string{"https://*", "http://*"},
+        AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+        AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
+        AllowCredentials: false,
+        MaxAge:           300,
+    }))
     api := humachi.New(router, huma.DefaultConfig("API", "1.0.0"))
 
     huma.Register(api, huma.Operation{

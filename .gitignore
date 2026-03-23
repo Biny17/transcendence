@@ -16,7 +16,7 @@ front/out/
 front/build/
 front/dist/
 front/.env
-
+front/node_modules
 # Yarn workspace files
 front/.yarn/*
 front/!.yarn/patches
