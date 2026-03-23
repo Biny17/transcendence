@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 
 	"github.com/go-playground/validator/v10"
@@ -40,6 +41,37 @@ func GetConfig() Config {
 		panic(fmt.Errorf("config validation failed: %w", err))
 	}
 	return cfg
+}
+
+func printAllowedOrigins(origins []string) {
+	fmt.Printf("Allowed Origins: %d\n", len(origins))
+	for _, origin := range origins {
+		fmt.Printf("- %s\n", origin)
+	}
+}
+
+func GetAllowedOrigins() []string {
+	var origins []string
+	var missing bool
+
+	missing = false
+	viper.SetConfigName("config")
+	viper.AddConfigPath(".")
+	if err := viper.ReadInConfig(); err != nil {
+		log.Printf("MISSING config.yaml: %s\n", err)
+		missing = true
+	}
+	if err := viper.UnmarshalKey("allowed_origins", &origins); err != nil {
+		log.Printf("MISSING config.yamal allowed_origins: %s\n", err)
+		missing = true
+	}
+	if missing {
+		//"https://*", "http://*"
+		origins = append(origins, "http://*")
+		origins = append(origins, "https://*")
+	}
+	printAllowedOrigins(origins)
+	return origins
 }
 
 func DebugConfig(cfg *Config) {

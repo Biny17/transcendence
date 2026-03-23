@@ -2,4 +2,13 @@
 ✔ Look up symmetric encryption @done (3/20/2026, 4:51:21 PM)
 ✔ Install jason web token lib @done (3/20/2026, 4:51:22 PM)
 ✔ Make notion jason web token documentation @done (3/20/2026, 4:51:23 PM)
-☐ Look up middleware + notion documentation
+✔ Look up middleware + notion documentation @done (3/23/2026, 2:21:43 PM)
+
+Service:
+    ☐ user_service
+    ☐ config
+    ☐ auth
+
+Game server <-> API => static API key
+user/frontend <-> API => JWT bearer
+

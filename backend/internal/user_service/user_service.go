@@ -19,13 +19,16 @@ type UserService struct {
 	Client *ent.Client
 }
 
-type AddUserI struct {
-	Username string `query:"username"`
-	Age      int    `query:"age"`
-	Email    string `query:"email"`
+type AddUserIn struct {
+	Body struct {
+		Username string `json:"username" required:"true"`
+		Age      int    `json:"age" minimum:"1" maximum:"99" required:"true"`
+		Email    string `json:"email" required:"true"`
+	}
 }
 
-type AddUserO struct {
+type AddUserOut struct {
+	message string `json:"message"`
 }
 
 func NewUserService() *UserService {
@@ -48,28 +51,31 @@ func NewUserService() *UserService {
 	return us
 }
 
-func (us *UserService) AddUser(ctx context.Context, input *AddUserI) (*AddUserO, error) {
-	log.Printf("username: %s | age: %d | email: %s\n", input.Username, input.Age, input.Email)
+func (us *UserService) AddUser(ctx context.Context, input *AddUserIn) (*AddUserOut, error) {
+	log.Printf("username: %s | age: %d | email: %s\n",
+		input.Body.Username,
+		input.Body.Age,
+		input.Body.Email,
+	)
 	_, err := us.Client.User.
 		Create().
-		SetUsername(input.Username).
-		SetAge(input.Age).
-		SetEmail(input.Email).
+		SetUsername(input.Body.Username).
+		SetAge(input.Body.Age).
+		SetEmail(input.Body.Email).
 		Save(ctx)
 	if err != nil {
-		return nil, err
+		log.Print(err)
+		return nil, huma.Error500InternalServerError(err.Error())
 	}
-	log.Printf("Test\n")
-	output := &AddUserO{}
-	return output, nil
+	return &AddUserOut{message: "user created successfully"}, nil
 }
 
 func (us *UserService) Register(api huma.API) {
 	log.Printf("Registering user service")
 	huma.Register(api, huma.Operation{
-		Method:  http.MethodGet,
-		Path:    "/adduser",
-		Summary: "Add a user to the database",
-	}, us.AddUser,
-	)
+		Method:        http.MethodPost,
+		Path:          "/adduser",
+		Summary:       "Add a user to the database",
+		DefaultStatus: 201,
+	}, us.AddUser)
 }
