@@ -1,0 +1,55 @@
+"use client";
+import "./Background.css";
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { motion } from "motion/react"
+import {Button } from "../animations/Button.jsx"
+export function Background({ signInOpen }) {
+  return (
+	<>
+    <div className="background">
+		 <DotLottieReact
+      src="https://lottie.host/1e6411ca-df14-4327-82a1-de9f5ebacc6b/rKObaLwEn8.lottie"
+	  
+      autoplay
+    />
+	      <div className="blob blob-1"></div>
+      <div className="blob blob-2"></div>
+      <div className="blob blob-3"></div>
+      <div className="blob blob-4"></div>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="relative px-20 py-14 text-center">
+          <div className="absolute -top-14 -left-14 h-28 w-28 md:h-32 md:w-32">
+            <DotLottieReact src="https://lottie.host/625715ba-c990-472d-88c9-679feb7fa833/K7RlLzljd1.lottie" loop autoplay />
+          </div>
+          <div className="absolute -top-14 -right-14 h-28 w-28 md:h-32 md:w-32">
+            <DotLottieReact src="https://lottie.host/3bc754e9-b96f-4a78-b231-ee8fd8222940/Eff0spwnNq.lottie" loop autoplay />
+          </div>
+          <div className="absolute -bottom-14 -left-14 h-28 w-28 md:h-32 md:w-32">
+            <DotLottieReact src="https://lottie.host/3bc754e9-b96f-4a78-b231-ee8fd8222940/Eff0spwnNq.lottie" loop autoplay />
+          </div>
+          <div className="absolute -bottom-14 -right-14 h-28 w-28 md:h-32 md:w-32">
+            <DotLottieReact src="https://lottie.host/625715ba-c990-472d-88c9-679feb7fa833/K7RlLzljd1.lottie" loop autoplay />
+          </div>
+            <motion.h1
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: signInOpen ? 0 : 1, scale: signInOpen ? 0.8 : 1 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+              className="party-title mb-6 text-5xl md:text-7xl lg:text-8xl xl:text-9xl text-white"
+            >
+              <span className="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">
+                Fun Guys
+              </span>{" "}
+              <span className="text-white">(For Sure)</span>
+
+              <p className="mt-3 text-2xl font-semibold text-white lg:text-3xl">
+                Here comes the Fun
+              </p>
+          </motion.h1>
+           <Button statement= "Let's play"/>
+        </div>
+        
+      </div>
+    </div>
+	</>
+  );
+}

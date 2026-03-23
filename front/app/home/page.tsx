@@ -1,0 +1,55 @@
+"use client"
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { Background } from './Background';
+import { Navbar } from './Navbar.jsx';
+import { Button } from "../animations/Button.jsx"
+import Chat from '../chat/chat';
+import { ChartComponent } from "../charts/chart"
+
+export default function Home() {
+  const [signInOpen, setSignInOpen] = useState(false);
+  return (
+    <main className="relative min-h-screen">
+      <Background />
+      <Navbar signInOpen={signInOpen} setSignInOpen={setSignInOpen} />
+
+      <div className="absolute inset-0 flex items-center justify-center gap-12">
+        <motion.div
+          className="flex flex-col items-center gap-6"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: signInOpen ? 0 : 1, scale: signInOpen ? 0.8 : 1 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+        >
+          <div className="w-[400px] h-[400px] md:w-[600px] md:h-[600px]">
+            <DotLottieReact
+              src="https://lottie.host/4a6712be-c728-4247-a609-65bd86fe8a84/JYUyKJJZH8.lottie"
+              loop
+              autoplay
+            />
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: signInOpen ? 0 : 1, y: signInOpen ? 20 : 0 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+          >
+            <Button statement="Let's play" />
+          </motion.div>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, x: 40 }}
+          animate={{ opacity: signInOpen ? 0 : 1, x: signInOpen ? 40 : 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+        >
+          <ChartComponent />
+        </motion.div>
+      </div>
+
+      <div className="fixed bottom-4 left-4 z-50 h-[55vh] max-h-128 w-80 max-w-[calc(100vw-2rem)]">
+        <Chat />
+      </div>
+    </main>
+  );
+}
