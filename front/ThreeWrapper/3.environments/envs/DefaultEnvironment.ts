@@ -1,6 +1,6 @@
-import { CollisionModule,ResizeModule,GravityModule, UIModule, SkyboxModule } from '../../5.modules/index'
-import { Environment } from '../EnvironmentClass'
-import { UIExtension } from '../../4.extensions/UIExtension'
+import { CollisionModule,ResizeModule,GravityModule, UIModule, SkyboxModule } from '@/ThreeWrapper/5.modules/index'
+import { Environment } from '@/ThreeWrapper/3.environments/EnvironmentClass'
+import { UIExtension } from '@/ThreeWrapper/4.extensions/UIExtension'
 export class DefaultEnvironment extends Environment {
   constructor() {
     super({

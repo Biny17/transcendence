@@ -1,8 +1,8 @@
-import { CollisionModule } from '../5.modules/physics/CollisionModule'
-import { GravityModule } from '../5.modules/physics/GravityModule'
-import { TeamModule } from '../5.modules/players/TeamModule'
-import { ResizeModule } from '../5.modules/rendering/ResizeModule'
-import { Environment } from './EnvironmentClass'
+import { CollisionModule } from '@/ThreeWrapper/5.modules/physics/CollisionModule'
+import { GravityModule } from '@/ThreeWrapper/5.modules/physics/GravityModule'
+import { TeamModule } from '@/ThreeWrapper/5.modules/players/TeamModule'
+import { ResizeModule } from '@/ThreeWrapper/5.modules/rendering/ResizeModule'
+import { Environment } from '@/ThreeWrapper/3.environments/EnvironmentClass'
 export class OnlinePlayerEnvironment extends Environment {
   constructor() {
     super({

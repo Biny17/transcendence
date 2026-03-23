@@ -1,5 +1,5 @@
-import type { PlayerInputPayload } from '../../shared/protocol'
-import type { Vec3 } from '../../shared/types'
+import type { PlayerInputPayload } from '@/shared/protocol'
+import type { Vec3 } from '@/shared/types'
 const CHECKPOINT_POSITIONS: Vec3[] = [
   { x: 5, y: 1, z: 0 },
   { x: 10, y: 2, z: 0 },

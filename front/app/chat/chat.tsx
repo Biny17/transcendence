@@ -56,7 +56,7 @@ export default function Chat() {
   const client = useMemo(
     () =>
       new Groq({
-        apiKey: "***REMOVED***",
+        apiKey: process.env.GROK,
         dangerouslyAllowBrowser: true,
       }),
     []

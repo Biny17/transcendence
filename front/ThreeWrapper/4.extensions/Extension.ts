@@ -1,4 +1,4 @@
-import type { EngineContext } from '../5.modules/Module'
+import type { EngineContext } from '@/ThreeWrapper/5.modules/Module'
 export interface Extension {
   readonly type: string
   init(context: EngineContext): void | Promise<void>

@@ -1,6 +1,6 @@
-import type { EnvConfig } from '../../shared/types'
-import type { Extension } from '../4.extensions/Extension'
-import type { Module } from '../5.modules/Module'
+import type { EnvConfig } from '@/shared/types'
+import type { Extension } from '@/ThreeWrapper/4.extensions/Extension'
+import type { Module } from '@/ThreeWrapper/5.modules/Module'
 export class Environment {
   readonly config: EnvConfig
   protected modules: Module[] = []

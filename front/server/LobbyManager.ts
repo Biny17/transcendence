@@ -1,4 +1,4 @@
-import type { Player } from '../shared/types'
+import type { Player } from '@/shared/types'
 type ClientWS = { send(data: string): void; close(): void }
 const LOBBY_COUNTDOWN_MS = 10_000
 export class LobbyManager {

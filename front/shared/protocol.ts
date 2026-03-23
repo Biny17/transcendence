@@ -20,16 +20,20 @@ export type PlayerReadyPayload = Record<string, never>
 export type AssetsReadyPayload = Record<string, never>
 export type PlayerInputPayload = { pos: Vec3; rot: Quat; action?: string }
 export const SERVER_MSG = {
-  CONNECTED:      'CONNECTED',
-  LOAD_WORLD:     'LOAD_WORLD',    
-  START_WORLD:    'START_WORLD',   
-  WORLD_STATE:    'WORLD_STATE',
-  WORLD_END:      'WORLD_END',     
-  LOBBY_STATE:    'LOBBY_STATE',
-  LOBBY_UPDATE:   'LOBBY_UPDATE',
-  SPECTATE_MODE:  'SPECTATE_MODE',
-  PLAYER_DROPPED: 'PLAYER_DROPPED',
-  ERROR:          'ERROR',
+  CONNECTED:       'CONNECTED',
+  LOAD_SCENE:      'LOAD_SCENE',
+  LOAD_WORLD:      'LOAD_WORLD',
+  START_WORLD:     'START_WORLD',
+  LOAD_GAMEMODE:   'LOAD_GAMEMODE',
+  GAMEMODE_START:  'GAMEMODE_START',
+  GAMEMODE_END:    'GAMEMODE_END',
+  WORLD_STATE:     'WORLD_STATE',
+  WORLD_END:       'WORLD_END',
+  LOBBY_STATE:     'LOBBY_STATE',
+  LOBBY_UPDATE:    'LOBBY_UPDATE',
+  SPECTATE_MODE:   'SPECTATE_MODE',
+  PLAYER_DROPPED:  'PLAYER_DROPPED',
+  ERROR:           'ERROR',
 } as const
 export type ConnectedPayload     = { playerId: string }
 export type LoadWorldPayload     = { worldId: string }

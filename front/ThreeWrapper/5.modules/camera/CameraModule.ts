@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import type { Module, EngineContext } from '../Module'
+import type { Module, EngineContext } from '@/ThreeWrapper/5.modules/Module'
 export type CameraMode = 'orbit' | 'third-person' | 'free'
 export interface CameraModuleOptions {
   mode?: CameraMode

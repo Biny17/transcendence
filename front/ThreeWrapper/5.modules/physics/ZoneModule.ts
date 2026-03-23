@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import type { Module, EngineContext } from '../Module'
+import type { Module, EngineContext } from '@/ThreeWrapper/5.modules/Module'
 import type { ManagedObject } from '@/ThreeWrapper/2.world/tools/ObjectManager'
 export type ZoneSphere = {
   shape: 'sphere'

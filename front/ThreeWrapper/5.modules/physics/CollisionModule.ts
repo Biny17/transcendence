@@ -1,6 +1,6 @@
 import * as THREE from 'three'
-import type { Module, EngineContext } from '../Module'
-import type { ManagedObject } from '../../2.world/tools/ObjectManager'
+import type { Module, EngineContext } from '@/ThreeWrapper/5.modules/Module'
+import type { ManagedObject } from '@/ThreeWrapper/2.world/tools/ObjectManager'
 export interface CollisionConfig {
 	friction?: number
 	debug?: boolean

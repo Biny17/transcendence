@@ -1,11 +1,11 @@
 import { createElement } from 'react'
 import type { Extension } from './Extension'
-import type { EngineContext } from '../5.modules/Module'
-import type { UIModule } from '../5.modules/ui/UIModule'
-import type { InputModule } from '../5.modules/input/InputModule'
-import { EscapeMenu } from '../5.modules/ui/components/EscapeMenu'
-import { HUD } from '../5.modules/ui/components/HUD'
-import { KeybindsMenu } from '../5.modules/ui/components/KeybindsMenu'
+import type { EngineContext } from '@/ThreeWrapper/5.modules/Module'
+import type { UIModule } from '@/ThreeWrapper/5.modules/ui/UIModule'
+import type { InputModule } from '@/ThreeWrapper/5.modules/input/InputModule'
+import { EscapeMenu } from '@/ThreeWrapper/5.modules/ui/components/EscapeMenu'
+import { HUD } from '@/ThreeWrapper/5.modules/ui/components/HUD'
+import { KeybindsMenu } from '@/ThreeWrapper/5.modules/ui/components/KeybindsMenu'
 
 export class UIExtension implements Extension {
 	readonly type = 'ui_extension'
@@ -63,8 +63,8 @@ export class UIExtension implements Extension {
 	}
 
 	dispose(): void {
-		this.ui.hide('hud')
-		this.ui.hide('escape-menu')
-		this.ui.hide('keybinds-menu')
+		this.ui?.hide('hud')
+		this.ui?.hide('escape-menu')
+		this.ui?.hide('keybinds-menu')
 	}
 }

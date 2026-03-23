@@ -1,15 +1,15 @@
-import type { Engine } from '../Engine'
-import type { WSMessage } from '../../../shared/protocol'
+import type { Engine } from '@/ThreeWrapper/1.engine/Engine'
+import type { WSMessage } from '@/shared/protocol'
 import {
   SERVER_MSG,
   CLIENT_MSG,
   createMessage,
   parseMessage,
-} from '../../../shared/protocol'
+} from '@/shared/protocol'
 import type {
   ConnectedPayload,
   PlayerInputPayload,
-} from '../../../shared/protocol'
+} from '@/shared/protocol'
 type MessageHandler<T = unknown> = (payload: T) => void
 const RECONNECT_ATTEMPTS = 3
 const RECONNECT_INTERVAL_MS = 2000
