@@ -52,6 +52,18 @@ func (_c *UserCreate) SetNillableCreatedAt(v *time.Time) *UserCreate {
 	return _c
 }
 
+// SetSalt sets the "salt" field.
+func (_c *UserCreate) SetSalt(v string) *UserCreate {
+	_c.mutation.SetSalt(v)
+	return _c
+}
+
+// SetHash sets the "hash" field.
+func (_c *UserCreate) SetHash(v string) *UserCreate {
+	_c.mutation.SetHash(v)
+	return _c
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_c *UserCreate) Mutation() *UserMutation {
 	return _c.mutation
@@ -98,6 +110,11 @@ func (_c *UserCreate) check() error {
 	if _, ok := _c.mutation.Username(); !ok {
 		return &ValidationError{Name: "username", err: errors.New(`ent: missing required field "User.username"`)}
 	}
+	if v, ok := _c.mutation.Username(); ok {
+		if err := user.UsernameValidator(v); err != nil {
+			return &ValidationError{Name: "username", err: fmt.Errorf(`ent: validator failed for field "User.username": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.Age(); !ok {
 		return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "User.age"`)}
 	}
@@ -109,8 +126,19 @@ func (_c *UserCreate) check() error {
 	if _, ok := _c.mutation.Email(); !ok {
 		return &ValidationError{Name: "email", err: errors.New(`ent: missing required field "User.email"`)}
 	}
+	if v, ok := _c.mutation.Email(); ok {
+		if err := user.EmailValidator(v); err != nil {
+			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "User.email": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "User.created_at"`)}
+	}
+	if _, ok := _c.mutation.Salt(); !ok {
+		return &ValidationError{Name: "salt", err: errors.New(`ent: missing required field "User.salt"`)}
+	}
+	if _, ok := _c.mutation.Hash(); !ok {
+		return &ValidationError{Name: "hash", err: errors.New(`ent: missing required field "User.hash"`)}
 	}
 	return nil
 }
@@ -153,6 +181,14 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
+	}
+	if value, ok := _c.mutation.Salt(); ok {
+		_spec.SetField(user.FieldSalt, field.TypeString, value)
+		_node.Salt = value
+	}
+	if value, ok := _c.mutation.Hash(); ok {
+		_spec.SetField(user.FieldHash, field.TypeString, value)
+		_node.Hash = value
 	}
 	return _node, _spec
 }

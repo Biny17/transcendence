@@ -24,7 +24,11 @@ type User struct {
 	// Email holds the value of the "email" field.
 	Email string `json:"email,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt    time.Time `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// Salt holds the value of the "salt" field.
+	Salt string `json:"salt,omitempty"`
+	// Hash holds the value of the "hash" field.
+	Hash         string `json:"hash,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -35,7 +39,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case user.FieldID, user.FieldAge:
 			values[i] = new(sql.NullInt64)
-		case user.FieldUsername, user.FieldEmail:
+		case user.FieldUsername, user.FieldEmail, user.FieldSalt, user.FieldHash:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
@@ -84,6 +88,18 @@ func (_m *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.CreatedAt = value.Time
 			}
+		case user.FieldSalt:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field salt", values[i])
+			} else if value.Valid {
+				_m.Salt = value.String
+			}
+		case user.FieldHash:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field hash", values[i])
+			} else if value.Valid {
+				_m.Hash = value.String
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -131,6 +147,12 @@ func (_m *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("salt=")
+	builder.WriteString(_m.Salt)
+	builder.WriteString(", ")
+	builder.WriteString("hash=")
+	builder.WriteString(_m.Hash)
 	builder.WriteByte(')')
 	return builder.String()
 }

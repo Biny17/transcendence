@@ -16,6 +16,8 @@ type Config struct {
 	DBName  string `mapstructure:"DB_NAME" validate:"required"`
 	DBPort  string `mapstructure:"DB_PORT" validate:"required"`
 	ApiPort string `mapstructure:"API_PORT" validate:"required"`
+	Origins []string
+	KeyPath string
 }
 
 func automaticBindEnv() {
@@ -33,12 +35,27 @@ func automaticBindEnv() {
 
 func GetConfig() Config {
 	automaticBindEnv()
+	viper.SetConfigName("config")
+	viper.AddConfigPath(".")
+
 	var cfg Config
 	if err := viper.Unmarshal(&cfg); err != nil {
-		panic(fmt.Errorf("unable to decode into struct: %w", err))
+		log.Panicf("unable to decode into struct: %s", err)
 	}
 	if err := validator.New().Struct(cfg); err != nil {
-		panic(fmt.Errorf("config validation failed: %w", err))
+		log.Panicf("config validation failed: %s", err)
+	}
+	viper.SetConfigName("config")
+	viper.AddConfigPath(".")
+	viper.SetDefault("allowed_origins", []string{"https://*", "http://"})
+	if err := viper.ReadInConfig(); err != nil {
+		log.Panicf("%s\n", err)
+	}
+	if err := viper.UnmarshalKey("allowed_origins", &cfg.Origins); err != nil {
+		log.Panicf("%s\n", err)
+	}
+	if err := viper.UnmarshalKey("rsa_key", &cfg.KeyPath); err != nil {
+		log.Panicf("%s\n", err)
 	}
 	return cfg
 }
@@ -50,32 +67,8 @@ func printAllowedOrigins(origins []string) {
 	}
 }
 
-func GetAllowedOrigins() []string {
-	var origins []string
-	var missing bool
-
-	missing = false
-	viper.SetConfigName("config")
-	viper.AddConfigPath(".")
-	if err := viper.ReadInConfig(); err != nil {
-		log.Printf("MISSING config.yaml: %s\n", err)
-		missing = true
-	}
-	if err := viper.UnmarshalKey("allowed_origins", &origins); err != nil {
-		log.Printf("MISSING config.yamal allowed_origins: %s\n", err)
-		missing = true
-	}
-	if missing {
-		//"https://*", "http://*"
-		origins = append(origins, "http://*")
-		origins = append(origins, "https://*")
-	}
-	printAllowedOrigins(origins)
-	return origins
-}
-
-func DebugConfig(cfg *Config) {
-	fmt.Printf("db_host: %s\n db_user: %s\n db_pwd: %s\n db_name: %s\n db_port: %s\n api_port: %s\n",
+func (cfg *Config) Debug() {
+	fmt.Printf("db_host: %s\ndb_user: %s\ndb_pwd: %s\ndb_name: %s\ndb_port: %s\napi_port: %s\n",
 		cfg.DBHost,
 		cfg.DBUser,
 		cfg.DBPwd,
@@ -83,4 +76,9 @@ func DebugConfig(cfg *Config) {
 		cfg.DBPort,
 		cfg.ApiPort,
 	)
+	fmt.Printf("rsa key path: %s\n", cfg.KeyPath)
+	fmt.Printf("Allowed Origins: %d\n", len(cfg.Origins))
+	for _, origin := range cfg.Origins {
+		fmt.Printf("- %s\n", origin)
+	}
 }

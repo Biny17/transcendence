@@ -24,6 +24,7 @@ type AddUserIn struct {
 		Username string `json:"username" required:"true"`
 		Age      int    `json:"age" minimum:"1" maximum:"99" required:"true"`
 		Email    string `json:"email" required:"true"`
+		Password string `json:"password" required:"true"`
 	}
 }
 
@@ -51,27 +52,39 @@ func NewUserService() *UserService {
 	return us
 }
 
-func (us *UserService) AddUser(ctx context.Context, input *AddUserIn) (*AddUserOut, error) {
-	log.Printf("username: %s | age: %d | email: %s\n",
+func logAddUserInput(input *AddUserIn) {
+	log.Printf("username: %s | age: %d | email: %s | password: %s\n",
 		input.Body.Username,
 		input.Body.Age,
 		input.Body.Email,
+		input.Body.Password,
 	)
+}
+
+func (us *UserService) AddUser(ctx context.Context, input *AddUserIn) (*AddUserOut, error) {
+	salt := NewSalt()
+	hash := HashPwd(salt, input.Body.Password)
+
 	_, err := us.Client.User.
 		Create().
 		SetUsername(input.Body.Username).
 		SetAge(input.Body.Age).
 		SetEmail(input.Body.Email).
+		SetHash(hash).
+		SetSalt(salt).
 		Save(ctx)
+
 	if err != nil {
 		log.Print(err)
-		return nil, huma.Error500InternalServerError(err.Error())
+		if ent.IsConstraintError(err) {
+			return nil, huma.Error400BadRequest("username or email already exists")
+		}
+		return nil, huma.Error500InternalServerError("oopsie")
 	}
 	return &AddUserOut{message: "user created successfully"}, nil
 }
 
 func (us *UserService) Register(api huma.API) {
-	log.Printf("Registering user service")
 	huma.Register(api, huma.Operation{
 		Method:        http.MethodPost,
 		Path:          "/adduser",

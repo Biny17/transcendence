@@ -91,6 +91,34 @@ func (_u *UserUpdate) SetNillableCreatedAt(v *time.Time) *UserUpdate {
 	return _u
 }
 
+// SetSalt sets the "salt" field.
+func (_u *UserUpdate) SetSalt(v string) *UserUpdate {
+	_u.mutation.SetSalt(v)
+	return _u
+}
+
+// SetNillableSalt sets the "salt" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableSalt(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetSalt(*v)
+	}
+	return _u
+}
+
+// SetHash sets the "hash" field.
+func (_u *UserUpdate) SetHash(v string) *UserUpdate {
+	_u.mutation.SetHash(v)
+	return _u
+}
+
+// SetNillableHash sets the "hash" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableHash(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetHash(*v)
+	}
+	return _u
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdate) Mutation() *UserMutation {
 	return _u.mutation
@@ -125,9 +153,19 @@ func (_u *UserUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *UserUpdate) check() error {
+	if v, ok := _u.mutation.Username(); ok {
+		if err := user.UsernameValidator(v); err != nil {
+			return &ValidationError{Name: "username", err: fmt.Errorf(`ent: validator failed for field "User.username": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Age(); ok {
 		if err := user.AgeValidator(v); err != nil {
 			return &ValidationError{Name: "age", err: fmt.Errorf(`ent: validator failed for field "User.age": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Email(); ok {
+		if err := user.EmailValidator(v); err != nil {
+			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "User.email": %w`, err)}
 		}
 	}
 	return nil
@@ -159,6 +197,12 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.Salt(); ok {
+		_spec.SetField(user.FieldSalt, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Hash(); ok {
+		_spec.SetField(user.FieldHash, field.TypeString, value)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -243,6 +287,34 @@ func (_u *UserUpdateOne) SetNillableCreatedAt(v *time.Time) *UserUpdateOne {
 	return _u
 }
 
+// SetSalt sets the "salt" field.
+func (_u *UserUpdateOne) SetSalt(v string) *UserUpdateOne {
+	_u.mutation.SetSalt(v)
+	return _u
+}
+
+// SetNillableSalt sets the "salt" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableSalt(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetSalt(*v)
+	}
+	return _u
+}
+
+// SetHash sets the "hash" field.
+func (_u *UserUpdateOne) SetHash(v string) *UserUpdateOne {
+	_u.mutation.SetHash(v)
+	return _u
+}
+
+// SetNillableHash sets the "hash" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableHash(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetHash(*v)
+	}
+	return _u
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdateOne) Mutation() *UserMutation {
 	return _u.mutation
@@ -290,9 +362,19 @@ func (_u *UserUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *UserUpdateOne) check() error {
+	if v, ok := _u.mutation.Username(); ok {
+		if err := user.UsernameValidator(v); err != nil {
+			return &ValidationError{Name: "username", err: fmt.Errorf(`ent: validator failed for field "User.username": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Age(); ok {
 		if err := user.AgeValidator(v); err != nil {
 			return &ValidationError{Name: "age", err: fmt.Errorf(`ent: validator failed for field "User.age": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Email(); ok {
+		if err := user.EmailValidator(v); err != nil {
+			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "User.email": %w`, err)}
 		}
 	}
 	return nil
@@ -341,6 +423,12 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	}
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.Salt(); ok {
+		_spec.SetField(user.FieldSalt, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Hash(); ok {
+		_spec.SetField(user.FieldHash, field.TypeString, value)
 	}
 	_node = &User{config: _u.config}
 	_spec.Assign = _node.assignValues
