@@ -63,7 +63,7 @@ export default function Home() {
           animate={{ opacity: signInOpen ? 0 : 1, x: signInOpen ? 40 : 0 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
         >
-          <ChartComponent />
+          {/* <ChartComponent /> */}
         </motion.div>
       </div>
 

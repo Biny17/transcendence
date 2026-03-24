@@ -105,42 +105,29 @@ export default function Chat() {
 
   return (
     <>
-      {isOpen && (
-        <div className="fixed bottom-20 left-4 w-[360px] h-[520px] z-50 shadow-xl rounded-xl border overflow-hidden bg-white">
+      {(
+        <div className="fixed bottom-90 left-4 w-[360px] h-[520px] z-50 shadow-xl rounded-xl border-yellow border-20 table-fixed border-double overflow-hidden rounded-r-lg">
           <ChatContainer className="h-full">
-            <ChatHeader className="border-b">
+            <ChatHeader className="border-b bg-yellow">
               <ChatHeaderAddon>
-                <ChatHeaderAvatar
-                  src="https://cdn.jsdelivr.net/gh/alohe/avatars/png/upstream_20.png"
-                  alt="@assistant"
-                  fallback="AI"
-                />
+           
               </ChatHeaderAddon>
-              <ChatHeaderMain>
-                <span className="font-medium">Assistant IA</span>
-                <span className="flex-1 grid">
+              <ChatHeaderMain >
+                <span className="font-medium">Global Chat</span>
+                {/* <span className="flex-1 grid">
                   <span className="text-sm font-medium truncate text-green-500">
                     {isLoading ? "En train d'écrire..." : "En ligne"}
                   </span>
-                </span>
+                </span> */}
               </ChatHeaderMain>
               <ChatHeaderAddon>
-                <ChatHeaderButton className="@2xl/chat:inline-flex hidden">
-                  <PhoneIcon />
-                </ChatHeaderButton>
-                <ChatHeaderButton className="@2xl/chat:inline-flex hidden">
-                  <VideoIcon />
-                </ChatHeaderButton>
-                <ChatHeaderButton>
-                  <MoreHorizontalIcon />
-                </ChatHeaderButton>
                 <ChatHeaderButton onClick={() => setIsOpen(false)}>
                   <XIcon />
                 </ChatHeaderButton>
               </ChatHeaderAddon>
             </ChatHeader>
 
-            <ChatMessages className="scrollbar-hidden">
+            <ChatMessages className="scrollbar-hidden text-white bg-indigo" >
               {enrichedMessages.length === 0 && (
                 <p className="text-center text-sm text-muted-foreground mt-8">
                   Commencez la conversation !
@@ -203,11 +190,9 @@ export default function Chat() {
               )}
             </ChatMessages>
 
-            <ChatToolbar>
+            <ChatToolbar className="bg-yellow">
               <ChatToolbarAddon align="inline-start">
-                <ChatToolbarButton>
-                  <PlusIcon />
-                </ChatToolbarButton>
+
               </ChatToolbarAddon>
               <textarea
                 value={input}
@@ -219,16 +204,11 @@ export default function Chat() {
                   }
                 }}
                 placeholder="Écrire un message..."
-                className="flex-1 resize-none bg-transparent outline-none text-sm py-2"
+                className="flex-1 resize-none bg-yellow outline-none text-sm py-2"
                 rows={1}
               />
               <ChatToolbarAddon align="inline-end">
-                <ChatToolbarButton>
-                  <GiftIcon />
-                </ChatToolbarButton>
-                <ChatToolbarButton>
-                  <CalendarDaysIcon />
-                </ChatToolbarButton>
+               
                 <ChatToolbarButton onClick={sendMessage} disabled={isLoading}>
                   <SquareChevronRightIcon />
                 </ChatToolbarButton>
@@ -238,7 +218,7 @@ export default function Chat() {
         </div>
       )}
 
-      <button
+      {/* <button
         onClick={() => setIsOpen((prev) => !prev)}
         className="fixed bottom-4 left-4 z-50 w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:scale-105 transition-transform"
       >
@@ -247,7 +227,7 @@ export default function Chat() {
         ) : (
           <MessageCircleIcon className="w-5 h-5" />
         )}
-      </button>
+      </button> */}
     </>
   );
 }
