@@ -30,7 +30,7 @@ export function PrimaryMessage({
   className?: string;
 }) {
   return (
-    <ChatEvent className={cn("hover:bg-accent", className)}>
+    <ChatEvent className={cn(className)}>
       <ChatEventAddon>
         <ChatEventAvatar
           src={avatarSrc}

@@ -106,7 +106,10 @@ export default function Chat() {
   return (
     <>
       {(
-        <div className="fixed bottom-90 left-4 w-[360px] h-[520px] z-50 shadow-xl rounded-xl border-yellow border-20 table-fixed border-double overflow-hidden rounded-r-lg">
+        <div
+          className="fixed bottom-90 left-4 w-[360px] h-[520px] z-50 shadow-xl rounded-3xl border-yellow border-20 table-fixed border-double overflow-hidden"
+          style={{ fontFamily: "var(--font-party-title), var(--font-geist-sans), sans-serif" }}
+        >
           <ChatContainer className="h-full">
             <ChatHeader className="border-b bg-yellow">
               <ChatHeaderAddon>
@@ -190,10 +193,7 @@ export default function Chat() {
               )}
             </ChatMessages>
 
-            <ChatToolbar className="bg-yellow">
-              <ChatToolbarAddon align="inline-start">
-
-              </ChatToolbarAddon>
+            <ChatToolbar className="bg-yellow p-0 [&>div]:w-full [&>div]:rounded-none [&>div]:border-0 [&>div]:px-2">
               <textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}

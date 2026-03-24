@@ -15,7 +15,7 @@ export function AdditionalMessage({
   timestamp: number;
 }) {
   return (
-    <ChatEvent className="hover:bg-accent group">
+    <ChatEvent className="group">
       <ChatEventAddon>
         <ChatEventTime
           timestamp={timestamp}
