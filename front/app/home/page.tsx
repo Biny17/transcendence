@@ -6,7 +6,7 @@ import { Background } from './Background';
 import { Navbar } from './Navbar.jsx';
 import { Button } from "../animations/Button.jsx"
 import Chat from '../chat/chat';
-import { ChartComponent } from "../charts/chart"
+import { ChartComponent } from "../../components/charts/chart"
 import { EngineCanvas } from '@/ThreeWrapper/1.engine/EngineCanvas';
 import { DemoWorld } from '@/ThreeWrapper/2.world/worlds/DemoWorld';
 

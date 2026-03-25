@@ -73,7 +73,7 @@ export default function Chat() {
     setIsLoading(true);
 
     try {
-      const res = await fetch("/api/chat", {       // 👈 adapte l'URL à ta route
+      const res = await fetch("/api/chat", {
        method: "POST",
       headers: { "Content-Type": "application/json" },
        body: JSON.stringify({
@@ -107,7 +107,7 @@ export default function Chat() {
     <>
       {(
         <div
-          className="fixed bottom-90 left-4 w-[360px] h-[520px] z-50 shadow-xl rounded-3xl border-yellow border-20 table-fixed border-double overflow-hidden"
+          className="fixed bottom-100 left-4 w-[360px] h-[520px] z-50 shadow-xl rounded-3xl border-yellow border-20 table-fixed border-double overflow-hidden"
           style={{ fontFamily: "var(--font-party-title), var(--font-geist-sans), sans-serif" }}
         >
           <ChatContainer className="h-full">
@@ -123,11 +123,7 @@ export default function Chat() {
                   </span>
                 </span> */}
               </ChatHeaderMain>
-              <ChatHeaderAddon>
-                <ChatHeaderButton onClick={() => setIsOpen(false)}>
-                  <XIcon />
-                </ChatHeaderButton>
-              </ChatHeaderAddon>
+              
             </ChatHeader>
 
             <ChatMessages className="scrollbar-hidden text-white bg-indigo" >
@@ -193,7 +189,7 @@ export default function Chat() {
               )}
             </ChatMessages>
 
-            <ChatToolbar className="bg-yellow p-0 [&>div]:w-full [&>div]:rounded-none [&>div]:border-0 [&>div]:px-2">
+           <div className="flex items-center w-full bg-yellow px-2">
               <textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -213,7 +209,7 @@ export default function Chat() {
                   <SquareChevronRightIcon />
                 </ChatToolbarButton>
               </ChatToolbarAddon>
-            </ChatToolbar>
+            </div>
           </ChatContainer>
         </div>
       )}

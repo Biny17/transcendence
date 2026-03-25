@@ -4,7 +4,7 @@ import Image from 'next/image';
 import './Navbar.css';
 import './Background.css';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import Link from 'next/link'
+import KpiCard1, { KpiCard } from "@/components/cards/multicards";
 import { useRouter } from 'next/navigation';
 
 export const Navbar = ({ signInOpen, setSignInOpen }) => {
@@ -21,7 +21,8 @@ const handleSubmit = () => {
   return (
     <>
     <div className="navbar">
-      <div className="navbar-logo">
+      <div className="w-full">
+        <KpiCard1 />
       </div>
       <div className="navbar-actions">
         <div className="dropdown-trigger" onMouseEnter={() => setDropdownOpen(true)} onMouseLeave={() => setDropdownOpen(false)}>
