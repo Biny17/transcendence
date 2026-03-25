@@ -17,7 +17,7 @@ import (
 
 func main() {
 	log.Printf("-------------------\n")
-	log.Printf("\tSTART\n")
+	log.Printf("\tSTARTING\n")
 	log.Printf("-------------------\n")
 
 	router := chi.NewMux()
@@ -38,7 +38,7 @@ func main() {
 	huma.AutoRegister(api, idk.NewIdk())
 	us := user_service.NewUserService()
 	us.Register(api)
-	
+
 	_, err := auth.NewAuthService(conf.KeyPath)
 	if err != nil {
 		log.Panic(err)

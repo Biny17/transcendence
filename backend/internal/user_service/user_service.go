@@ -23,13 +23,13 @@ type AddUserIn struct {
 	Body struct {
 		Username string `json:"username" required:"true"`
 		Age      int    `json:"age" minimum:"1" maximum:"99" required:"true"`
-		Email    string `json:"email" required:"true"`
+		Email    string `json:"email" required:"true" format:"email"`
 		Password string `json:"password" required:"true"`
 	}
 }
 
 type AddUserOut struct {
-	message string `json:"message"`
+	Message string `json:"message"`
 }
 
 func NewUserService() *UserService {
@@ -81,7 +81,7 @@ func (us *UserService) AddUser(ctx context.Context, input *AddUserIn) (*AddUserO
 		}
 		return nil, huma.Error500InternalServerError("oopsie")
 	}
-	return &AddUserOut{message: "user created successfully"}, nil
+	return &AddUserOut{Message: "user created successfully"}, nil
 }
 
 func (us *UserService) Register(api huma.API) {
@@ -91,4 +91,10 @@ func (us *UserService) Register(api huma.API) {
 		Summary:       "Add a user to the database",
 		DefaultStatus: 201,
 	}, us.AddUser)
+	huma.Register(api, huma.Operation{
+		Method:			http.MethodPost,
+		Path:			"/login",
+		Summary: 		"Fail if password is invalid",
+		DefaultStatus: 	200,
+	}, us.VerifyPwd)
 }

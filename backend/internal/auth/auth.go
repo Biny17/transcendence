@@ -11,49 +11,51 @@ import (
 )
 
 type Auth struct {
-	Key jwk.Key
+	PrivKey jwk.Key
+	PubKey  jwk.Key
 }
 
-func parseAndTestKey(keyPath string) (jwk.Key, error) {
+func (auth *Auth) parseKey(keyPath string) error {
 	keyData, err := os.ReadFile(keyPath)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	jwk_key, err := jwk.ParseKey(keyData, jwk.WithPEM(true))
+	priv_key, err := jwk.ParseKey(keyData, jwk.WithPEM(true))
 	if err != nil {
-		log.Print("ici")
-		return nil, err
+		log.Print("Failed with key path: %s", keyPath)
+		return err
 	}
 	tok, err := jwt.NewBuilder().
 		Issuer("tgallet").
 		IssuedAt(time.Now()).
 		Build()
-	signed, err := jwt.Sign(tok, jwt.WithKey(jwa.RS256(), jwk_key))
+	signed, err := jwt.Sign(tok, jwt.WithKey(jwa.RS256(), priv_key))
 	if err != nil {
-		return nil, err
+		return err
 	}
-	pubkey, err := jwk.PublicKeyOf(jwk_key)
+	pubkey, err := jwk.PublicKeyOf(priv_key)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	_, err = jwt.Parse(signed, jwt.WithKey(jwa.RS256(), pubkey))
 	if err != nil {
-		return nil, err
+		return err
 	}
 	// issuer, exist := verifiedToken.Issuer()
 	// if exist {
 	// 	log.Printf("Token issuer is: %s\n", issuer)
 	// }
-	return jwk_key, nil
+	auth.PrivKey = priv_key
+	auth.PubKey = pubkey
+	return nil
 }
 
 func NewAuthService(keyPath string) (*Auth, error) {
 	var auth Auth
 
-	key, err := parseAndTestKey(keyPath)
+	err := auth.parseKey(keyPath)
 	if err != nil {
 		return nil, err
 	}
-	auth.Key = key
 	return &auth, nil
 }
