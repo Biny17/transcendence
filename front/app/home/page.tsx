@@ -50,7 +50,7 @@ export default function Home() {
         <Button statement="Let's play" />
       </motion.div>
     </div>
-    <div>
+    <div className="translate-x-50">
       <Online />
     </div>
   </div>

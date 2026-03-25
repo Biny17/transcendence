@@ -51,9 +51,9 @@
   width: 6.8rem;
   height: 6.8rem;
   padding: 0.35rem;
-  border: 2px solid #ff7a00;
+  border: 2px solid #facc15;
   border-radius: 1.15rem;
-  background: linear-gradient(145deg, #ffc56b 0%, #ff9f2f 28%, #ff7a00 62%, #ff4d00 100%);
+  background: linear-gradient(145deg, #facc15 0%, #facc15 28%, #facc15 62%, #facc15 100%);
   box-shadow: 0 12px 26px rgba(255, 115, 0, 0.58);
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
@@ -209,7 +209,14 @@
   padding: 1.5rem;
   padding-top: 0;
 }
-
+.auth-button {
+  background-color: #facc15;    /* fond blanc */
+  color: #333;               /* texte foncé */
+  border: 1px solid #facc15;    /* bordure grise */
+}
+.auth-button:hover {
+  background-color: #facc15; /* fond au survol */
+}
 .auth-button.auth-button-google {
   display: flex;
   align-items: center;

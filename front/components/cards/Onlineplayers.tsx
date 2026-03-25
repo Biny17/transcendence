@@ -121,27 +121,6 @@ export default function Online() {
 					<ListCard />
 				</div>
 			</div>
-		   <div className="flex items-center w-full bg-yellow px-2">
-			  <textarea
-				value={input}
-				onChange={(e) => setInput(e.target.value)}
-				onKeyDown={(e) => {
-				  if (e.key === "Enter" && !e.shiftKey) {
-					e.preventDefault();
-					sendMessage();
-				  }
-				}}
-				placeholder="Écrire un message..."
-				className="flex-1 resize-none bg-yellow outline-none text-sm py-2"
-				rows={1}
-			  />
-			  <ChatToolbarAddon align="inline-end">
-			   
-				<ChatToolbarButton onClick={sendMessage} disabled={isLoading}>
-				  <SquareChevronRightIcon />
-				</ChatToolbarButton>
-			  </ChatToolbarAddon>
-			</div>
 		  </ChatContainer>
 		</div>
 	  )}
