@@ -37,6 +37,7 @@ export default function Home() {
     <div className="flex flex-col items-center gap-6">
       <div className="w-[400px] h-[400px] md:w-[600px] md:h-[600px]">
         <DotLottieReact
+          id="navbar-avatar-animation"
           src="https://lottie.host/4a6712be-c728-4247-a609-65bd86fe8a84/JYUyKJJZH8.lottie"
           loop
           autoplay

@@ -6,6 +6,7 @@ import './Background.css';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import KpiCard1, { KpiCard } from "@/components/cards/multicards";
 import { useRouter } from 'next/navigation';
+import Options from "@/components/cards/Options";
 
 export const Navbar = ({ signInOpen, setSignInOpen }) => {
 const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -103,14 +104,10 @@ const handleSubmit = () => {
           className="auth-card"
           onClick={e => e.stopPropagation()}
         >
-          <div className="auth-header">
+          {/* <div className="auth-header">
 			<h3 className="auth-title">{isSignUpMode ? "Create an account" : "Let's Play!"}</h3>
           </div>
           <div className="auth-body">
-			{isSignUpMode &&<div className="form-group">
-              <label className="form-label">PseudoName</label>
-              <input type="email" className="auth-input" onChange={e => setForm({...form, username: e.target.value})} placeholder= {error ? error : "Your Pseudo"} />
-            </div>}
             <div className="form-group">
               <label className="form-label">Email</label>
               <input type="email" className="auth-input" onChange={e => setForm({...form, email: e.target.value})} placeholder={error ? error : "Your Email"} />
@@ -141,7 +138,8 @@ const handleSubmit = () => {
               {isSignUpMode ? "Already have an account?" : "Don't have an account?"}
               <button onClick={() => {{isSignUpMode ? setisSignUpMode(false) : setisSignUpMode(true)}}} className="auth-switch-btn"> {isSignUpMode ? "Sign In?" : "Sign up"}</button>
             </p>
-          </div>
+          </div> */}
+          <Options />
         </div>
       </div>
     )}
