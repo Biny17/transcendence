@@ -60,3 +60,7 @@ postgres_data/
 # Turbo
 .turbo
 .turborepo
+.env
+.gitignore
+secret
+.TODO

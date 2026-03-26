@@ -1,42 +1,49 @@
 package main
 
 import (
-    "context"
-    "net/http"
-
-    "github.com/danielgtaylor/huma/v2"
-    "github.com/danielgtaylor/huma/v2/adapters/humachi"
-    "github.com/go-chi/chi/v5"
+	"backend/internal/auth"
+	"backend/internal/config"
+	"backend/internal/idk"
+	"backend/internal/user_service"
 	"fmt"
-    "github.com/go-chi/cors"
+	"log"
+	"net/http"
+
+	"github.com/danielgtaylor/huma/v2"
+	"github.com/danielgtaylor/huma/v2/adapters/humachi"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 )
 
-type Output struct {
-    Body struct {
-        Message string `json:"message"`
-    }
-}
-
 func main() {
-    router := chi.NewMux()
-     router.Use(cors.Handler(cors.Options{
-        AllowedOrigins:   []string{"https://*", "http://*"},
-        AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-        AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
-        AllowCredentials: false,
-        MaxAge:           300,
-    }))
-    api := humachi.New(router, huma.DefaultConfig("API", "1.0.0"))
+	log.Printf("-------------------\n")
+	log.Printf("\tSTARTING\n")
+	log.Printf("-------------------\n")
 
-    huma.Register(api, huma.Operation{
-        OperationID: "get-hello",
-        Method:      http.MethodGet,
-        Path:        "/hello",
-    }, func(ctx context.Context, input *struct{}) (*Output, error) {
-        resp := &Output{}
-        resp.Body.Message = "Hello, world!"
-        return resp, nil
-    })
-	fmt.Println("hello world !");
-    http.ListenAndServe(":8080", router)
+	router := chi.NewMux()
+	conf := config.GetConfig()
+	conf.Debug()
+
+	router.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   conf.Origins,
+		AllowedMethods:   []string{"*"},
+		AllowedHeaders:   []string{"*"},
+		ExposedHeaders:   []string{},
+		AllowCredentials: true,
+		MaxAge:           300,
+	}))
+
+	api := humachi.New(router, huma.DefaultConfig("transcendence", "1.0.0"))
+
+	huma.AutoRegister(api, idk.NewIdk())
+	us := user_service.NewUserService()
+	us.Register(api)
+
+	_, err := auth.NewAuthService(conf.KeyPath)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", conf.ApiPort), router))
 }
+
