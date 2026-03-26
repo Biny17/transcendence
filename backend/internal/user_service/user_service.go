@@ -88,13 +88,13 @@ func (us *UserService) Register(api huma.API) {
 	huma.Register(api, huma.Operation{
 		Method:        http.MethodPost,
 		Path:          "/adduser",
-		Summary:       "Add a user to the database",
+		Summary:       "Add new user to the database",
 		DefaultStatus: 201,
 	}, us.AddUser)
 	huma.Register(api, huma.Operation{
 		Method:			http.MethodPost,
 		Path:			"/login",
-		Summary: 		"Fail if password is invalid",
+		Summary: 		"Login with email or username",
 		DefaultStatus: 	200,
 	}, us.VerifyPwd)
 }

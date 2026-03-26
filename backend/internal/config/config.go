@@ -4,20 +4,24 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"os"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
 )
 
 type Config struct {
-	DBHost  string `mapstructure:"DB_HOST" validate:"required"`
-	DBUser  string `mapstructure:"DB_USER" validate:"required"`
-	DBPwd   string `mapstructure:"DB_PWD" validate:"required"`
-	DBName  string `mapstructure:"DB_NAME" validate:"required"`
-	DBPort  string `mapstructure:"DB_PORT" validate:"required"`
-	ApiPort string `mapstructure:"API_PORT" validate:"required"`
-	Origins []string
-	KeyPath string
+	JwtSecret	string 	`mapstructure:"JWT_SECRET" validate:"required"`
+	DBHost   	string 	`mapstructure:"DB_HOST" validate:"required"`
+	DBUser   	string 	`mapstructure:"DB_USER" validate:"required"`
+	DBPwd    	string 	`mapstructure:"DB_PWD" validate:"required"`
+	DBName   	string 	`mapstructure:"DB_NAME" validate:"required"`
+	DBPort   	string 	`mapstructure:"DB_PORT" validate:"required"`
+	ApiPort  	string	`mapstructure:"API_PORT" validate:"required"`
+	Gmail    	string 	`mapstructure:"GMAIL"`
+	GmailPwd 	string 	`mapstructure:"GMAIL_PASSWORD"`
+	Origins  	[]string
+	KeyPath  	string	`filepath:"true"`
 }
 
 func automaticBindEnv() {
@@ -31,6 +35,22 @@ func automaticBindEnv() {
 		}
 		_ = viper.BindEnv(env)
 	}
+}
+
+func automaticFileCheck() {
+	v := reflect.ValueOf(&Config{})
+	t := v.Elem().Type()
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		if _, exists := field.Tag.Lookup("filepath"); exists == true {
+			value := v.Elem().Field(i).String()
+			_, err := os.Stat(value)
+			if err != nil {
+				log.Printf("file not found: %s\n", value)
+			}
+		}
+	}
+
 }
 
 func GetConfig() Config {
@@ -57,6 +77,7 @@ func GetConfig() Config {
 	if err := viper.UnmarshalKey("rsa_key", &cfg.KeyPath); err != nil {
 		log.Panicf("%s\n", err)
 	}
+	// automaticFileCheck()
 	return cfg
 }
 
@@ -68,17 +89,18 @@ func printAllowedOrigins(origins []string) {
 }
 
 func (cfg *Config) Debug() {
-	fmt.Printf("db_host: %s\ndb_user: %s\ndb_pwd: %s\ndb_name: %s\ndb_port: %s\napi_port: %s\n",
-		cfg.DBHost,
-		cfg.DBUser,
-		cfg.DBPwd,
-		cfg.DBName,
-		cfg.DBPort,
-		cfg.ApiPort,
-	)
-	fmt.Printf("rsa key path: %s\n", cfg.KeyPath)
-	fmt.Printf("Allowed Origins: %d\n", len(cfg.Origins))
-	for _, origin := range cfg.Origins {
-		fmt.Printf("- %s\n", origin)
+	v := reflect.ValueOf(cfg).Elem()
+	t := v.Type()
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		value := v.Field(i)
+		if value.Kind() == reflect.Slice {
+			fmt.Printf("%s:\n", field.Name)
+			for j := 0; j < value.Len(); j++ {
+				fmt.Printf("  - %v\n", value.Index(j).Interface())
+			}
+		} else {
+			fmt.Printf("%s: %v\n", field.Name, value.Interface())
+		}
 	}
 }

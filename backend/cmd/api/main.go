@@ -22,7 +22,7 @@ func main() {
 
 	router := chi.NewMux()
 	conf := config.GetConfig()
-	// conf.Debug()
+	conf.Debug()
 
 	router.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   conf.Origins,
