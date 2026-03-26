@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"backend/ent/mailverif"
 	"backend/ent/user"
 	"context"
 	"errors"
@@ -64,6 +65,39 @@ func (_c *UserCreate) SetHash(v string) *UserCreate {
 	return _c
 }
 
+// SetVerifiedEmail sets the "verified_email" field.
+func (_c *UserCreate) SetVerifiedEmail(v bool) *UserCreate {
+	_c.mutation.SetVerifiedEmail(v)
+	return _c
+}
+
+// SetNillableVerifiedEmail sets the "verified_email" field if the given value is not nil.
+func (_c *UserCreate) SetNillableVerifiedEmail(v *bool) *UserCreate {
+	if v != nil {
+		_c.SetVerifiedEmail(*v)
+	}
+	return _c
+}
+
+// SetMailVerifID sets the "mail_verif" edge to the MailVerif entity by ID.
+func (_c *UserCreate) SetMailVerifID(id int) *UserCreate {
+	_c.mutation.SetMailVerifID(id)
+	return _c
+}
+
+// SetNillableMailVerifID sets the "mail_verif" edge to the MailVerif entity by ID if the given value is not nil.
+func (_c *UserCreate) SetNillableMailVerifID(id *int) *UserCreate {
+	if id != nil {
+		_c = _c.SetMailVerifID(*id)
+	}
+	return _c
+}
+
+// SetMailVerif sets the "mail_verif" edge to the MailVerif entity.
+func (_c *UserCreate) SetMailVerif(v *MailVerif) *UserCreate {
+	return _c.SetMailVerifID(v.ID)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_c *UserCreate) Mutation() *UserMutation {
 	return _c.mutation
@@ -103,6 +137,10 @@ func (_c *UserCreate) defaults() {
 		v := user.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
+	if _, ok := _c.mutation.VerifiedEmail(); !ok {
+		v := user.DefaultVerifiedEmail
+		_c.mutation.SetVerifiedEmail(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -139,6 +177,9 @@ func (_c *UserCreate) check() error {
 	}
 	if _, ok := _c.mutation.Hash(); !ok {
 		return &ValidationError{Name: "hash", err: errors.New(`ent: missing required field "User.hash"`)}
+	}
+	if _, ok := _c.mutation.VerifiedEmail(); !ok {
+		return &ValidationError{Name: "verified_email", err: errors.New(`ent: missing required field "User.verified_email"`)}
 	}
 	return nil
 }
@@ -189,6 +230,26 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Hash(); ok {
 		_spec.SetField(user.FieldHash, field.TypeString, value)
 		_node.Hash = value
+	}
+	if value, ok := _c.mutation.VerifiedEmail(); ok {
+		_spec.SetField(user.FieldVerifiedEmail, field.TypeBool, value)
+		_node.VerifiedEmail = value
+	}
+	if nodes := _c.mutation.MailVerifIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.MailVerifTable,
+			Columns: []string{user.MailVerifColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mailverif.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"backend/ent/mailverif"
 	"backend/ent/predicate"
 	"backend/ent/user"
 	"context"
@@ -119,9 +120,48 @@ func (_u *UserUpdate) SetNillableHash(v *string) *UserUpdate {
 	return _u
 }
 
+// SetVerifiedEmail sets the "verified_email" field.
+func (_u *UserUpdate) SetVerifiedEmail(v bool) *UserUpdate {
+	_u.mutation.SetVerifiedEmail(v)
+	return _u
+}
+
+// SetNillableVerifiedEmail sets the "verified_email" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableVerifiedEmail(v *bool) *UserUpdate {
+	if v != nil {
+		_u.SetVerifiedEmail(*v)
+	}
+	return _u
+}
+
+// SetMailVerifID sets the "mail_verif" edge to the MailVerif entity by ID.
+func (_u *UserUpdate) SetMailVerifID(id int) *UserUpdate {
+	_u.mutation.SetMailVerifID(id)
+	return _u
+}
+
+// SetNillableMailVerifID sets the "mail_verif" edge to the MailVerif entity by ID if the given value is not nil.
+func (_u *UserUpdate) SetNillableMailVerifID(id *int) *UserUpdate {
+	if id != nil {
+		_u = _u.SetMailVerifID(*id)
+	}
+	return _u
+}
+
+// SetMailVerif sets the "mail_verif" edge to the MailVerif entity.
+func (_u *UserUpdate) SetMailVerif(v *MailVerif) *UserUpdate {
+	return _u.SetMailVerifID(v.ID)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdate) Mutation() *UserMutation {
 	return _u.mutation
+}
+
+// ClearMailVerif clears the "mail_verif" edge to the MailVerif entity.
+func (_u *UserUpdate) ClearMailVerif() *UserUpdate {
+	_u.mutation.ClearMailVerif()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -203,6 +243,38 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Hash(); ok {
 		_spec.SetField(user.FieldHash, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.VerifiedEmail(); ok {
+		_spec.SetField(user.FieldVerifiedEmail, field.TypeBool, value)
+	}
+	if _u.mutation.MailVerifCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.MailVerifTable,
+			Columns: []string{user.MailVerifColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mailverif.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.MailVerifIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.MailVerifTable,
+			Columns: []string{user.MailVerifColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mailverif.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -315,9 +387,48 @@ func (_u *UserUpdateOne) SetNillableHash(v *string) *UserUpdateOne {
 	return _u
 }
 
+// SetVerifiedEmail sets the "verified_email" field.
+func (_u *UserUpdateOne) SetVerifiedEmail(v bool) *UserUpdateOne {
+	_u.mutation.SetVerifiedEmail(v)
+	return _u
+}
+
+// SetNillableVerifiedEmail sets the "verified_email" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableVerifiedEmail(v *bool) *UserUpdateOne {
+	if v != nil {
+		_u.SetVerifiedEmail(*v)
+	}
+	return _u
+}
+
+// SetMailVerifID sets the "mail_verif" edge to the MailVerif entity by ID.
+func (_u *UserUpdateOne) SetMailVerifID(id int) *UserUpdateOne {
+	_u.mutation.SetMailVerifID(id)
+	return _u
+}
+
+// SetNillableMailVerifID sets the "mail_verif" edge to the MailVerif entity by ID if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableMailVerifID(id *int) *UserUpdateOne {
+	if id != nil {
+		_u = _u.SetMailVerifID(*id)
+	}
+	return _u
+}
+
+// SetMailVerif sets the "mail_verif" edge to the MailVerif entity.
+func (_u *UserUpdateOne) SetMailVerif(v *MailVerif) *UserUpdateOne {
+	return _u.SetMailVerifID(v.ID)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdateOne) Mutation() *UserMutation {
 	return _u.mutation
+}
+
+// ClearMailVerif clears the "mail_verif" edge to the MailVerif entity.
+func (_u *UserUpdateOne) ClearMailVerif() *UserUpdateOne {
+	_u.mutation.ClearMailVerif()
+	return _u
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -429,6 +540,38 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	}
 	if value, ok := _u.mutation.Hash(); ok {
 		_spec.SetField(user.FieldHash, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.VerifiedEmail(); ok {
+		_spec.SetField(user.FieldVerifiedEmail, field.TypeBool, value)
+	}
+	if _u.mutation.MailVerifCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.MailVerifTable,
+			Columns: []string{user.MailVerifColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mailverif.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.MailVerifIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.MailVerifTable,
+			Columns: []string{user.MailVerifColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mailverif.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &User{config: _u.config}
 	_spec.Assign = _node.assignValues

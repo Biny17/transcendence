@@ -1,4 +1,4 @@
-package idk
+package server
 
 import (
 	"context"

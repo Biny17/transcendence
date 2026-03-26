@@ -10,6 +10,7 @@ require (
 	github.com/go-playground/validator/v10 v10.30.1
 	github.com/lestrrat-go/jwx/v3 v3.0.13
 	github.com/lib/pq v1.10.9
+	github.com/samber/do/v2 v2.0.0
 	github.com/spf13/viper v1.21.0
 )
 
@@ -39,6 +40,7 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/sagikazarmark/locafero v0.11.0 // indirect
+	github.com/samber/go-type-to-string v1.8.0 // indirect
 	github.com/segmentio/asm v1.2.1 // indirect
 	github.com/sourcegraph/conc v0.3.1-0.20240121214520-5f936abd7ae8 // indirect
 	github.com/spf13/afero v1.15.0 // indirect

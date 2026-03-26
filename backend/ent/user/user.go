@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -25,8 +26,19 @@ const (
 	FieldSalt = "salt"
 	// FieldHash holds the string denoting the hash field in the database.
 	FieldHash = "hash"
+	// FieldVerifiedEmail holds the string denoting the verified_email field in the database.
+	FieldVerifiedEmail = "verified_email"
+	// EdgeMailVerif holds the string denoting the mail_verif edge name in mutations.
+	EdgeMailVerif = "mail_verif"
 	// Table holds the table name of the user in the database.
 	Table = "users"
+	// MailVerifTable is the table that holds the mail_verif relation/edge.
+	MailVerifTable = "mail_verifs"
+	// MailVerifInverseTable is the table name for the MailVerif entity.
+	// It exists in this package in order to avoid circular dependency with the "mailverif" package.
+	MailVerifInverseTable = "mail_verifs"
+	// MailVerifColumn is the table column denoting the mail_verif relation/edge.
+	MailVerifColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -38,6 +50,7 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldSalt,
 	FieldHash,
+	FieldVerifiedEmail,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -59,6 +72,8 @@ var (
 	EmailValidator func(string) error
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
+	// DefaultVerifiedEmail holds the default value on creation for the "verified_email" field.
+	DefaultVerifiedEmail bool
 )
 
 // OrderOption defines the ordering options for the User queries.
@@ -97,4 +112,23 @@ func BySalt(opts ...sql.OrderTermOption) OrderOption {
 // ByHash orders the results by the hash field.
 func ByHash(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldHash, opts...).ToFunc()
+}
+
+// ByVerifiedEmail orders the results by the verified_email field.
+func ByVerifiedEmail(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVerifiedEmail, opts...).ToFunc()
+}
+
+// ByMailVerifField orders the results by mail_verif field.
+func ByMailVerifField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newMailVerifStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newMailVerifStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(MailVerifInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, MailVerifTable, MailVerifColumn),
+	)
 }

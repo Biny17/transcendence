@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"backend/ent/mailverif"
 	"backend/ent/schema"
 	"backend/ent/user"
 	"time"
@@ -12,6 +13,20 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	mailverifFields := schema.MailVerif{}.Fields()
+	_ = mailverifFields
+	// mailverifDescUserID is the schema descriptor for user_id field.
+	mailverifDescUserID := mailverifFields[0].Descriptor()
+	// mailverif.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	mailverif.UserIDValidator = mailverifDescUserID.Validators[0].(func(int) error)
+	// mailverifDescToken is the schema descriptor for token field.
+	mailverifDescToken := mailverifFields[1].Descriptor()
+	// mailverif.TokenValidator is a validator for the "token" field. It is called by the builders before save.
+	mailverif.TokenValidator = mailverifDescToken.Validators[0].(func(string) error)
+	// mailverifDescExpiringAt is the schema descriptor for expiring_at field.
+	mailverifDescExpiringAt := mailverifFields[2].Descriptor()
+	// mailverif.DefaultExpiringAt holds the default value on creation for the expiring_at field.
+	mailverif.DefaultExpiringAt = mailverifDescExpiringAt.Default.(func() time.Time)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescUsername is the schema descriptor for username field.
@@ -44,4 +59,8 @@ func init() {
 	userDescCreatedAt := userFields[3].Descriptor()
 	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
 	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
+	// userDescVerifiedEmail is the schema descriptor for verified_email field.
+	userDescVerifiedEmail := userFields[6].Descriptor()
+	// user.DefaultVerifiedEmail holds the default value on creation for the verified_email field.
+	user.DefaultVerifiedEmail = userDescVerifiedEmail.Default.(bool)
 }

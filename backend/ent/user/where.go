@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // ID filters vertices based on their ID field.
@@ -82,6 +83,11 @@ func Salt(v string) predicate.User {
 // Hash applies equality check predicate on the "hash" field. It's identical to HashEQ.
 func Hash(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldHash, v))
+}
+
+// VerifiedEmail applies equality check predicate on the "verified_email" field. It's identical to VerifiedEmailEQ.
+func VerifiedEmail(v bool) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldVerifiedEmail, v))
 }
 
 // UsernameEQ applies the EQ predicate on the "username" field.
@@ -422,6 +428,39 @@ func HashEqualFold(v string) predicate.User {
 // HashContainsFold applies the ContainsFold predicate on the "hash" field.
 func HashContainsFold(v string) predicate.User {
 	return predicate.User(sql.FieldContainsFold(FieldHash, v))
+}
+
+// VerifiedEmailEQ applies the EQ predicate on the "verified_email" field.
+func VerifiedEmailEQ(v bool) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldVerifiedEmail, v))
+}
+
+// VerifiedEmailNEQ applies the NEQ predicate on the "verified_email" field.
+func VerifiedEmailNEQ(v bool) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldVerifiedEmail, v))
+}
+
+// HasMailVerif applies the HasEdge predicate on the "mail_verif" edge.
+func HasMailVerif() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, MailVerifTable, MailVerifColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasMailVerifWith applies the HasEdge predicate on the "mail_verif" edge with a given conditions (other predicates).
+func HasMailVerifWith(preds ...predicate.MailVerif) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newMailVerifStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

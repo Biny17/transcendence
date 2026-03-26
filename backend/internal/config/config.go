@@ -3,25 +3,26 @@ package config
 import (
 	"fmt"
 	"log"
-	"reflect"
 	"os"
+	"reflect"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/samber/do/v2"
 	"github.com/spf13/viper"
 )
 
 type Config struct {
-	JwtSecret	string 	`mapstructure:"JWT_SECRET" validate:"required"`
-	DBHost   	string 	`mapstructure:"DB_HOST" validate:"required"`
-	DBUser   	string 	`mapstructure:"DB_USER" validate:"required"`
-	DBPwd    	string 	`mapstructure:"DB_PWD" validate:"required"`
-	DBName   	string 	`mapstructure:"DB_NAME" validate:"required"`
-	DBPort   	string 	`mapstructure:"DB_PORT" validate:"required"`
-	ApiPort  	string	`mapstructure:"API_PORT" validate:"required"`
-	Gmail    	string 	`mapstructure:"GMAIL"`
-	GmailPwd 	string 	`mapstructure:"GMAIL_PASSWORD"`
-	Origins  	[]string
-	KeyPath  	string	`filepath:"true"`
+	JwtSecret string `mapstructure:"JWT_SECRET" validate:"required"`
+	DBHost    string `mapstructure:"DB_HOST" validate:"required"`
+	DBUser    string `mapstructure:"DB_USER" validate:"required"`
+	DBPwd     string `mapstructure:"DB_PWD" validate:"required"`
+	DBName    string `mapstructure:"DB_NAME" validate:"required"`
+	DBPort    string `mapstructure:"DB_PORT" validate:"required"`
+	ApiPort   string `mapstructure:"API_PORT" validate:"required"`
+	Gmail     string `mapstructure:"GMAIL"`
+	GmailPwd  string `mapstructure:"GMAIL_PASSWORD"`
+	Origins   []string
+	KeyPath   string `filepath:"true"`
 }
 
 func automaticBindEnv() {
@@ -37,8 +38,8 @@ func automaticBindEnv() {
 	}
 }
 
-func automaticFileCheck() {
-	v := reflect.ValueOf(&Config{})
+func automaticFileCheck(cfg *Config) {
+	v := reflect.ValueOf(cfg)
 	t := v.Elem().Type()
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
@@ -53,32 +54,31 @@ func automaticFileCheck() {
 
 }
 
-func GetConfig() Config {
-	automaticBindEnv()
+func ProvideConfig(i do.Injector) (Config, error) {
+	var cfg Config
+	viper.SetDefault("allowed_origins", []string{"https://*", "http://"})
 	viper.SetConfigName("config")
 	viper.AddConfigPath(".")
+	automaticBindEnv()
 
-	var cfg Config
 	if err := viper.Unmarshal(&cfg); err != nil {
-		log.Panicf("unable to decode into struct: %s", err)
+		return cfg, err
 	}
 	if err := validator.New().Struct(cfg); err != nil {
-		log.Panicf("config validation failed: %s", err)
+		return cfg, err
 	}
-	viper.SetConfigName("config")
-	viper.AddConfigPath(".")
-	viper.SetDefault("allowed_origins", []string{"https://*", "http://"})
+
 	if err := viper.ReadInConfig(); err != nil {
-		log.Panicf("%s\n", err)
+		return cfg, err
 	}
 	if err := viper.UnmarshalKey("allowed_origins", &cfg.Origins); err != nil {
-		log.Panicf("%s\n", err)
+		return cfg, err
 	}
 	if err := viper.UnmarshalKey("rsa_key", &cfg.KeyPath); err != nil {
-		log.Panicf("%s\n", err)
+		return cfg, err
 	}
-	// automaticFileCheck()
-	return cfg
+	automaticFileCheck(&cfg)
+	return cfg, nil
 }
 
 func printAllowedOrigins(origins []string) {

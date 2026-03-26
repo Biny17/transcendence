@@ -1,23 +1,12 @@
-package user_service
+package user
 
 import (
-	"backend/internal/config"
+	"backend/ent"
 	"context"
 	"log"
 
-	"backend/ent"
-	"fmt"
-
-	"net/http"
-
 	"github.com/danielgtaylor/huma/v2"
-	_ "github.com/lib/pq"
 )
-
-type UserService struct {
-	Conf   config.Config
-	Client *ent.Client
-}
 
 type AddUserIn struct {
 	Body struct {
@@ -30,26 +19,6 @@ type AddUserIn struct {
 
 type AddUserOut struct {
 	Message string `json:"message"`
-}
-
-func NewUserService() *UserService {
-	var connect_db string
-	us := &UserService{}
-	us.Conf = config.GetConfig()
-	// "host=<host> port=<port> user=<user> dbname=<database> password=<pass>"
-	connect_db = fmt.Sprintf(
-		"host=%s port=%s user=%s dbname=%s password=%s sslmode=disable",
-		us.Conf.DBHost, us.Conf.DBPort, us.Conf.DBUser, us.Conf.DBName, us.Conf.DBPwd,
-	)
-	client, err := ent.Open("postgres", connect_db)
-	if err != nil {
-		log.Panic(err)
-	}
-	us.Client = client
-	if err := client.Schema.Create(context.Background()); err != nil {
-		log.Fatalf("failed creating schema resources: %v", err)
-	}
-	return us
 }
 
 func logAddUserInput(input *AddUserIn) {
@@ -82,19 +51,4 @@ func (us *UserService) AddUser(ctx context.Context, input *AddUserIn) (*AddUserO
 		return nil, huma.Error500InternalServerError("oopsie")
 	}
 	return &AddUserOut{Message: "user created successfully"}, nil
-}
-
-func (us *UserService) Register(api huma.API) {
-	huma.Register(api, huma.Operation{
-		Method:        http.MethodPost,
-		Path:          "/adduser",
-		Summary:       "Add new user to the database",
-		DefaultStatus: 201,
-	}, us.AddUser)
-	huma.Register(api, huma.Operation{
-		Method:			http.MethodPost,
-		Path:			"/login",
-		Summary: 		"Login with email or username",
-		DefaultStatus: 	200,
-	}, us.VerifyPwd)
 }

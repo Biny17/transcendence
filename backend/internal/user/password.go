@@ -1,4 +1,4 @@
-package user_service
+package user
 
 import (
 	"backend/ent"
@@ -21,14 +21,6 @@ type VerifyPwdIn struct {
 
 type VerifyPwdOut struct {
 }
-
-// func (m *MyInput) Resolve(ctx huma.Context, prefix *huma.PathBuffer) []error {
-// 	return []error{&huma.ErrorDetail{
-// 		Message: "Foo has a bad value",
-// 		Location: prefix.With("foo"),
-// 		Value: m.Foo,
-// 	}}
-// }
 
 func (m *VerifyPwdIn) Resolve(ctx huma.Context) []error {
 	if m.Body.Email == "" && m.Body.Username == "" {
