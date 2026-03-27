@@ -13,7 +13,7 @@ import ListCard from "@/components/cards/listcard";
 import Online from "@/components/cards/Onlineplayers";
 
 export default function Home() {
-  const [signInOpen, setSignInOpen] = useState(false);
+  const [OptionsOpen, setOptionsOpen] = useState(false);
 //   const testAPI = async () =>{
 // const url = 'http://localhost:8080/hello';
 // const options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
@@ -30,7 +30,7 @@ export default function Home() {
     
     <main className="relative min-h-screen">
       <Background />
-      <Navbar signInOpen={signInOpen} setSignInOpen={setSignInOpen} />
+      <Navbar OptionsOpen={OptionsOpen} setOptionsOpen={setOptionsOpen} />
 
   <div className="absolute inset-0 flex items-center justify-center gap-12">
   <div className="flex flex-row items-center gap-12">
@@ -39,13 +39,13 @@ export default function Home() {
         <DotLottieReact
           id="navbar-avatar-animation"
           src="https://lottie.host/4a6712be-c728-4247-a609-65bd86fe8a84/JYUyKJJZH8.lottie"
-          loop
-          autoplay
+        //   loop
+        //   autoplay
         />
       </div>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: signInOpen ? 0 : 1, y: signInOpen ? 20 : 0 }}
+        animate={{ opacity: OptionsOpen ? 0 : 1, y: OptionsOpen ? 20 : 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
       >
         <Button statement="Let's play" />
@@ -56,7 +56,6 @@ export default function Home() {
     </div>
   </div>
 </div>
-
       <div className="fixed bottom-4 left-4 z-50 h-[55vh] max-h-128 w-80 max-w-[calc(100vw-2rem)]">
         <Chat />
       </div>

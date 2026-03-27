@@ -8,10 +8,8 @@ import KpiCard1, { KpiCard } from "@/components/cards/multicards";
 import { useRouter } from 'next/navigation';
 import Options from "@/components/cards/Options";
 
-export const Navbar = ({ signInOpen, setSignInOpen }) => {
+export const Navbar = ({OptionsOpen, setOptionsOpen}) => {
 const [dropdownOpen, setDropdownOpen] = useState(false);
-const[isSignUpMode, setisSignUpMode] = useState(false);
-const [form, setForm] = useState({ email: "", password: "", username: "" });
 const [error, setError] = useState("");
 const router = useRouter();
 const handleSubmit = () => {
@@ -53,9 +51,9 @@ const handleSubmit = () => {
                   <path fillRule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-5.5-2.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0ZM10 12a5.99 5.99 0 0 0-4.793 2.39A6.483 6.483 0 0 0 10 16.5a6.483 6.483 0 0 0 4.793-2.11A5.99 5.99 0 0 0 10 12Z" clipRule="evenodd" />
                 </svg>
             
-                <button className="text-slate-800 font-medium ml-2" onClick={() => setSignInOpen(true)}>
+                <p className="text-slate-800 font-medium ml-2">
                 ALIX CRUSOE
-                </button>
+                </p>
               </li>
               <li
                 role="menuitem"
@@ -65,9 +63,9 @@ const handleSubmit = () => {
                   <path fillRule="evenodd" d="M7.84 1.804A1 1 0 0 1 8.82 1h2.36a1 1 0 0 1 .98.804l.331 1.652a6.993 6.993 0 0 1 1.929 1.115l1.598-.54a1 1 0 0 1 1.186.447l1.18 2.044a1 1 0 0 1-.205 1.251l-1.267 1.113a7.047 7.047 0 0 1 0 2.228l1.267 1.113a1 1 0 0 1 .206 1.25l-1.18 2.045a1 1 0 0 1-1.187.447l-1.598-.54a6.993 6.993 0 0 1-1.929 1.115l-.33 1.652a1 1 0 0 1-.98.804H8.82a1 1 0 0 1-.98-.804l-.331-1.652a6.993 6.993 0 0 1-1.929-1.115l-1.598.54a1 1 0 0 1-1.186-.447l-1.18-2.044a1 1 0 0 1 .205-1.251l1.267-1.114a7.05 7.05 0 0 1 0-2.227L1.821 7.773a1 1 0 0 1-.206-1.25l1.18-2.045a1 1 0 0 1 1.187-.447l1.598.54A6.992 6.992 0 0 1 7.51 3.456l.33-1.652ZM10 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" clipRule="evenodd" />
                 </svg>
             
-                <p className="text-slate-800 font-medium ml-2">
+                <button className="text-slate-800 font-medium ml-2" onClick={() => setOptionsOpen(true)}>
                   Options
-                </p>
+                </button>
               </li>
               <hr className="my-2 border-slate-200" role="menuitem" />
               <li
@@ -84,10 +82,6 @@ const handleSubmit = () => {
                 </button>
               </li>
             </ul>
-                {/* <ul className="dropdown-list">
-                  <li><button className="dropdown-item" onClick={() => setSignInOpen(true)}>Se connecter</button></li>
-                  <li><button className="dropdown-item">Options</button></li>
-                </ul> */}
               </div>
             </div>
           )}
@@ -95,50 +89,12 @@ const handleSubmit = () => {
       </div>
     </div>
 
-    {signInOpen && (
+    {OptionsOpen && (
       <div
         className="modal-overlay"
-        onClick={() => setSignInOpen(false)}
+        onClick={() => setOptionsOpen(false)}
       >
-        <div
-          className="auth-card"
-          onClick={e => e.stopPropagation()}
-        >
-          {/* <div className="auth-header">
-			<h3 className="auth-title">{isSignUpMode ? "Create an account" : "Let's Play!"}</h3>
-          </div>
-          <div className="auth-body">
-            <div className="form-group">
-              <label className="form-label">Email</label>
-              <input type="email" className="auth-input" onChange={e => setForm({...form, email: e.target.value})} placeholder={error ? error : "Your Email"} />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Password</label>
-              <input type="password" className="auth-input" onChange={e => setForm({...form, password: e.target.value})} placeholder= {error ? error : "Your Password"} />
-            </div>
-            <div className="checkbox-wrapper">
-              <label className="checkbox-label" htmlFor="check-2">
-                <input type="checkbox" className="checkbox-input" id="check-2" />
-                <span className="checkbox-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="checkbox-svg" viewBox="0 0 20 20" fill="currentColor" stroke="currentColor" strokeWidth="1">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </span>
-              </label>
-              <label className="remember-label" htmlFor="check-2">Remember Me</label>
-            </div>
-          </div>
-          <div className="auth-footer">
-              <button className="auth-button" type="button" onClick={handleSubmit}>{isSignUpMode ? "Sign Up" : "Sign In"}</button>
-              <button className="auth-button auth-button-google" type="button">
-              <img src="https://docs.material-tailwind.com/icons/google.svg" alt="google" className="google-icon" />
-              Continue with Google
-            </button>
-            <p className="auth-switch">
-              {isSignUpMode ? "Already have an account?" : "Don't have an account?"}
-              <button onClick={() => {{isSignUpMode ? setisSignUpMode(false) : setisSignUpMode(true)}}} className="auth-switch-btn"> {isSignUpMode ? "Sign In?" : "Sign up"}</button>
-            </p>
-          </div> */}
+        <div onClick={e => e.stopPropagation()}>
           <Options />
         </div>
       </div>

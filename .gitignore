@@ -64,3 +64,4 @@ postgres_data/
 .gitignore
 secret
 .TODO
+node_modules

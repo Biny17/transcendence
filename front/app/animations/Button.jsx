@@ -3,23 +3,10 @@ import { useRouter } from 'next/navigation';
 import React from 'react';
 import styled from 'styled-components';
 
-export const Button = ({ statement }) => {
-const router = useRouter();
- const testAPI = async () =>{
-const url = 'http://localhost:8080/hello';
-const options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
-
-  try {
-    const response = await fetch(url, options);
-    const data = await response.json();
-    alert(data.message);
-  } catch (error) {
-    console.error(error);
-  }
-}
+export const Button = ({ statement, onClick }) => {
   return (
     <StyledWrapper>
-      <button className="button"  onClick={testAPI}>
+      <button className="button" onClick={onClick}>
         <div><span>{statement}</span></div>
       </button>
     </StyledWrapper>
