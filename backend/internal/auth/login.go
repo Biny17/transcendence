@@ -1,13 +1,10 @@
-package user
+package auth
 
 import (
+	"backend/internal/pkg"
 	"backend/ent"
 	"backend/ent/user"
 	"context"
-	"crypto/rand"
-	"crypto/sha256"
-	"fmt"
-
 	"github.com/danielgtaylor/huma/v2"
 )
 
@@ -31,19 +28,7 @@ func (m *VerifyPwdIn) Resolve(ctx huma.Context) []error {
 	return nil
 }
 
-func NewSalt() string {
-	salt := rand.Text()
-	fmt.Println(salt)
-	return salt
-}
-
-func HashPwd(salt string, password string) string {
-	hash := sha256.New()
-	hash.Write([]byte(salt + password))
-	return fmt.Sprintf("%X", hash.Sum(nil))
-}
-
-func (us *UserService) VerifyPwd(
+func (auth *AuthService) VerifyPwd(
 	ctx context.Context,
 	input *VerifyPwdIn,
 ) (
@@ -56,9 +41,9 @@ func (us *UserService) VerifyPwd(
 	)
 
 	if input.Body.Email != "" {
-		u, err = us.Client.User.Query().Where(user.EmailEQ(input.Body.Email)).Only(ctx)
+		u, err = auth.Client.User.Query().Where(user.EmailEQ(input.Body.Email)).Only(ctx)
 	} else {
-		u, err = us.Client.User.Query().Where(user.UsernameEQ(input.Body.Username)).Only(ctx)
+		u, err = auth.Client.User.Query().Where(user.UsernameEQ(input.Body.Username)).Only(ctx)
 	}
 
 	if err != nil {
@@ -68,7 +53,7 @@ func (us *UserService) VerifyPwd(
 		return nil, huma.Error500InternalServerError("oopsie")
 	}
 
-	if HashPwd(u.Salt, input.Body.Password) != u.Hash {
+	if pkg.HashPwd(u.Salt, input.Body.Password) != u.Hash {
 		return nil, huma.Error401Unauthorized("invalid credentials")
 	}
 

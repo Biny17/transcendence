@@ -14,7 +14,7 @@ func ProvideDB(i do.Injector) (*ent.Client, error) {
 	cfg := do.MustInvoke[config.Config](i)
 	connect_string := fmt.Sprintf(
 		"host=%s port=%s user=%s dbname=%s password=%s sslmode=disable",
-		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBName, cfg.DBPwd,
+		cfg.DB.Host, cfg.DB.Port, cfg.DB.User, cfg.DB.Name, cfg.DB.Pwd,
 	)
 	client, err := ent.Open("postgres", connect_string)
 	if err != nil {

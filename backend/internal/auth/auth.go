@@ -3,10 +3,13 @@ package auth
 import (
 	"backend/ent"
 	"backend/internal/config"
+	"backend/internal/pkg/routes"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
+	"github.com/danielgtaylor/huma/v2"
 	"github.com/lestrrat-go/jwx/v3/jwa"
 	"github.com/lestrrat-go/jwx/v3/jwk"
 	"github.com/lestrrat-go/jwx/v3/jwt"
@@ -19,7 +22,7 @@ type AuthService struct {
 	PubKey  jwk.Key
 }
 
-func ProvideAndRegister(i do.Injector) (*AuthService) {
+func ProvideAndRegister(i do.Injector) *AuthService {
 	auth, err := ProvideAuthService(i)
 
 	if err != nil {
@@ -42,7 +45,13 @@ func ProvideAuthService(i do.Injector) (*AuthService, error) {
 }
 
 func (auth *AuthService) Register(i do.Injector) {
-	// api := do.MustInvoke[huma.API](i)
+	api := do.MustInvoke[huma.API](i)
+	huma.Register(api, huma.Operation{
+		Method:        http.MethodPost,
+		Path:          routes.Login,
+		Summary:       "Login with email or username",
+		DefaultStatus: 200,
+	}, auth.VerifyPwd)
 }
 
 func (auth *AuthService) parseKey(keyPath string) error {
@@ -75,4 +84,3 @@ func (auth *AuthService) parseKey(keyPath string) error {
 	auth.PubKey = pubkey
 	return nil
 }
-

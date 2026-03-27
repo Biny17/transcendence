@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
@@ -16,7 +17,7 @@ import (
 	"github.com/samber/do/v2"
 )
 
-func addService(i do.Injector) {
+func addServices(i do.Injector) {
 	do.ProvideValue(i, user.ProvideAndRegister(i))
 	do.ProvideValue(i, auth.ProvideAndRegister(i))
 }
@@ -28,10 +29,10 @@ func main() {
 
 	inj := do.New()
 	addProviders(inj)
-	addService(inj)
+	addServices(inj)
 
 	http.ListenAndServe(
-		fmt.Sprintf(":%s", do.MustInvoke[config.Config](inj).ApiPort),
+		fmt.Sprintf(":%s", do.MustInvoke[config.Config](inj).Net.Port),
 		do.MustInvoke[*chi.Mux](inj),
 	)
 }
@@ -40,7 +41,7 @@ func ProvideRouter(i do.Injector) (*chi.Mux, error) {
 	cfg := do.MustInvoke[config.Config](i)
 	router := chi.NewMux()
 	router.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   cfg.Origins,
+		AllowedOrigins:   strings.Split(cfg.Origins, ","),
 		AllowedMethods:   []string{"*"},
 		AllowedHeaders:   []string{"*"},
 		ExposedHeaders:   []string{},

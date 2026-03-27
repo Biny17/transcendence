@@ -2,6 +2,7 @@ package user
 
 import (
 	"backend/ent"
+	"backend/internal/pkg"
 	"context"
 	"log"
 
@@ -31,10 +32,10 @@ func logAddUserInput(input *AddUserIn) {
 }
 
 func (us *UserService) AddUser(ctx context.Context, input *AddUserIn) (*AddUserOut, error) {
-	salt := NewSalt()
-	hash := HashPwd(salt, input.Body.Password)
+	salt := pkg.NewSalt()
+	hash := pkg.HashPwd(salt, input.Body.Password)
 
-	_, err := us.Client.User.
+	new_user, err := us.Client.User.
 		Create().
 		SetUsername(input.Body.Username).
 		SetAge(input.Body.Age).
@@ -48,7 +49,12 @@ func (us *UserService) AddUser(ctx context.Context, input *AddUserIn) (*AddUserO
 		if ent.IsConstraintError(err) {
 			return nil, huma.Error400BadRequest("username or email already exists")
 		}
-		return nil, huma.Error500InternalServerError("oopsie")
+		return nil, huma.Error500InternalServerError("Internal Error")
+	}
+	err = us.newVerifEmail(ctx, new_user)
+	if err != nil {
+		log.Print(err)
+		return nil, huma.Error500InternalServerError("Internal Error")
 	}
 	return &AddUserOut{Message: "user created successfully"}, nil
 }
