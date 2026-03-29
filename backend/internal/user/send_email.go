@@ -34,6 +34,14 @@ func (us *UserService) verifEmail(
         fmt.Sprintf("%s", user.ID),
 	)
 	err = us.sendVerificationEmail(user.Email, link)
+		if err != nil {
+		return err
+	}
+	_, err = us.Client.MailVerif.
+	Create().
+	SetToken(token).
+	SetUser(user).
+	Save(ctx)
 	return err
 }
 

@@ -4,14 +4,15 @@ import (
 	"backend/ent"
 	"backend/ent/user"
 	"context"
+	"strconv"
 
 	"github.com/danielgtaylor/huma/v2"
 )
 
 type DelUserIn struct {
-	UserID    	*int    `query:"user_id"`
-	Email 		*string `query:"email"`
-	Username  	*string `query:"username"`
+	UserID   string `query:"user_id"`
+	Email    string `query:"email"`
+	Username string `query:"username"`
 }
 
 type DelUserOut struct {
@@ -23,15 +24,19 @@ func (us *UserService) DelUser(ctx context.Context, input *DelUserIn) (*DelUserO
 	// 	Delete().
 	// 	Wh
 	var err error
-	if input.UserID != nil {
+	if input.UserID != "" {
+		id, err := strconv.Atoi(input.UserID)
+		if err != nil {
+			huma.Error400BadRequest("invalid ID")
+		}
 		_, err = us.Client.User.
-			Delete().Where(user.IDEQ(*input.UserID)).Exec(ctx)
-	} else if input.Email != nil {
+			Delete().Where(user.IDEQ(id)).Exec(ctx)
+	} else if input.Email != "" {
 		_, err = us.Client.User.
-			Delete().Where(user.EmailEQ(*input.Email)).Exec(ctx)
-	} else if input.Username != nil {
+			Delete().Where(user.EmailEQ(input.Email)).Exec(ctx)
+	} else if input.Username != "" {
 		_, err = us.Client.User.
-			Delete().Where(user.UsernameEQ(*input.Username)).Exec(ctx)
+			Delete().Where(user.UsernameEQ(input.Username)).Exec(ctx)
 	} else {
 		return nil, huma.Error400BadRequest("Must provide one of user_id, email or username")
 	}
