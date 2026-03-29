@@ -2,6 +2,7 @@ package user
 
 import (
 	"backend/internal/config"
+	"backend/internal/pkg/routes"
 
 	"backend/ent"
 
@@ -32,9 +33,15 @@ func ProvideUserService(i do.Injector) (*UserService, error) {
 
 func (us *UserService) Register(api huma.API) {
 	huma.Register(api, huma.Operation{
-		Method:        http.MethodPost,
-		Path:          "/adduser",
-		Summary:       "Add new user to the database",
-		DefaultStatus: 201,
+		Method:        	http.MethodPost,
+		Path:          	routes.AddUser,
+		Summary:		"Add new user to the database",
+		DefaultStatus:	201,
 	}, us.AddUser)
+	huma.Register(api, huma.Operation{
+		Method:			http.MethodDelete,
+		Path:			routes.DeleteUser,
+		Summary: 		"Delete user from the database",
+		DefaultStatus: 	200,
+	}, us.DelUser)
 }

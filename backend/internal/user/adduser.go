@@ -11,10 +11,11 @@ import (
 
 type AddUserIn struct {
 	Body struct {
-		Username string `json:"username" required:"true"`
-		Age      int    `json:"age" minimum:"1" maximum:"99" required:"true"`
-		Email    string `json:"email" required:"true" format:"email"`
-		Password string `json:"password" required:"true"`
+		Username string `json:"username"`
+		Age      int    `json:"age" minimum:"1" maximum:"99"`
+		Email    string `json:"email" format:"email"`
+		Password string `json:"password"`
+		Verified *bool  `json:"verified,omitempty" default:"true"`
 	}
 }
 
@@ -34,6 +35,10 @@ func logAddUserInput(input *AddUserIn) {
 func (us *UserService) AddUser(ctx context.Context, input *AddUserIn) (*AddUserOut, error) {
 	salt := pkg.NewSalt()
 	hash := pkg.HashPwd(salt, input.Body.Password)
+	verified := true
+	if input.Body.Verified != nil {
+		verified = *input.Body.Verified
+	}
 
 	new_user, err := us.Client.User.
 		Create().
@@ -42,6 +47,7 @@ func (us *UserService) AddUser(ctx context.Context, input *AddUserIn) (*AddUserO
 		SetEmail(input.Body.Email).
 		SetHash(hash).
 		SetSalt(salt).
+		SetVerifiedEmail(verified).
 		Save(ctx)
 
 	if err != nil {
@@ -51,7 +57,7 @@ func (us *UserService) AddUser(ctx context.Context, input *AddUserIn) (*AddUserO
 		}
 		return nil, huma.Error500InternalServerError("Internal Error")
 	}
-	err = us.newVerifEmail(ctx, new_user)
+	err = us.verifEmail(ctx, new_user)
 	if err != nil {
 		log.Print(err)
 		return nil, huma.Error500InternalServerError("Internal Error")
