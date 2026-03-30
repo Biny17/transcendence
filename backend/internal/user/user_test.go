@@ -19,10 +19,10 @@ type test struct {
 var tests = []test {
 	{
 		input: test_input{
-			to: "tristangallet17@gmail.com",
-			link: "youtube.com",
-			from: "tristanbiny.log@gmail.com",
-			password: "olydlosuugmayvujd",
+			to: "sarter.julien@gmail.com",
+			link: "urlr.me/EJxQNp",
+			from: "tristanbiny.lod@gmail.com",
+			password: "fsyxvrqgbyeqckei",
 		},
 		want: nil,
 	},
@@ -32,8 +32,9 @@ func TestSendMail(t *testing.T) {
 	for _, tc := range tests {
 		err := sendVerificationEmail(tc.input.to, tc.input.link, tc.input.from, tc.input.password)
 		if err != tc.want {
-			t.Errorf("sendVerificationEmail(%s, %s, %s, %s) = %v; want %v",
-				tc.input.to, tc.input.link, tc.input.from, tc.input.password, err, tc.want)
+			t.Logf("\nto: %s\nlink: %s\nfrom: %s\npassword: %s\n",
+				tc.input.to, tc.input.link, tc.input.from, tc.input.password)
+			t.Errorf("%v", err)
 		}
 	}
 }
