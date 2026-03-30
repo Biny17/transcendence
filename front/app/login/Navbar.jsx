@@ -9,21 +9,30 @@ import { Button } from "../animations/Button.jsx"
 export const Navbar = ({ signInOpen, setSignInOpen }) => {
 const [dropdownOpen, setDropdownOpen] = useState(false);
 const [isSignUp, setIsSignUp] = useState(false);
+const [isSignIn, setIsSignIn] = useState(false);
 const[isSignUpMode, setisSignUpMode] = useState(false);
 const [form, setForm] = useState({ age: 0, email: "", password: "", username: "" });
 const [error, setError] = useState("");
 const router = useRouter();
 const handleSubmit = () => {
-    if (!form.email || !form.password || !form.age) { setError("Remplissez tous les champs !"); return; }
+  if (!form.email || !form.password) { setError("Remplissez tous les champs !"); return; }
+  if (isSignUpMode && !form.age) { setError("Remplissez tous les champs !"); return; }
     if (isSignUpMode && !form.username) { setError("Choisissez un pseudo !"); return; }
-  else if (isSignUpMode) { setIsSignUp(true); return; }
-  else { setIsSignUp(true); }
+    else if (isSignUpMode) { setIsSignUp(true); return; }
+    else { setIsSignIn(true); return;}
+};
 
-  useEffect(function() {
+useEffect(function() {
+  if (!isSignUp && !isSignIn) {
+    return;
+  }
   async function fetchData() {
-    const url = 'http://localhost:8080/api/adduser';
-    // Ensure age is sent as a number
-    const payload = { ...form, age: Number(form.age), verified: true };
+    const url = isSignUp ? 'http://localhost:8080/api/adduser' : 'http://localhost:8080/api/login';
+  let payload;
+  if (isSignUp)
+    payload = { ...form, age: Number(form.age), verified: true };
+  else
+    payload = {email: form.email,password: form.password};
     const options = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/problem+json' },
@@ -31,19 +40,20 @@ const handleSubmit = () => {
     };
     try {
       const response = await fetch(url, options);
-      setIsSubmit(false);
-      if (response.ok === false)
-        throw new Error('Failed to fetch data');
-      const data = await response.json();
-      console.log(data);
-      if (data.status === 201)
+      setIsSignIn(false);
+      setIsSignUp(false);
+      if (!response.ok) {
+        throw new Error('Request failed');
+      }
+      if (response.status === 200 || response.status === 201)
         router.push("/home");
     } catch (error) {
       console.error(error.message);
+      setError("Impossible de contacter le serveur. Vérifiez que l'API tourne sur localhost:8080.");
     }
   }
   fetchData();
-}, [isSignUp])
+}, [isSignUp, isSignIn])
 
   return (
     <>
