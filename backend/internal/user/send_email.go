@@ -19,14 +19,6 @@ func (us *UserService) verifEmail(
 		return nil
 	}
 	token := pkg.NewSalt()
-	_, err := us.Client.MailVerif.
-		Create().
-		SetToken(token).
-		SetUser(user).
-		Save(ctx)
-	if err != nil {
-		return err
-	}
 	link := fmt.Sprintf("http://%s:%s%s?token=%s&user_id=%s",
 		us.Conf.Net.Host,
 		us.Conf.Net.Port,
@@ -34,7 +26,7 @@ func (us *UserService) verifEmail(
 		token,
 		fmt.Sprintf("%d", user.ID),
 	)
-	err = sendVerificationEmail(user.Email, link, us.Conf.Gmail.Address, us.Conf.Gmail.Password)
+	err := sendVerificationEmail(user.Email, link, us.Conf.Gmail.Address, us.Conf.Gmail.Password)
 	if err != nil {
 		return err
 	}

@@ -6,6 +6,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/dialect/entsql"
 )
 
 // User holds the schema definition for the User entity.
@@ -31,6 +32,7 @@ func (User) Fields() []ent.Field {
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("mail_verif", MailVerif.Type).
-			Unique(),
+			Unique().
+			Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }
