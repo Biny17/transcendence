@@ -48,7 +48,7 @@ services:
       - GMAIL_ADDRESS=${GMAIL_ADDRESS}
       - GMAIL_PASSWORD=${GMAIL_PASSWORD}
       - HOST=${HOST}
-      - ORIGINS="http://${HOST}:*,https://${HOST}:*"
+      - ORIGINS=${ORIGINS}
       - KEYPATH=${KEYPATH}
     volumes:
       - ./backend:/app

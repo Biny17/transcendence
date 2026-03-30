@@ -39,8 +39,8 @@ export default function Home() {
         <DotLottieReact
           id="navbar-avatar-animation"
           src="https://lottie.host/4a6712be-c728-4247-a609-65bd86fe8a84/JYUyKJJZH8.lottie"
-        //   loop
-        //   autoplay
+          loop
+          autoplay
         />
       </div>
       <motion.div

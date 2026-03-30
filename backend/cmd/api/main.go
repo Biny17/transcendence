@@ -24,7 +24,7 @@ func addServices(i do.Injector) {
 
 func main() {
 	log.Printf("-------------------\n")
-	log.Printf("\tSTARTING\n")
+	log.Printf("\tSTARTINGG\n")
 	log.Printf("-------------------\n")
 
 	inj := do.New()
@@ -42,7 +42,7 @@ func ProvideRouter(i do.Injector) (*chi.Mux, error) {
 	router := chi.NewMux()
 	router.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   strings.Split(cfg.Origins, ","),
-		AllowedMethods:   []string{"*"},
+		AllowedMethods:   []string{"POST", "OPTIONS", "GET", "DELETE", "PUT"},
 		AllowedHeaders:   []string{"*"},
 		ExposedHeaders:   []string{},
 		AllowCredentials: true,

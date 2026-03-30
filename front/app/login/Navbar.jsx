@@ -1,24 +1,50 @@
 "use client"
-import { useState } from 'react';
-import Image from 'next/image';
+import { useState, useEffect } from 'react';
 import './Navbar.css';
 import './Background.css';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import Link from 'next/link'
 import { useRouter } from 'next/navigation';
 import { Button } from "../animations/Button.jsx"
 
 export const Navbar = ({ signInOpen, setSignInOpen }) => {
 const [dropdownOpen, setDropdownOpen] = useState(false);
+const [isSignUp, setIsSignUp] = useState(false);
 const[isSignUpMode, setisSignUpMode] = useState(false);
-const [form, setForm] = useState({ email: "", password: "", username: "" });
+const [form, setForm] = useState({ age: 0, email: "", password: "", username: "" });
 const [error, setError] = useState("");
 const router = useRouter();
 const handleSubmit = () => {
-    if (!form.email || !form.password) { setError("Remplissez tous les champs !"); return; }
+    if (!form.email || !form.password || !form.age) { setError("Remplissez tous les champs !"); return; }
     if (isSignUpMode && !form.username) { setError("Choisissez un pseudo !"); return; }
-	else {router.push("/home")}
-}
+  else if (isSignUpMode) { setIsSignUp(true); return; }
+  else { setIsSignUp(true); }
+
+  useEffect(function() {
+  async function fetchData() {
+    const url = 'http://localhost:8080/api/adduser';
+    // Ensure age is sent as a number
+    const payload = { ...form, age: Number(form.age), verified: true };
+    const options = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/problem+json' },
+      body: JSON.stringify(payload)
+    };
+    try {
+      const response = await fetch(url, options);
+      setIsSubmit(false);
+      if (response.ok === false)
+        throw new Error('Failed to fetch data');
+      const data = await response.json();
+      console.log(data);
+      if (data.status === 201)
+        router.push("/home");
+    } catch (error) {
+      console.error(error.message);
+    }
+  }
+  fetchData();
+}, [isSignUp])
+
   return (
     <>
     <div className="navbar">
@@ -83,10 +109,6 @@ const handleSubmit = () => {
                 </button>
               </li>
             </ul>
-                {/* <ul className="dropdown-list">
-                  <li><button className="dropdown-item" onClick={() => setSignInOpen(true)}>Se connecter</button></li>
-                  <li><button className="dropdown-item">Options</button></li>
-                </ul> */}
               </div>
             </div>
           )}
@@ -112,7 +134,7 @@ const handleSubmit = () => {
     >
       <div className="flex items-center justify-between border-b bg-yellow px-4 py-3">
         <h3 className="text-lg font-medium text-white">
-          {isSignUpMode ? "Let's get tot know each other!" : "Let's Play!"}
+          {isSignUpMode ? "Let's get to know each other!" : "Let's Play!"}
         </h3>
       </div>
       <div className="flex flex-col justify-between bg-[#05113a] px-4 py-5">
@@ -137,6 +159,17 @@ const handleSubmit = () => {
               placeholder={error ? error : "Your Email here"}
             />
           </fieldset>
+           {isSignUpMode && (
+                       <fieldset className="flex items-center gap-4">
+            <label className="w-24 text-right text-[15px] text-slate-200">Age</label>
+            <input
+              type="age"
+              className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"
+              onChange={e => setForm({ ...form, age: e.target.value })}
+              placeholder={error ? error : "Your Age here"}
+            />
+          </fieldset>
+          )}
           <fieldset className="flex items-center gap-4">
             <label className="w-24 text-right text-[15px] text-slate-200">Password</label>
             <input

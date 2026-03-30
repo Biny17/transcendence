@@ -30,27 +30,30 @@ export function Profile({ SetProfileOpen }) {
               <label className="w-24 text-right text-[15px] text-slate-200" htmlFor="username">
                 Username
               </label>
-                <input className="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"/>
+                <input
+                  className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"
+                  placeholder="Louloute"
+                />
             </fieldset>
 
             <fieldset className="flex items-center gap-4">
               <label className="w-24 text-right text-[15px] text-slate-200" htmlFor="name">
                 Name
               </label>
-               <input className="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"/>
+               <input placeholder="Alix" className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"/>
             </fieldset>
 
             <fieldset className="flex items-center gap-4">
               <label className="w-24 text-right text-[15px] text-slate-200" htmlFor="email">
                 Email
               </label>
-              <input className="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"/>
+              <input placeholder="alix.crusoe@gmail.com" className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"/>
             </fieldset>
 			 <fieldset className="flex items-center gap-4">
               <label className="w-24 text-right text-[15px] text-slate-200" htmlFor="email">
                 Password
               </label>
-                <input type="password" className="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"/>
+                <input type="password" placeholder="..........." className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"/>
             </fieldset>
           </div>
 
