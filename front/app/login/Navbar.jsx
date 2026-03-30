@@ -6,6 +6,7 @@ import './Background.css';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import Link from 'next/link'
 import { useRouter } from 'next/navigation';
+import { Button } from "../animations/Button.jsx"
 
 export const Navbar = ({ signInOpen, setSignInOpen }) => {
 const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -94,56 +95,87 @@ const handleSubmit = () => {
     </div>
 
     {signInOpen && (
-      <div
-        className="modal-overlay"
-        onClick={() => setSignInOpen(false)}
-      >
-        <div
-          className="auth-card"
-          onClick={e => e.stopPropagation()}
-        >
-          <div className="auth-header">
-			<h3 className="auth-title">{isSignUpMode ? "Create an account" : "Let's Play!"}</h3>
-          </div>
-          <div className="auth-body">
-			{isSignUpMode &&<div className="form-group">
-              <label className="form-label">PseudoName</label>
-              <input type="email" className="auth-input" onChange={e => setForm({...form, username: e.target.value})} placeholder= {error ? error : "Your Pseudo"} />
-            </div>}
-            <div className="form-group">
-              <label className="form-label">Email</label>
-              <input type="email" className="auth-input" onChange={e => setForm({...form, email: e.target.value})} placeholder={error ? error : "Your Email"} />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Password</label>
-              <input type="password" className="auth-input" onChange={e => setForm({...form, password: e.target.value})} placeholder= {error ? error : "Your Password"} />
-            </div>
-            <div className="checkbox-wrapper">
-              <label className="checkbox-label" htmlFor="check-2">
-                <input type="checkbox" className="checkbox-input" id="check-2" />
-                <span className="checkbox-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="checkbox-svg" viewBox="0 0 20 20" fill="currentColor" stroke="currentColor" strokeWidth="1">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </span>
-              </label>
-              <label className="remember-label" htmlFor="check-2">Remember Me</label>
-            </div>
-          </div>
-          <div className="auth-footer">
-              <button className="auth-button" type="button" onClick={handleSubmit}>{isSignUpMode ? "Sign Up" : "Sign In"}</button>
-              <button className="auth-button auth-button-google" type="button">
-              <img src="https://docs.material-tailwind.com/icons/google.svg" alt="google" className="google-icon" />
-              Continue with Google
-            </button>
-            <p className="auth-switch">
-              {isSignUpMode ? "Already have an account?" : "Don't have an account?"}
-              <button onClick={() => {{isSignUpMode ? setisSignUpMode(false) : setisSignUpMode(true)}}} className="auth-switch-btn"> {isSignUpMode ? "Sign In?" : "Sign up"}</button>
-            </p>
+  <div
+    data-dialog-backdrop="web-3-dialog"
+    data-dialog-backdrop-close="true"
+    className="modal-overlay"
+    onClick={() => setSignInOpen(false)}
+  >
+    <div
+      className="relative m-4 h-auto max-w-5xl overflow-hidden rounded-3xl border-20 border-double shadow-xl"
+      style={{
+        fontFamily: "var(--font-party-title), var(--font-geist-sans), sans-serif",
+        borderColor: "var(--color-yellow, #facc15)"
+      }}
+      data-dialog="web-3-dialog"
+      onClick={e => e.stopPropagation()}
+    >
+      <div className="flex items-center justify-between border-b bg-yellow px-4 py-3">
+        <h3 className="text-lg font-medium text-white">
+          {isSignUpMode ? "Let's get tot know each other!" : "Let's Play!"}
+        </h3>
+      </div>
+      <div className="flex flex-col justify-between bg-[#05113a] px-4 py-5">
+        <div className="space-y-4">
+          {isSignUpMode && (
+            <fieldset className="flex items-center gap-4">
+              <label className="w-24 text-right text-[15px] text-slate-200">Pseudo</label>
+              <input
+                type="text"
+                className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"
+                onChange={e => setForm({ ...form, username: e.target.value })}
+                placeholder={error ? error : "Your Pseudo here"}
+              />
+            </fieldset>
+          )}
+          <fieldset className="flex items-center gap-4">
+            <label className="w-24 text-right text-[15px] text-slate-200">Email</label>
+            <input
+              type="email"
+              className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"
+              onChange={e => setForm({ ...form, email: e.target.value })}
+              placeholder={error ? error : "Your Email here"}
+            />
+          </fieldset>
+          <fieldset className="flex items-center gap-4">
+            <label className="w-24 text-right text-[15px] text-slate-200">Password</label>
+            <input
+              type="password"
+              className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"
+              onChange={e => setForm({ ...form, password: e.target.value })}
+              placeholder={error ? error : "Your Password here"}
+            />
+          </fieldset>
+          <div className="flex items-center gap-2 mt-2">
+            <input type="checkbox" className="checkbox-input" id="check-2" />
+            <label className="text-slate-200" htmlFor="check-2">Remember Me</label>
           </div>
         </div>
+        <div className="mt-6 flex flex-col gap-5 justify-end pr-1">
+          <Button statement={isSignUpMode ? "Sign Up" : "Sign In"} onClick={handleSubmit} />
+          <Button
+            statement={
+              <span className="flex items-center gap-2">
+                <img src="https://docs.material-tailwind.com/icons/google.svg" alt="google" className="w-5 h-5" />
+                Continue with Google
+              </span>
+            }
+            onClick={() => {/* handle Google sign-in */}}
+          />
+          <p className="text-center text-slate-300 mt-2">
+            {isSignUpMode ? "Already have an account?" : "Don't have an account?"}
+            <button
+              onClick={() => setisSignUpMode(!isSignUpMode)}
+              className="ml-2 text-blue-400 hover:underline"
+            >
+              {isSignUpMode ? "Sign In?" : "Sign up"}
+            </button>
+          </p>
+        </div>
       </div>
-    )}
+    </div>
+  </div>
+)}
     </>
   );
 }

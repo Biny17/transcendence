@@ -171,11 +171,11 @@
   transition: all 0.15s;
   appearance: none;
   border-radius: 0.25rem;
-  border: 1px solid #67e8f9;
+  border: 1px solid #f7f8f8;
 }
 
 .checkbox-input:checked {
-  background-color: #22d3ee;
+  background-color: #f7f8f8;
   border-color: #67e8f9;
 }
 
