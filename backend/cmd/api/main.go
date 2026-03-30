@@ -40,9 +40,10 @@ func main() {
 func ProvideRouter(i do.Injector) (*chi.Mux, error) {
 	cfg := do.MustInvoke[config.Config](i)
 	router := chi.NewMux()
+	fmt.Println("allowed origins:", strings.Split(cfg.Origins, ","))
 	router.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   strings.Split(cfg.Origins, ","),
-		AllowedMethods:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"*"},
 		ExposedHeaders:   []string{},
 		AllowCredentials: true,

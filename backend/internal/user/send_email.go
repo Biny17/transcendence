@@ -33,7 +33,7 @@ func (us *UserService) verifEmail(
 		token,
         fmt.Sprintf("%s", user.ID),
 	)
-	err = us.sendVerificationEmail(user.Email, link)
+	err = sendVerificationEmail(user.Email, link, us.Conf.Gmail.Address, us.Conf.Gmail.Password)
 		if err != nil {
 		return err
 	}
@@ -45,10 +45,7 @@ func (us *UserService) verifEmail(
 	return err
 }
 
-func (us *UserService) sendVerificationEmail(add_mail string, link string) error {
-	from := us.Conf.Gmail.Address
-	password := us.Conf.Gmail.Password
-	to := add_mail
+func sendVerificationEmail(to string, link string, from string, password string) error {
 	host := "smtp.gmail.com"
 	port := "587"
 
