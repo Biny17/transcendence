@@ -6,5 +6,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// MailVerif is the predicate function for mailverif builders.
+type MailVerif func(*sql.Selector)
+
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

@@ -1,28 +1,67 @@
 package auth
 
 import (
+	"backend/ent"
+	"backend/internal/config"
+	"backend/internal/pkg/routes"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
+	"github.com/danielgtaylor/huma/v2"
 	"github.com/lestrrat-go/jwx/v3/jwa"
 	"github.com/lestrrat-go/jwx/v3/jwk"
 	"github.com/lestrrat-go/jwx/v3/jwt"
+	"github.com/samber/do/v2"
 )
 
-type Auth struct {
+type AuthService struct {
+	Client  *ent.Client
 	PrivKey jwk.Key
 	PubKey  jwk.Key
 }
 
-func (auth *Auth) parseKey(keyPath string) error {
+func ProvideAndRegister(i do.Injector) *AuthService {
+	auth, err := ProvideAuthService(i)
+
+	if err != nil {
+		log.Panic(err)
+	}
+	auth.Register(i)
+	return auth
+}
+
+func ProvideAuthService(i do.Injector) (*AuthService, error) {
+	var auth AuthService
+
+	keypath := do.MustInvoke[config.Config](i).KeyPath
+	err := auth.parseKey(keypath)
+	if err != nil {
+		return nil, err
+	}
+	auth.Client = do.MustInvoke[*ent.Client](i)
+	return &auth, err
+}
+
+func (auth *AuthService) Register(i do.Injector) {
+	api := do.MustInvoke[huma.API](i)
+	huma.Register(api, huma.Operation{
+		Method:        http.MethodPost,
+		Path:          routes.Login,
+		Summary:       "Login with email or username",
+		DefaultStatus: 200,
+	}, auth.VerifyPwd)
+}
+
+func (auth *AuthService) parseKey(keyPath string) error {
 	keyData, err := os.ReadFile(keyPath)
 	if err != nil {
 		return err
 	}
 	priv_key, err := jwk.ParseKey(keyData, jwk.WithPEM(true))
 	if err != nil {
-		log.Print("Failed with key path: %s", keyPath)
+		log.Printf("Failed with key path: %s", keyPath)
 		return err
 	}
 	tok, err := jwt.NewBuilder().
@@ -41,21 +80,7 @@ func (auth *Auth) parseKey(keyPath string) error {
 	if err != nil {
 		return err
 	}
-	// issuer, exist := verifiedToken.Issuer()
-	// if exist {
-	// 	log.Printf("Token issuer is: %s\n", issuer)
-	// }
 	auth.PrivKey = priv_key
 	auth.PubKey = pubkey
 	return nil
-}
-
-func NewAuthService(keyPath string) (*Auth, error) {
-	var auth Auth
-
-	err := auth.parseKey(keyPath)
-	if err != nil {
-		return nil, err
-	}
-	return &auth, nil
 }

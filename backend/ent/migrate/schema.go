@@ -8,6 +8,27 @@ import (
 )
 
 var (
+	// MailVerifsColumns holds the columns for the "mail_verifs" table.
+	MailVerifsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "token", Type: field.TypeString},
+		{Name: "expiring_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeInt, Unique: true},
+	}
+	// MailVerifsTable holds the schema information for the "mail_verifs" table.
+	MailVerifsTable = &schema.Table{
+		Name:       "mail_verifs",
+		Columns:    MailVerifsColumns,
+		PrimaryKey: []*schema.Column{MailVerifsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "mail_verifs_users_mail_verif",
+				Columns:    []*schema.Column{MailVerifsColumns[3]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -17,6 +38,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "salt", Type: field.TypeString},
 		{Name: "hash", Type: field.TypeString},
+		{Name: "verified_email", Type: field.TypeBool, Default: false},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -26,9 +48,11 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		MailVerifsTable,
 		UsersTable,
 	}
 )
 
 func init() {
+	MailVerifsTable.ForeignKeys[0].RefTable = UsersTable
 }

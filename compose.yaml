@@ -43,10 +43,13 @@ services:
       - DB_USER=${POSTGRES_USER}
       - DB_PWD=${POSTGRES_PASSWORD}
       - DB_NAME=${POSTGRES_DB}
-      - API_PORT=8080
+      - PORT=8080
       - JWT_SECRET=${JWT_SECRET}
-      - GMAIL=${GMAIL}
+      - GMAIL_ADDRESS=${GMAIL_ADDRESS}
       - GMAIL_PASSWORD=${GMAIL_PASSWORD}
+      - HOST=${HOST}
+      - ORIGINS="http://${HOST}:*,https://${HOST}:*"
+      - KEYPATH=${KEYPATH}
     volumes:
       - ./backend:/app
       - ./secret:/app/secret
