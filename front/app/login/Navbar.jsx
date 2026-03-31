@@ -11,7 +11,7 @@ const [dropdownOpen, setDropdownOpen] = useState(false);
 const [isSignUp, setIsSignUp] = useState(false);
 const [isSignIn, setIsSignIn] = useState(false);
 const[isSignUpMode, setisSignUpMode] = useState(false);
-const [form, setForm] = useState({ age: 0, email: "", password: "", username: "" });
+const [form, setForm] = useState({ age: "", email: "", password: "", username: "" });
 const [error, setError] = useState("");
 const router = useRouter();
 const handleSubmit = () => {
@@ -43,13 +43,15 @@ useEffect(function() {
       setIsSignIn(false);
       setIsSignUp(false);
       if (!response.ok) {
-        throw new Error('Request failed');
+        const err = await response.json();
+        throw new Error(err.title);
       }
       if (response.status === 200 || response.status === 201)
         router.push("/home");
     } catch (error) {
-      console.error(error.message);
-      setError("Impossible de contacter le serveur. Vérifiez que l'API tourne sur localhost:8080.");
+      console.log(error);
+      setError("Invalid credentials");
+      isSignIn ? setForm({email: "", password: "" }) : setForm({email: "", password: "", age:"", username: ""});
     }
   }
   fetchData();
@@ -154,6 +156,7 @@ useEffect(function() {
               <label className="w-24 text-right text-[15px] text-slate-200">Pseudo</label>
               <input
                 type="text"
+                value={form.username}
                 className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"
                 onChange={e => setForm({ ...form, username: e.target.value })}
                 placeholder={error ? error : "Your Pseudo here"}
@@ -164,6 +167,7 @@ useEffect(function() {
             <label className="w-24 text-right text-[15px] text-slate-200">Email</label>
             <input
               type="email"
+              value={form.email}
               className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"
               onChange={e => setForm({ ...form, email: e.target.value })}
               placeholder={error ? error : "Your Email here"}
@@ -174,6 +178,7 @@ useEffect(function() {
             <label className="w-24 text-right text-[15px] text-slate-200">Age</label>
             <input
               type="age"
+              value={form.age}
               className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"
               onChange={e => setForm({ ...form, age: e.target.value })}
               placeholder={error ? error : "Your Age here"}
@@ -184,6 +189,7 @@ useEffect(function() {
             <label className="w-24 text-right text-[15px] text-slate-200">Password</label>
             <input
               type="password"
+              value={form.password}
               className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"
               onChange={e => setForm({ ...form, password: e.target.value })}
               placeholder={error ? error : "Your Password here"}
@@ -208,7 +214,7 @@ useEffect(function() {
           <p className="text-center text-slate-300 mt-2">
             {isSignUpMode ? "Already have an account?" : "Don't have an account?"}
             <button
-              onClick={() => setisSignUpMode(!isSignUpMode)}
+              onClick={function(){setisSignUpMode(!isSignUpMode); setError("")}}
               className="ml-2 text-blue-400 hover:underline"
             >
               {isSignUpMode ? "Sign In?" : "Sign up"}
