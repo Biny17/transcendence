@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Profile } from "@/components/dialogs/profile";
 import { Keyboard } from "@/components/dialogs/keyboard";
 
-export default function MenuOptions() {
+export default function MenuOptions({setOptionsOpen}) {
   const options = [
     "View profile",
     "Keyboard settings",
@@ -24,7 +24,7 @@ export default function MenuOptions() {
               {option === "View profile" && <Button statement={option} onClick={() => setProfileOpen(true)} />}
 			  {option === "Keyboard settings" && <Button statement={option} onClick={() => setKeyboardOpen(true)} />}
 			  {option === "About us" && <Button statement={option} onClick={() => setAboutusOpen(true)} />}
-        {option === "Go back" && <Button statement={option} onClick={() => setGoBack(false)} />}
+        {option === "Go back" && <Button statement={option} onClick={() => setOptionsOpen(false)} />}
             </div>
           </div>
         ))}

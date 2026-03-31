@@ -193,7 +193,7 @@ export default function Chat() {
               <textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
+               onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
                     sendMessage();
@@ -213,17 +213,6 @@ export default function Chat() {
           </ChatContainer>
         </div>
       )}
-
-      {/* <button
-        onClick={() => setIsOpen((prev) => !prev)}
-        className="fixed bottom-4 left-4 z-50 w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:scale-105 transition-transform"
-      >
-        {isOpen ? (
-          <XIcon className="w-5 h-5" />
-        ) : (
-          <MessageCircleIcon className="w-5 h-5" />
-        )}
-      </button> */}
     </>
   );
-}
+} 

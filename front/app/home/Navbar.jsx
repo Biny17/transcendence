@@ -17,6 +17,11 @@ const handleSubmit = () => {
     if (isSignUpMode && !form.username) { setError("Choisissez un pseudo !"); return; }
 	else {router.push("/picks")}
 }
+
+// const token = localStorage.getItem("token");//pour recuperer le username
+// const payload = token.split(".")[1];
+// const decoded = JSON.parse(atob(payload));
+// const username = decoded.username;
   return (
     <>
     <div className="navbar">
@@ -95,7 +100,7 @@ const handleSubmit = () => {
         onClick={() => setOptionsOpen(false)}
       >
         <div onClick={e => e.stopPropagation()}>
-          <Options />
+          <Options setOptionsOpen={setOptionsOpen}/>
         </div>
       </div>
     )}

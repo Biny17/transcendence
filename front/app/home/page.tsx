@@ -11,6 +11,7 @@ import { EngineCanvas } from '@/ThreeWrapper/1.engine/EngineCanvas';
 import { DemoWorld } from '@/ThreeWrapper/2.world/worlds/DemoWorld';
 import ListCard from "@/components/cards/listcard";
 import Online from "@/components/cards/Onlineplayers";
+import LeaderBoard from "@/components/cards/Leaderboard";
 
 export default function Home() {
   const [OptionsOpen, setOptionsOpen] = useState(false);
@@ -53,6 +54,9 @@ export default function Home() {
     </div>
     <div className="translate-x-50">
       <Online />
+    </div>
+	<div className="translate-x-50">
+      <LeaderBoard />
     </div>
   </div>
 </div>

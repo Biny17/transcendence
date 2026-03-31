@@ -31,7 +31,7 @@ import { AdditionalMessage } from "@/components/examples/additional-message";
 import { DateItem } from "@/components/examples/date-item";
 import MenuOptions from "@/components/cards/menu_options";
 
-export default function Options() {
+export default function Options({setOptionsOpen}) {
   
 
   return (
@@ -47,7 +47,7 @@ export default function Options() {
         <span className="font-medium">Options</span>
         </ChatHeaderMain>
       </ChatHeader>
-        <MenuOptions />
+        <MenuOptions setOptionsOpen={setOptionsOpen} />
 		  </ChatContainer>
 		</div>
 	  )}
