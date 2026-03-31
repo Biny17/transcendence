@@ -10,10 +10,11 @@ export default function MenuOptions() {
     "View profile",
     "Keyboard settings",
     "About us",
+    "Go back",
   ];
   const [profileOpen, setProfileOpen] = useState(false);
   const [KeyboardOpen, setKeyboardOpen] = useState(false);
-   const [AboutusOpen, setAboutusOpen] = useState(false);
+  const [AboutusOpen, setAboutusOpen] = useState(false);
   return (
     <div className="w-full h-full flex flex-col items-center justify-center bg-[#05113a]">
       <nav className="flex flex-col gap-4 overflow-y-auto scrollbar-hide p-2 box-border pb-12 max-h-[calc(100%-8px)]">
@@ -23,6 +24,7 @@ export default function MenuOptions() {
               {option === "View profile" && <Button statement={option} onClick={() => setProfileOpen(true)} />}
 			  {option === "Keyboard settings" && <Button statement={option} onClick={() => setKeyboardOpen(true)} />}
 			  {option === "About us" && <Button statement={option} onClick={() => setAboutusOpen(true)} />}
+        {option === "Go back" && <Button statement={option} onClick={() => setGoBack(false)} />}
             </div>
           </div>
         ))}

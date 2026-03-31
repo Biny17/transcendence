@@ -35,19 +35,19 @@ export default function Options() {
   
 
   return (
-	<>
-	  {(
-		<div
+  <>
+    {(
+    <div
       className="w-90 h-130 z-50 shadow-xl rounded-3xl border-yellow border-20 table-fixed border-double overflow-hidden"
-			style={{ fontFamily: "var(--font-party-title), var(--font-geist-sans), sans-serif" }}
-		>
-		  <ChatContainer className="h-full">
-			<ChatHeader className="border-b bg-yellow">
-			  <ChatHeaderMain >
-				<span className="font-medium">Options</span>
-			  </ChatHeaderMain>
-			</ChatHeader>
-				<MenuOptions />
+      style={{ fontFamily: "var(--font-party-title), var(--font-geist-sans), sans-serif" }}
+    >
+      <ChatContainer className="h-full">
+      <ChatHeader className="border-b bg-yellow">
+        <ChatHeaderMain >
+        <span className="font-medium">Options</span>
+        </ChatHeaderMain>
+      </ChatHeader>
+        <MenuOptions />
 		  </ChatContainer>
 		</div>
 	  )}

@@ -138,7 +138,8 @@ export function Keyboard({ setKeyboardOpen }) {
             </fieldset>
           </div>
 
-          <div className="mt-6 flex justify-end pr-1">
+          <div className="mt-6 flex gap-3 justify-end pr-1">
+            <Button statement="Go back" onClick={() => setKeyboardOpen(false)} />
             <Button statement="Save Changes" onClick={saveAndClose} />
           </div>
         </div>
