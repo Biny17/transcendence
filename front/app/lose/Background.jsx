@@ -4,8 +4,15 @@ import { motion } from "motion/react"
 import { SparklesCore } from "@/components/ui/sparkles"
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { Button } from "../animations/Button.jsx"
+import { useRouter } from 'next/navigation';
+
 
 export function Background() {
+  const router = useRouter();
+
+function handleClick(){
+  router.push("/home")
+}
   return (
     <div className="h-screen w-screen relative bg-slate-950 flex flex-col items-center justify-center overflow-hidden">
       <div className="w-full absolute inset-0 h-full">
@@ -38,7 +45,7 @@ export function Background() {
         </h1>
 
         <div className="mt-8">
-          <Button statement= "Retour au lobby"/>
+          <Button statement= "Retour au lobby" onClick={handleClick}/>
         </div>
       </motion.div>
     </div>

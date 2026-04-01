@@ -96,7 +96,7 @@ const handleSubmit = () => {
 
     {OptionsOpen && (
       <div
-        className="modal-overlay"
+        className="modal-overlay backdrop-blur-sm" 
         onClick={() => setOptionsOpen(false)}
       >
         <div onClick={e => e.stopPropagation()}>

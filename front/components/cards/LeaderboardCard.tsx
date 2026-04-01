@@ -103,34 +103,34 @@ export default function LeaderBoardCard() {
 	sender: msg.role === "user" ? USER_SENDER : ASSISTANT_SENDER,
   }));
 
-  return (
-	<>
-	  {(
-		<div
-			className="w-[360px] h-[520px] z-50 shadow-xl rounded-3xl border-yellow border-20 table-fixed border-double overflow-hidden ml-12"
-			style={{ fontFamily: "var(--font-party-title), var(--font-geist-sans), sans-serif" }}
-		>
-		  <ChatContainer className="h-full">
-			<div className="bg-yellow flex items-center justify-center pt-3 pb-1">
-			  <img
-				src="champion.png"
-				alt="Medaille du leaderboard"
-				className="h-20 w-20 object-contain drop-shadow-md"
-			  />
-			</div>
-			<ChatHeader className="border-b bg-yellow">
-			  <ChatHeaderMain >
-				<span className="font-medium">LeaderBoard</span>
-			  </ChatHeaderMain>
-			</ChatHeader>
-			<div className="flex-1 w-full h-full bg-indigo p-0">
-				<div className="w-full h-full">
-					<ListCard />
+	return (
+		<>
+			{(
+				<div
+					className="w-[600px] h-[800px] z-50 shadow-xl rounded-3xl border-yellow border-20 table-fixed border-double overflow-hidden ml-12"
+					style={{ fontFamily: "var(--font-party-title), var(--font-geist-sans), sans-serif" }}
+				>
+					<ChatContainer className="h-full flex flex-col">
+						<div className="bg-yellow flex items-center justify-center pt-3 pb-1">
+							<img
+								src="champion.png"
+								alt="Medaille du leaderboard"
+								className="h-20 w-20 object-contain drop-shadow-md"
+							/>
+						</div>
+						<ChatHeader className="border-b bg-yellow">
+							<ChatHeaderMain >
+								<span className="font-medium">LeaderBoard</span>
+							</ChatHeaderMain>
+						</ChatHeader>
+						<div className="flex-1 w-full h-0 bg-indigo p-0 overflow-y-auto">
+							<div className="w-full h-full">
+								<ListCard />
+							</div>
+						</div>
+					</ChatContainer>
 				</div>
-			</div>
-		  </ChatContainer>
-		</div>
-	  )}
-	</>
-  );
+			)}
+		</>
+	);
 }

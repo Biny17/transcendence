@@ -52,11 +52,8 @@ export default function Home() {
         <Button statement="Let's play" />
       </motion.div>
     </div>
-    <div className="translate-x-50">
+    <div className="translate-x-185">
       <Online />
-    </div>
-	<div className="translate-x-50">
-      <LeaderBoard />
     </div>
   </div>
 </div>

@@ -4,7 +4,15 @@ import { motion } from "motion/react"
 import { BackgroundGradientAnimation } from "@/components/ui/background-gradient-animation";
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import {Button } from "../animations/Button.jsx"
+import { useRouter } from 'next/navigation';
+
 export function Background() {
+  
+  const router = useRouter();
+  
+  function handleClick(){
+    router.push("/home")
+  }
   return (
     <div className="h-screen w-screen relative bg-slate-950 flex flex-col items-center justify-center overflow-hidden">
       <div className="w-full absolute inset-0 h-full">
@@ -42,7 +50,7 @@ export function Background() {
             <DotLottieReact src="https://lottie.host/625715ba-c990-472d-88c9-679feb7fa833/K7RlLzljd1.lottie" loop autoplay />
           </div>
         </div>
-		<Button statement= "Retour au lobby"/>
+		<Button statement= "Retour au lobby"onClick={handleClick}/>
       </motion.div>
 		  
     </div>
