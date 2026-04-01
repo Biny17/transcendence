@@ -36,6 +36,7 @@ export default function Home() {
   <div className="absolute inset-0 flex items-center justify-center gap-12">
   <div className="flex flex-row items-center gap-12">
     <div className="flex flex-col items-center gap-6">
+      <div className="tooltip party-title translate-y-10 translate-x-50" >Hey! Here's the rules: don't die. That's it!</div>
       <div className="w-[400px] h-[400px] md:w-[600px] md:h-[600px]">
         <DotLottieReact
           id="navbar-avatar-animation"
