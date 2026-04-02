@@ -4,13 +4,14 @@ import (
 	"backend/ent"
 	"backend/ent/user"
 	"context"
-	"strconv"
+	"log"
+	// "strconv"
 
 	"github.com/danielgtaylor/huma/v2"
 )
 
 type DelUserIn struct {
-	UserID   string `query:"user_id"`
+	UserID   int `query:"user_id"`
 	Email    string `query:"email"`
 	Username string `query:"username"`
 }
@@ -24,13 +25,14 @@ func (us *UserService) DelUser(ctx context.Context, input *DelUserIn) (*DelUserO
 	// 	Delete().
 	// 	Wh
 	var err error
-	if input.UserID != "" {
-		id, err := strconv.Atoi(input.UserID)
-		if err != nil {
-			huma.Error400BadRequest("invalid ID")
-		}
+	log.Printf("DELETE user_id: %s | email: %s | username: %s\n", input.UserID, input.Email, input.Username)
+	if input.UserID != 0 {
+		// id, err := strconv.Atoi(input.UserID)
+		// if err != nil {
+		// 	huma.Error400BadRequest("invalid ID")
+		// }
 		_, err = us.Client.User.
-			Delete().Where(user.IDEQ(id)).Exec(ctx)
+			Delete().Where(user.IDEQ(input.UserID)).Exec(ctx)
 	} else if input.Email != "" {
 		_, err = us.Client.User.
 			Delete().Where(user.EmailEQ(input.Email)).Exec(ctx)

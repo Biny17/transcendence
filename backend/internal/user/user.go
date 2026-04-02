@@ -18,7 +18,7 @@ type UserService struct {
 	Client *ent.Client
 }
 
-func ProvideAndRegister(i do.Injector) (*UserService) {
+func ProvideAndRegister(i do.Injector) *UserService {
 	us, _ := ProvideUserService(i)
 	us.Register(do.MustInvoke[huma.API](i))
 	return us
@@ -33,15 +33,32 @@ func ProvideUserService(i do.Injector) (*UserService, error) {
 
 func (us *UserService) Register(api huma.API) {
 	huma.Register(api, huma.Operation{
-		Method:        	http.MethodPost,
-		Path:          	routes.AddUser,
-		Summary:		"Add new user to the database",
-		DefaultStatus:	201,
+		Method:        http.MethodPost,
+		Path:          routes.AddUser,
+		Summary:       "Add new user to the database",
+		DefaultStatus: 201,
 	}, us.AddUser)
 	huma.Register(api, huma.Operation{
-		Method:			http.MethodDelete,
-		Path:			routes.DeleteUser,
-		Summary: 		"Delete user from the database",
-		DefaultStatus: 	200,
+		Method:        http.MethodDelete,
+		Path:          routes.DeleteUser,
+		Summary:       "Delete user from the database",
+		DefaultStatus: 200,
 	}, us.DelUser)
+	huma.Register(api, huma.Operation{
+		Method:  http.MethodGet,
+		Path:    routes.User,
+		Summary: "Query information from email, username, id",
+		Description: `Provide either user_id, email or username as query
+			to get specific user information. If no query is given, it will return all users`,
+	}, us.QueryUser)
+	huma.Register(api, huma.Operation{
+		Method:  http.MethodGet,
+		Path:    routes.GetUserById,
+		Summary: "Get user by ID in path",
+	}, us.GetUserById)
+	huma.Register(api, huma.Operation{
+		Method:  http.MethodGet,
+		Path:    routes.GetUsers,
+		Summary: "Get all users",
+	}, us.AllUsers)
 }
