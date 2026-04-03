@@ -1,7 +1,7 @@
 package routes
 
 const (
-	VerifyEmail		= "/api/auth/verify-email"
+	ConfirmEmail	= "/api/auth/verify-email"
 	AddUser			= "/api/user/add"
 	DeleteUser		= "/api/user/delete"
 	Login			= "/api/login"
@@ -11,4 +11,5 @@ const (
 	UpdateUsername	= "/api/update/username"
 	GetUserById		= "/api/users/{id}"
 	GetUsers		= "/api/users"
+	ResendEmail		= "/api/users/resend-email/{id}"
 )

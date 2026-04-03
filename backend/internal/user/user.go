@@ -61,4 +61,14 @@ func (us *UserService) Register(api huma.API) {
 		Path:    routes.GetUsers,
 		Summary: "Get all users",
 	}, us.AllUsers)
+	huma.Register(api, huma.Operation{
+		Method:  http.MethodGet,
+		Path:    "/api/users/resend-email/{id}",
+		Summary: "Send a new link to verify the email",
+	}, us.ResendEmail)
+	huma.Register(api, huma.Operation{
+		Method: http.MethodGet,
+		Path: routes.ConfirmEmail,
+		Summary: "Confirm the email with the token and user_id in query",
+	}, us.ConfirmEmail)
 }

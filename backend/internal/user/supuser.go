@@ -25,7 +25,7 @@ func (us *UserService) DelUser(ctx context.Context, input *DelUserIn) (*DelUserO
 	// 	Delete().
 	// 	Wh
 	var err error
-	log.Printf("DELETE user_id: %s | email: %s | username: %s\n", input.UserID, input.Email, input.Username)
+	log.Printf("DELETE user_id: %d | email: %s | username: %s\n", input.UserID, input.Email, input.Username)
 	if input.UserID != 0 {
 		// id, err := strconv.Atoi(input.UserID)
 		// if err != nil {

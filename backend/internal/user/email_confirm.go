@@ -3,6 +3,8 @@ package user
 import (
 	"backend/ent"
 	"backend/ent/mailverif"
+	"log"
+
 	// "backend/ent/user"
 	"context"
 	"time"
@@ -23,14 +25,13 @@ func (us *UserService) ConfirmEmail(
 	ctx context.Context,
 	input *CallbackIn,
 ) (*CallBackOut, error) {
-	if input == nil || input.Token == "" || input.UserID <= 0 {
+	if input.Token == "" || input.UserID <= 0 {
 		return nil, huma.Error400BadRequest("invalid verification query")
 	}
 	mv, err := us.Client.MailVerif.Query().
 		Where(mailverif.TokenEQ(input.Token)).
 		Where(mailverif.UserIDEQ(input.UserID)).
 		Only(ctx)
-	us.Client.MailVerif.DeleteOneID(mv.ID).Exec(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, huma.Error400BadRequest("invalid verification query")
@@ -44,5 +45,13 @@ func (us *UserService) ConfirmEmail(
 		UpdateOneID(input.UserID).
 		SetVerifiedEmail(true).
 		Save(ctx)
+	if err != nil {
+		log.Print(err)
+		return nil, huma.Error500InternalServerError("Server Error")
+	}
+	err = us.Client.MailVerif.DeleteOneID(mv.ID).Exec(ctx)
+	if err != nil {
+		log.Print(err)
+	}
 	return &CallBackOut{Message: "email confirmed !"}, nil
 }

@@ -34,7 +34,7 @@ type InfoOut struct {
 	Body []UserInfo
 }
 
-func (us *UserService) AllUsers(ctx context.Context, input *any) (*InfoOut, error) {
+func (us *UserService) AllUsers(ctx context.Context, input *struct{}) (*InfoOut, error) {
 	users, err := us.Client.User.
 		Query().
 		All(ctx)

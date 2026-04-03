@@ -2,27 +2,36 @@ package user
 
 import (
 	"backend/ent"
+	"backend/ent/mailverif"
 	"backend/internal/pkg"
 	"backend/internal/pkg/routes"
 	"context"
 	"crypto/tls"
 	"fmt"
+	"log"
 	"net"
 	"net/smtp"
+
+	"github.com/danielgtaylor/huma/v2"
 )
+
+type ResendEmailIn struct {
+	User_id int `path:"id"`
+}
 
 func (us *UserService) verifEmail(
 	ctx context.Context,
 	user *ent.User,
 ) error {
 	if user.VerifiedEmail == true {
+		log.Printf("email already verified\n")
 		return nil
 	}
 	token := pkg.NewSalt()
 	link := fmt.Sprintf("http://%s:%s%s?token=%s&user_id=%s",
 		us.Conf.Net.Host,
 		us.Conf.Net.Port,
-		routes.VerifyEmail,
+		routes.ConfirmEmail,
 		token,
 		fmt.Sprintf("%d", user.ID),
 	)
@@ -30,6 +39,7 @@ func (us *UserService) verifEmail(
 	if err != nil {
 		return err
 	}
+	log.Printf("email sent to %s\n", user.Email)
 	_, err = us.Client.MailVerif.
 		Create().
 		SetToken(token).
@@ -86,4 +96,26 @@ func sendVerificationEmail(to string, link string, from string, password string)
 	w.Write([]byte(msg))
 	w.Close()
 	return nil
+}
+
+func (us *UserService) ResendEmail(ctx context.Context, input *ResendEmailIn) (*struct{}, error) {
+	// log.Printf("resend\n")
+	user, err := us.Client.User.Get(ctx, input.User_id)
+	if err != nil {
+		str := fmt.Sprintf("user_id: %d not found\n", input.User_id)
+		if ent.IsNotFound(err) {
+			return nil, huma.Error400BadRequest(str)
+		}
+		return nil, huma.Error500InternalServerError("operation failed")
+	}
+	_, err = us.Client.MailVerif.Delete().Where(mailverif.UserID(user.ID)).Exec(ctx)
+	if err != nil {
+		log.Print(err)
+		return nil, huma.Error500InternalServerError("operation failed")
+	}
+	if err := us.verifEmail(ctx, user); err != nil {
+		log.Print(err)
+		return nil, huma.Error500InternalServerError("operation failed")
+	}
+	return &struct{}{}, nil
 }

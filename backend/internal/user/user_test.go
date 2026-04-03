@@ -5,23 +5,23 @@ import (
 )
 
 type test_input struct {
-	to 			string
-	link		string
-	from		string
-	password	string
+	to       string
+	link     string
+	from     string
+	password string
 }
 
 type test struct {
-	input	test_input
-	want	error
+	input test_input
+	want  error
 }
 
-var tests = []test {
+var tests = []test{
 	{
 		input: test_input{
-			to: "sarter.julien@gmail.com",
-			link: "urlr.me/EJxQNp",
-			from: "tristanbiny.lod@gmail.com",
+			to:       "tristangallet17@gmail.com",
+			link:     "urlr.me/EJxQNp",
+			from:     "tristanbiny.lod@gmail.com",
 			password: "fsyxvrqgbyeqckei",
 		},
 		want: nil,
