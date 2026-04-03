@@ -53,9 +53,19 @@ func (us *UserService) Register(api huma.API) {
 	}, us.QueryUser)
 	huma.Register(api, huma.Operation{
 		Method:  http.MethodGet,
-		Path:    routes.GetUserById,
+		Path:    routes.UserById,
 		Summary: "Get user by ID in path",
 	}, us.GetUserById)
+	huma.Register(api, huma.Operation{
+		Method:  http.MethodPut,
+		Path:    routes.UserById,
+		Summary: "Replace user by ID",
+	}, us.PutUser)
+	huma.Register(api, huma.Operation{
+		Method:  http.MethodPatch,
+		Path:    routes.UserById,
+		Summary: "Update user by ID",
+	}, us.PatchUser)
 	huma.Register(api, huma.Operation{
 		Method:  http.MethodGet,
 		Path:    routes.GetUsers,
@@ -67,8 +77,8 @@ func (us *UserService) Register(api huma.API) {
 		Summary: "Send a new link to verify the email",
 	}, us.ResendEmail)
 	huma.Register(api, huma.Operation{
-		Method: http.MethodGet,
-		Path: routes.ConfirmEmail,
+		Method:  http.MethodGet,
+		Path:    routes.ConfirmEmail,
 		Summary: "Confirm the email with the token and user_id in query",
 	}, us.ConfirmEmail)
 }
