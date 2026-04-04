@@ -17,6 +17,7 @@ type VerifyPwdIn struct {
 }
 
 type VerifyPwdOut struct {
+	Token string `header:"Authorization"`
 }
 
 func (m *VerifyPwdIn) Resolve(ctx huma.Context) []error {
@@ -38,6 +39,7 @@ func (auth *AuthService) VerifyPwd(
 	var (
 		u   *ent.User
 		err error
+		out	VerifyPwdOut
 	)
 
 	if input.Body.Email != "" {
@@ -56,6 +58,6 @@ func (auth *AuthService) VerifyPwd(
 	if pkg.HashPwd(u.Salt, input.Body.Password) != u.Hash {
 		return nil, huma.Error401Unauthorized("invalid credentials")
 	}
-
-	return &VerifyPwdOut{}, nil
+	out.Token, err = auth.NewToken(u)
+	return &out, nil
 }

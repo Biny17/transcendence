@@ -10,7 +10,7 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
-type PatchIn struct {
+type PatchUser struct {
 	User_id   int        `path:"id"`
 	Body struct {
 		Email     *string    `json:"email,omitempty"`
@@ -22,7 +22,7 @@ type PatchIn struct {
 	}
 }
 
-type PutIn struct {
+type PutUser struct {
 	User_id   int       `path:"id"`
 	Body struct {
 		Email     string    `json:"email"`
@@ -34,7 +34,7 @@ type PutIn struct {
 	}
 }
 
-func (us *UserService) PutUser(ctx context.Context, input *PutIn) (*InfoOut, error) {
+func (us *UserService) PutUser(ctx context.Context, input *PutUser) (*InfoOut, error) {
 	user, err := us.Client.User.Get(ctx, input.User_id)
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -71,7 +71,7 @@ func (us *UserService) PutUser(ctx context.Context, input *PutIn) (*InfoOut, err
 	return out, nil
 }
 
-func (pi PatchIn) String() string {
+func (pi PatchUser) String() string {
 	return fmt.Sprintf(`id: %d\nemail: %v\nusername: %v\npassword: %v
 		\nverified: %v\nage: %v\ncreated_at: %v\n`,
 		pi.User_id, pi.Body.Email, pi.Body.Username,
@@ -79,7 +79,7 @@ func (pi PatchIn) String() string {
 		pi.Body.CreatedAt)
 }
 
-func (us *UserService) PatchUser(ctx context.Context, input *PatchIn) (*InfoOut, error) {
+func (us *UserService) PatchUser(ctx context.Context, input *PatchUser) (*InfoOut, error) {
 	fmt.Println(*input)
 	user, err := us.Client.User.Get(ctx, input.User_id)
 	if err != nil {
