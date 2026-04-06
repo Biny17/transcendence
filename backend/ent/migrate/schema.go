@@ -25,7 +25,7 @@ var (
 				Symbol:     "mail_verifs_users_mail_verif",
 				Columns:    []*schema.Column{MailVerifsColumns[3]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
