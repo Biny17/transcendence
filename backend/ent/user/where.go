@@ -463,6 +463,52 @@ func HasMailVerifWith(preds ...predicate.MailVerif) predicate.User {
 	})
 }
 
+// HasFriendships applies the HasEdge predicate on the "friendships" edge.
+func HasFriendships() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, FriendshipsTable, FriendshipsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasFriendshipsWith applies the HasEdge predicate on the "friendships" edge with a given conditions (other predicates).
+func HasFriendshipsWith(preds ...predicate.Friendship) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newFriendshipsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasFriendOf applies the HasEdge predicate on the "friend_of" edge.
+func HasFriendOf() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, FriendOfTable, FriendOfColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasFriendOfWith applies the HasEdge predicate on the "friend_of" edge with a given conditions (other predicates).
+func HasFriendOfWith(preds ...predicate.Friendship) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newFriendOfStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.User) predicate.User {
 	return predicate.User(sql.AndPredicates(predicates...))

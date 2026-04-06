@@ -6,6 +6,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// Friendship is the predicate function for friendship builders.
+type Friendship func(*sql.Selector)
+
 // MailVerif is the predicate function for mailverif builders.
 type MailVerif func(*sql.Selector)
 

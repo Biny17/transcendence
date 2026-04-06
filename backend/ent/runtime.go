@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"backend/ent/friendship"
 	"backend/ent/mailverif"
 	"backend/ent/schema"
 	"backend/ent/user"
@@ -13,6 +14,16 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	friendshipFields := schema.Friendship{}.Fields()
+	_ = friendshipFields
+	// friendshipDescCreatedAt is the schema descriptor for created_at field.
+	friendshipDescCreatedAt := friendshipFields[0].Descriptor()
+	// friendship.DefaultCreatedAt holds the default value on creation for the created_at field.
+	friendship.DefaultCreatedAt = friendshipDescCreatedAt.Default.(func() time.Time)
+	// friendshipDescStatus is the schema descriptor for status field.
+	friendshipDescStatus := friendshipFields[1].Descriptor()
+	// friendship.DefaultStatus holds the default value on creation for the status field.
+	friendship.DefaultStatus = friendshipDescStatus.Default.(string)
 	mailverifFields := schema.MailVerif{}.Fields()
 	_ = mailverifFields
 	// mailverifDescUserID is the schema descriptor for user_id field.

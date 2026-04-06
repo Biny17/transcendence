@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"backend/ent/friendship"
 	"backend/ent/mailverif"
 	"backend/ent/predicate"
 	"backend/ent/user"
@@ -20,11 +21,13 @@ import (
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	ctx           *QueryContext
-	order         []user.OrderOption
-	inters        []Interceptor
-	predicates    []predicate.User
-	withMailVerif *MailVerifQuery
+	ctx             *QueryContext
+	order           []user.OrderOption
+	inters          []Interceptor
+	predicates      []predicate.User
+	withMailVerif   *MailVerifQuery
+	withFriendships *FriendshipQuery
+	withFriendOf    *FriendshipQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -76,6 +79,50 @@ func (_q *UserQuery) QueryMailVerif() *MailVerifQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(mailverif.Table, mailverif.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, user.MailVerifTable, user.MailVerifColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryFriendships chains the current query on the "friendships" edge.
+func (_q *UserQuery) QueryFriendships() *FriendshipQuery {
+	query := (&FriendshipClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(friendship.Table, friendship.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.FriendshipsTable, user.FriendshipsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryFriendOf chains the current query on the "friend_of" edge.
+func (_q *UserQuery) QueryFriendOf() *FriendshipQuery {
+	query := (&FriendshipClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(friendship.Table, friendship.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.FriendOfTable, user.FriendOfColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -270,12 +317,14 @@ func (_q *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:        _q.config,
-		ctx:           _q.ctx.Clone(),
-		order:         append([]user.OrderOption{}, _q.order...),
-		inters:        append([]Interceptor{}, _q.inters...),
-		predicates:    append([]predicate.User{}, _q.predicates...),
-		withMailVerif: _q.withMailVerif.Clone(),
+		config:          _q.config,
+		ctx:             _q.ctx.Clone(),
+		order:           append([]user.OrderOption{}, _q.order...),
+		inters:          append([]Interceptor{}, _q.inters...),
+		predicates:      append([]predicate.User{}, _q.predicates...),
+		withMailVerif:   _q.withMailVerif.Clone(),
+		withFriendships: _q.withFriendships.Clone(),
+		withFriendOf:    _q.withFriendOf.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -290,6 +339,28 @@ func (_q *UserQuery) WithMailVerif(opts ...func(*MailVerifQuery)) *UserQuery {
 		opt(query)
 	}
 	_q.withMailVerif = query
+	return _q
+}
+
+// WithFriendships tells the query-builder to eager-load the nodes that are connected to
+// the "friendships" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithFriendships(opts ...func(*FriendshipQuery)) *UserQuery {
+	query := (&FriendshipClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withFriendships = query
+	return _q
+}
+
+// WithFriendOf tells the query-builder to eager-load the nodes that are connected to
+// the "friend_of" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithFriendOf(opts ...func(*FriendshipQuery)) *UserQuery {
+	query := (&FriendshipClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withFriendOf = query
 	return _q
 }
 
@@ -371,8 +442,10 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = _q.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [3]bool{
 			_q.withMailVerif != nil,
+			_q.withFriendships != nil,
+			_q.withFriendOf != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -396,6 +469,20 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	if query := _q.withMailVerif; query != nil {
 		if err := _q.loadMailVerif(ctx, query, nodes, nil,
 			func(n *User, e *MailVerif) { n.Edges.MailVerif = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withFriendships; query != nil {
+		if err := _q.loadFriendships(ctx, query, nodes,
+			func(n *User) { n.Edges.Friendships = []*Friendship{} },
+			func(n *User, e *Friendship) { n.Edges.Friendships = append(n.Edges.Friendships, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withFriendOf; query != nil {
+		if err := _q.loadFriendOf(ctx, query, nodes,
+			func(n *User) { n.Edges.FriendOf = []*Friendship{} },
+			func(n *User, e *Friendship) { n.Edges.FriendOf = append(n.Edges.FriendOf, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -424,6 +511,68 @@ func (_q *UserQuery) loadMailVerif(ctx context.Context, query *MailVerifQuery, n
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadFriendships(ctx context.Context, query *FriendshipQuery, nodes []*User, init func(*User), assign func(*User, *Friendship)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Friendship(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.FriendshipsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.user_friendships
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "user_friendships" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_friendships" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadFriendOf(ctx context.Context, query *FriendshipQuery, nodes []*User, init func(*User), assign func(*User, *Friendship)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Friendship(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.FriendOfColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.user_friend_of
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "user_friend_of" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_friend_of" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

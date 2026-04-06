@@ -8,6 +8,41 @@ import (
 )
 
 var (
+	// FriendshipsColumns holds the columns for the "friendships" table.
+	FriendshipsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "status", Type: field.TypeString, Default: "pending"},
+		{Name: "user_friendships", Type: field.TypeInt},
+		{Name: "user_friend_of", Type: field.TypeInt},
+	}
+	// FriendshipsTable holds the schema information for the "friendships" table.
+	FriendshipsTable = &schema.Table{
+		Name:       "friendships",
+		Columns:    FriendshipsColumns,
+		PrimaryKey: []*schema.Column{FriendshipsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "friendships_users_friendships",
+				Columns:    []*schema.Column{FriendshipsColumns[3]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "friendships_users_friend_of",
+				Columns:    []*schema.Column{FriendshipsColumns[4]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "friendship_user_friendships_user_friend_of",
+				Unique:  true,
+				Columns: []*schema.Column{FriendshipsColumns[3], FriendshipsColumns[4]},
+			},
+		},
+	}
 	// MailVerifsColumns holds the columns for the "mail_verifs" table.
 	MailVerifsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -48,11 +83,14 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		FriendshipsTable,
 		MailVerifsTable,
 		UsersTable,
 	}
 )
 
 func init() {
+	FriendshipsTable.ForeignKeys[0].RefTable = UsersTable
+	FriendshipsTable.ForeignKeys[1].RefTable = UsersTable
 	MailVerifsTable.ForeignKeys[0].RefTable = UsersTable
 }

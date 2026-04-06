@@ -11,6 +11,7 @@ import (
 
 	"backend/ent/migrate"
 
+	"backend/ent/friendship"
 	"backend/ent/mailverif"
 	"backend/ent/user"
 
@@ -25,6 +26,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Friendship is the client for interacting with the Friendship builders.
+	Friendship *FriendshipClient
 	// MailVerif is the client for interacting with the MailVerif builders.
 	MailVerif *MailVerifClient
 	// User is the client for interacting with the User builders.
@@ -40,6 +43,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.Friendship = NewFriendshipClient(c.config)
 	c.MailVerif = NewMailVerifClient(c.config)
 	c.User = NewUserClient(c.config)
 }
@@ -132,10 +136,11 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:       ctx,
-		config:    cfg,
-		MailVerif: NewMailVerifClient(cfg),
-		User:      NewUserClient(cfg),
+		ctx:        ctx,
+		config:     cfg,
+		Friendship: NewFriendshipClient(cfg),
+		MailVerif:  NewMailVerifClient(cfg),
+		User:       NewUserClient(cfg),
 	}, nil
 }
 
@@ -153,17 +158,18 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:       ctx,
-		config:    cfg,
-		MailVerif: NewMailVerifClient(cfg),
-		User:      NewUserClient(cfg),
+		ctx:        ctx,
+		config:     cfg,
+		Friendship: NewFriendshipClient(cfg),
+		MailVerif:  NewMailVerifClient(cfg),
+		User:       NewUserClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		MailVerif.
+//		Friendship.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -185,6 +191,7 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.Friendship.Use(hooks...)
 	c.MailVerif.Use(hooks...)
 	c.User.Use(hooks...)
 }
@@ -192,6 +199,7 @@ func (c *Client) Use(hooks ...Hook) {
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.Friendship.Intercept(interceptors...)
 	c.MailVerif.Intercept(interceptors...)
 	c.User.Intercept(interceptors...)
 }
@@ -199,12 +207,179 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *FriendshipMutation:
+		return c.Friendship.mutate(ctx, m)
 	case *MailVerifMutation:
 		return c.MailVerif.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// FriendshipClient is a client for the Friendship schema.
+type FriendshipClient struct {
+	config
+}
+
+// NewFriendshipClient returns a client for the Friendship from the given config.
+func NewFriendshipClient(c config) *FriendshipClient {
+	return &FriendshipClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `friendship.Hooks(f(g(h())))`.
+func (c *FriendshipClient) Use(hooks ...Hook) {
+	c.hooks.Friendship = append(c.hooks.Friendship, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `friendship.Intercept(f(g(h())))`.
+func (c *FriendshipClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Friendship = append(c.inters.Friendship, interceptors...)
+}
+
+// Create returns a builder for creating a Friendship entity.
+func (c *FriendshipClient) Create() *FriendshipCreate {
+	mutation := newFriendshipMutation(c.config, OpCreate)
+	return &FriendshipCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Friendship entities.
+func (c *FriendshipClient) CreateBulk(builders ...*FriendshipCreate) *FriendshipCreateBulk {
+	return &FriendshipCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *FriendshipClient) MapCreateBulk(slice any, setFunc func(*FriendshipCreate, int)) *FriendshipCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &FriendshipCreateBulk{err: fmt.Errorf("calling to FriendshipClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*FriendshipCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &FriendshipCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Friendship.
+func (c *FriendshipClient) Update() *FriendshipUpdate {
+	mutation := newFriendshipMutation(c.config, OpUpdate)
+	return &FriendshipUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *FriendshipClient) UpdateOne(_m *Friendship) *FriendshipUpdateOne {
+	mutation := newFriendshipMutation(c.config, OpUpdateOne, withFriendship(_m))
+	return &FriendshipUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *FriendshipClient) UpdateOneID(id int) *FriendshipUpdateOne {
+	mutation := newFriendshipMutation(c.config, OpUpdateOne, withFriendshipID(id))
+	return &FriendshipUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Friendship.
+func (c *FriendshipClient) Delete() *FriendshipDelete {
+	mutation := newFriendshipMutation(c.config, OpDelete)
+	return &FriendshipDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *FriendshipClient) DeleteOne(_m *Friendship) *FriendshipDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *FriendshipClient) DeleteOneID(id int) *FriendshipDeleteOne {
+	builder := c.Delete().Where(friendship.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &FriendshipDeleteOne{builder}
+}
+
+// Query returns a query builder for Friendship.
+func (c *FriendshipClient) Query() *FriendshipQuery {
+	return &FriendshipQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeFriendship},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Friendship entity by its id.
+func (c *FriendshipClient) Get(ctx context.Context, id int) (*Friendship, error) {
+	return c.Query().Where(friendship.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *FriendshipClient) GetX(ctx context.Context, id int) *Friendship {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a Friendship.
+func (c *FriendshipClient) QueryUser(_m *Friendship) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(friendship.Table, friendship.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, friendship.UserTable, friendship.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryFriend queries the friend edge of a Friendship.
+func (c *FriendshipClient) QueryFriend(_m *Friendship) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(friendship.Table, friendship.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, friendship.FriendTable, friendship.FriendColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *FriendshipClient) Hooks() []Hook {
+	return c.hooks.Friendship
+}
+
+// Interceptors returns the client interceptors.
+func (c *FriendshipClient) Interceptors() []Interceptor {
+	return c.inters.Friendship
+}
+
+func (c *FriendshipClient) mutate(ctx context.Context, m *FriendshipMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&FriendshipCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&FriendshipUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&FriendshipUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&FriendshipDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Friendship mutation op: %q", m.Op())
 	}
 }
 
@@ -481,6 +656,38 @@ func (c *UserClient) QueryMailVerif(_m *User) *MailVerifQuery {
 	return query
 }
 
+// QueryFriendships queries the friendships edge of a User.
+func (c *UserClient) QueryFriendships(_m *User) *FriendshipQuery {
+	query := (&FriendshipClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(friendship.Table, friendship.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.FriendshipsTable, user.FriendshipsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryFriendOf queries the friend_of edge of a User.
+func (c *UserClient) QueryFriendOf(_m *User) *FriendshipQuery {
+	query := (&FriendshipClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(friendship.Table, friendship.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.FriendOfTable, user.FriendOfColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
@@ -509,9 +716,9 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		MailVerif, User []ent.Hook
+		Friendship, MailVerif, User []ent.Hook
 	}
 	inters struct {
-		MailVerif, User []ent.Interceptor
+		Friendship, MailVerif, User []ent.Interceptor
 	}
 )

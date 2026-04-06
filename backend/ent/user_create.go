@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"backend/ent/friendship"
 	"backend/ent/mailverif"
 	"backend/ent/user"
 	"context"
@@ -96,6 +97,36 @@ func (_c *UserCreate) SetNillableMailVerifID(id *int) *UserCreate {
 // SetMailVerif sets the "mail_verif" edge to the MailVerif entity.
 func (_c *UserCreate) SetMailVerif(v *MailVerif) *UserCreate {
 	return _c.SetMailVerifID(v.ID)
+}
+
+// AddFriendshipIDs adds the "friendships" edge to the Friendship entity by IDs.
+func (_c *UserCreate) AddFriendshipIDs(ids ...int) *UserCreate {
+	_c.mutation.AddFriendshipIDs(ids...)
+	return _c
+}
+
+// AddFriendships adds the "friendships" edges to the Friendship entity.
+func (_c *UserCreate) AddFriendships(v ...*Friendship) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddFriendshipIDs(ids...)
+}
+
+// AddFriendOfIDs adds the "friend_of" edge to the Friendship entity by IDs.
+func (_c *UserCreate) AddFriendOfIDs(ids ...int) *UserCreate {
+	_c.mutation.AddFriendOfIDs(ids...)
+	return _c
+}
+
+// AddFriendOf adds the "friend_of" edges to the Friendship entity.
+func (_c *UserCreate) AddFriendOf(v ...*Friendship) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddFriendOfIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -244,6 +275,38 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(mailverif.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.FriendshipsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.FriendshipsTable,
+			Columns: []string{user.FriendshipsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(friendship.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.FriendOfIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.FriendOfTable,
+			Columns: []string{user.FriendOfColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(friendship.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

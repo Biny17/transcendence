@@ -8,6 +8,18 @@ import (
 	"fmt"
 )
 
+// The FriendshipFunc type is an adapter to allow the use of ordinary
+// function as Friendship mutator.
+type FriendshipFunc func(context.Context, *ent.FriendshipMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f FriendshipFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.FriendshipMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FriendshipMutation", m)
+}
+
 // The MailVerifFunc type is an adapter to allow the use of ordinary
 // function as MailVerif mutator.
 type MailVerifFunc func(context.Context, *ent.MailVerifMutation) (ent.Value, error)
