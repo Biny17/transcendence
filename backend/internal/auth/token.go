@@ -2,6 +2,7 @@ package auth
 
 import (
 	"backend/ent"
+	"backend/internal/pkg"
 	"strconv"
 	"time"
 
@@ -16,9 +17,9 @@ func (auth *AuthService) NewToken(u *ent.User) (string, error) {
 		Subject(strconv.Itoa(u.ID)).
 		Issuer("transcendence").
 		IssuedAt(time.Now()).
-		Expiration(time.Now().Add(time.Hour)).
-		Claim("email", u.Email).
+		Expiration(time.Now().Add(pkg.TokenLifetime)).
 		Build()
+		// Claim("email", u.Email).
 	if err != nil {
 		return tk_str, err
 	}

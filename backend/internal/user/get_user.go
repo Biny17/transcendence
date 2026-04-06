@@ -6,9 +6,11 @@ import (
 	"backend/ent/user"
 	"context"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/danielgtaylor/huma/v2"
+	"github.com/lestrrat-go/jwx/v3/jwt"
 )
 
 type UserByIdIn struct {
@@ -22,7 +24,7 @@ type InfoIn struct {
 }
 
 type UserInfo struct {
-	Id       int       `json:"user_id"`
+	Id       int       `json:"id"`
 	Username string    `json:"username"`
 	Email    string    `json:"email"`
 	Verified bool      `json:"verified"`
@@ -104,4 +106,30 @@ func (us *UserService) GetUserById(ctx context.Context, input *UserByIdIn) (*Inf
 		return nil, err
 	}
 	return info_out, nil
+}
+
+type MeInput struct {
+	Cooken string `cookie:"auth_token"`
+}
+
+func (us *UserService) Me(ctx context.Context, input *MeInput) (*InfoOut, error) {
+	// verifiedToken, err := jwt.Parse(input.Cooken, jwt.WithKey(jwa.RS256(), pubkey))
+	// if err != nil {
+	// 	fmt.Printf("failed to verify JWS: %s\n", err)
+	// 	return nil, huma.Error400BadRequest("failed to recognized JWT")
+	// }
+	token, err := jwt.Parse([]byte(input.Cooken), jwt.WithVerify(false))
+	if err != nil {
+		return nil, huma.Error400BadRequest("failed to recognized JWT")
+	}
+	id_str, exists := token.Subject()
+	if exists == false {
+		return nil, huma.Error400BadRequest("invalid JWT: missing sub claim")
+	} 
+	id, error := strconv.Atoi(id_str)
+	if error != nil {
+		log.Print(err)
+		return nil, huma.Error400BadRequest("invalid JWT: sub claim is not an integer")
+	}
+	return us.GetUserById(ctx, &UserByIdIn{UserId: id})
 }

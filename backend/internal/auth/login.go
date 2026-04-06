@@ -1,10 +1,13 @@
 package auth
 
 import (
-	"backend/internal/pkg"
 	"backend/ent"
 	"backend/ent/user"
+	"backend/internal/pkg"
 	"context"
+	"net/http"
+	"time"
+
 	"github.com/danielgtaylor/huma/v2"
 )
 
@@ -17,7 +20,7 @@ type VerifyPwdIn struct {
 }
 
 type VerifyPwdOut struct {
-	Token string `header:"Authorization"`
+	SetCookie http.Cookie `header:"Set-Cookie"`
 }
 
 func (m *VerifyPwdIn) Resolve(ctx huma.Context) []error {
@@ -39,7 +42,7 @@ func (auth *AuthService) VerifyPwd(
 	var (
 		u   *ent.User
 		err error
-		out	VerifyPwdOut
+		out VerifyPwdOut
 	)
 
 	if input.Body.Email != "" {
@@ -52,12 +55,21 @@ func (auth *AuthService) VerifyPwd(
 		if ent.IsNotFound(err) {
 			return nil, huma.Error401Unauthorized("invalid credentials")
 		}
-		return nil, huma.Error500InternalServerError("oopsie")
+		return nil, huma.Error500InternalServerError("internal error")
 	}
 
 	if pkg.HashPwd(u.Salt, input.Body.Password) != u.Hash {
 		return nil, huma.Error401Unauthorized("invalid credentials")
 	}
-	out.Token, err = auth.NewToken(u)
+	jwt, err := auth.NewToken(u)
+	if err != nil {
+		return nil, huma.Error500InternalServerError("internal error")
+	}
+	out.SetCookie = http.Cookie{
+		Name:   	"auth_token",
+		Value:  	jwt,
+		Expires:	time.Now().Add(pkg.TokenLifetime),
+		Path: 		"/",	
+	}
 	return &out, nil
 }
