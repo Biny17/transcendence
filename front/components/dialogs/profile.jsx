@@ -4,14 +4,14 @@ import { Button } from "@/app/animations/Button.jsx";
 import { useEffect, useState } from "react";
 
 export function Profile({ SetProfileOpen }) {
-  const [Profile, setProfile] = useState({ age: "", email: "", password: "", username: "" })
+  const [Profile, setProfile] = useState({ age: "", email: "", password: ".........", username: "" })
   async function fetchData(id) {
     const url = 'http://localhost:8080/api/users/' + id;
     let options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
     try {
       const response = await fetch(url, options);
       const data = await response.json();
-      setProfile({age: data[0].age, email: data[0].email, password: data[0].password, username: data[0].username })
+      setProfile({age: data[0].age, email: data[0].email, password: ".........", username: data[0].username })
     } catch (error) {
       console.error(error);
     }
