@@ -27,7 +27,7 @@ useEffect(function() {
     return;
   }
   async function fetchData() {
-    const url = isSignUp ? 'http://localhost:8080/api/adduser' : 'http://localhost:8080/api/login';
+    const url = isSignUp ? 'http://localhost:8080/api/user/add' : 'http://localhost:8080/api/login';
   let payload;
   if (isSignUp)
     payload = { ...form, age: Number(form.age), verified: true };
@@ -51,7 +51,7 @@ useEffect(function() {
     } catch (error) {
       console.log(error);
       setError("Invalid credentials");
-      isSignIn ? setForm({email: "", password: "" }) : setForm({email: "", password: "", age:"", username: ""});
+      setForm({ email: "", password: "", age: "", username: "" });
     }
   }
   fetchData();
@@ -188,6 +188,7 @@ useEffect(function() {
           <fieldset className="flex items-center gap-4">
             <label className="w-24 text-right text-[15px] text-slate-200">Password</label>
             <input
+              id = "password"
               type="password"
               value={form.password}
               className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"

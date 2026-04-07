@@ -7,6 +7,7 @@ import (
 	"backend/ent"
 
 	"net/http"
+	"log"
 
 	"github.com/danielgtaylor/huma/v2"
 	_ "github.com/lib/pq"
@@ -27,7 +28,9 @@ func ProvideAndRegister(i do.Injector) *UserService {
 func ProvideUserService(i do.Injector) (*UserService, error) {
 	us := &UserService{}
 	us.Conf = do.MustInvoke[config.Config](i)
+	log.Print("ici")
 	us.Client = do.MustInvoke[*ent.Client](i)
+	log.Print("la")
 	return us, nil
 }
 

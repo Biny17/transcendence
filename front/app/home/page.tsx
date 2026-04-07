@@ -15,6 +15,7 @@ import LeaderBoard from "@/components/cards/Leaderboard";
 
 export default function Home() {
   const [OptionsOpen, setOptionsOpen] = useState(false);
+  
 //   const testAPI = async () =>{
 // const url = 'http://localhost:8080/hello';
 // const options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
