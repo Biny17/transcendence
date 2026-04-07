@@ -49,7 +49,7 @@ func (us *UserService) Register(api huma.API) {
 	}, us.DelUser)
 	huma.Register(api, huma.Operation{
 		Method:  http.MethodGet,
-		Path:    routes.User,
+		Path:    routes.FindUser,
 		Summary: "Query information from email, username, id",
 		Description: `Provide either user_id, email or username as query
 			to get specific user information. If no query is given, it will return all users`,
@@ -84,4 +84,9 @@ func (us *UserService) Register(api huma.API) {
 		Path:    routes.ConfirmEmail,
 		Summary: "Confirm the email with the token and user_id in query",
 	}, us.ConfirmEmail)
+	huma.Register(api, huma.Operation{
+		Method:	http.MethodGet,
+		Path:	routes.Me,
+		Summary: "Use Token in cookie to return information about the user",
+	}, us.Me)
 }

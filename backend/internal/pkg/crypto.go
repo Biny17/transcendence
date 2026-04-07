@@ -4,6 +4,11 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"fmt"
+	"time"
+)
+
+const (
+	TokenLifetime = time.Hour
 )
 
 func NewSalt() string {
