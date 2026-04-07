@@ -27,7 +27,7 @@ useEffect(function() {
     return;
   }
   async function fetchData() {
-    const url = isSignUp ? 'http://localhost:8080/api/user/add' : 'http://localhost:8080/api/login';
+    const url = isSignUp ? 'http://localhost:8080/api/users/add' : 'http://localhost:8080/api/auth/login';
   let payload;
   if (isSignUp)
     payload = { ...form, age: Number(form.age), verified: true };
@@ -35,6 +35,7 @@ useEffect(function() {
     payload = {email: form.email,password: form.password};
     const options = {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json', Accept: 'application/problem+json' },
       body: JSON.stringify(payload)
     };

@@ -1,5 +1,5 @@
 "use client"
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import './Navbar.css';
 import './Background.css';
@@ -11,17 +11,42 @@ import Options from "@/components/cards/Options";
 export const Navbar = ({OptionsOpen, setOptionsOpen}) => {
 const [dropdownOpen, setDropdownOpen] = useState(false);
 const [error, setError] = useState("");
+const [username, setUserName] = useState('');
 const router = useRouter();
-const handleSubmit = () => {
-    if (!form.email || !form.password) { setError("Remplissez tous les champs !"); return; }
-    if (isSignUpMode && !form.username) { setError("Choisissez un pseudo !"); return; }
-	else {router.push("/picks")}
+
+// const handleSubmit = () => {
+//     if (!form.email || !form.password) { setError("Remplissez tous les champs !"); return; }
+//     if (isSignUpMode && !form.username) { setError("Choisissez un pseudo !"); return; }
+// 	else {router.push("/picks")}
+// }
+async function fetchData(id) {
+  const url = 'http://localhost:8080/api/users/' + id;
+  const options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
+  try {
+    const response = await fetch(url, options);
+    const data = await response.json();
+    setUserName(data[0].username);
+  } catch (error) {
+    console.error(error);
+  }
 }
 
-// const token = localStorage.getItem("token");//pour recuperer le username
-// const payload = token.split(".")[1];
-// const decoded = JSON.parse(atob(payload));
-// const username = decoded.username;
+function getCookie(name) {
+  return document.cookie
+    .split('; ')
+    .find(row => row.startsWith(name + '='))
+    ?.split('=')[1];
+}
+
+useEffect(() => {
+  const token = getCookie('auth_token');
+  if (!token) return;
+
+  const payload = token.split('.')[1];
+  const decoded = JSON.parse(atob(payload));
+  fetchData(decoded.sub);
+}, []);
+
   return (
     <>
     <div className="navbar">
@@ -57,7 +82,7 @@ const handleSubmit = () => {
                 </svg>
             
                 <p className="text-slate-800 font-medium ml-2">
-                ALIX CRUSOE
+                {username}
                 </p>
               </li>
               <li

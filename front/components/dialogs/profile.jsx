@@ -1,8 +1,54 @@
 "use client";
 
 import { Button } from "@/app/animations/Button.jsx";
+import { useEffect, useState } from "react";
 
 export function Profile({ SetProfileOpen }) {
+  const [Profile, setProfile] = useState({ age: "", email: "", password: "", username: "" })
+  async function fetchData(id) {
+    const url = 'http://localhost:8080/api/users/' + id;
+    let options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
+    try {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      setProfile({age: data[0].age, email: data[0].email, password: data[0].password, username: data[0].username })
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  function getCookie(name) {
+    return document.cookie
+      .split('; ')
+      .find(row => row.startsWith(name + '='))
+      ?.split('=')[1];
+  }
+  
+  useEffect(() => {
+    
+    const token = getCookie('auth_token');
+    if (!token) return;
+    const payload = token.split('.')[1];
+    const decoded = JSON.parse(atob(payload));
+    fetchData(decoded.sub);
+  }, []);
+
+  async function handleSave(){
+    const token = getCookie('auth_token');
+    if (!token) return;
+    const payloadToken = token.split('.')[1];
+    const decoded = JSON.parse(atob(payloadToken));
+    const url = 'http://localhost:8080/api/users/' + decoded.sub;
+
+    let payload = Profile;
+    const options = {method: 'PATCH', headers: {'Accept': 'application/json, application/problem+json', 'Content-Type': 'application/json'}, body: JSON.stringify(payload)};
+    try {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      console.log(data)
+    } catch (error) {
+      console.error(error);
+    }
+  }
   return (
     <div
       data-dialog-backdrop="web-3-dialog"
@@ -32,34 +78,39 @@ export function Profile({ SetProfileOpen }) {
               </label>
                 <input
                   className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"
-                  placeholder="Louloute"
+                  value={Profile.username}
+                  onChange={(e) => {
+                    setProfile({ ...Profile, username: e.target.value });
+                  }}
                 />
             </fieldset>
-
-            <fieldset className="flex items-center gap-4">
-              <label className="w-24 text-right text-[15px] text-slate-200" htmlFor="name">
-                Name
-              </label>
-               <input placeholder="Alix" className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"/>
-            </fieldset>
-
             <fieldset className="flex items-center gap-4">
               <label className="w-24 text-right text-[15px] text-slate-200" htmlFor="email">
                 Email
               </label>
-              <input placeholder="alix.crusoe@gmail.com" className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"/>
+              <input
+                className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"
+                value={Profile.email}
+                onChange={(e) => {
+                  setProfile({ ...Profile, email: e.target.value });
+                }}
+              />
             </fieldset>
 			 <fieldset className="flex items-center gap-4">
               <label className="w-24 text-right text-[15px] text-slate-200" htmlFor="email">
                 Password
               </label>
-                <input type="password" placeholder="..........." className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"/>
+                <input type="password" 
+                onChange={(e) => {
+                  setProfile({ ...Profile, password: e.target.value });
+                }}
+                value= {Profile.password} className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"/>
             </fieldset>
           </div>
 
           <div className="mt-6 flex gap-3 justify-end pr-1">
             <Button statement="Go back" onClick={() => SetProfileOpen(false)} />
-            <Button statement="Save Changes" onClick={() => SetProfileOpen(false)} />
+            <Button statement="Save Changes" onClick={() => { SetProfileOpen(false); handleSave(); }} />
           </div>
         </div>
       </div>
