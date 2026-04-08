@@ -47,14 +47,21 @@ useEffect(function() {
         const err = await response.json();
         throw new Error(err.title);
       }
-      if (response.status === 200 || response.status === 201)
-        router.push("/home");
-    } catch (error) {
+      if (isSignUpMode && (response.status === 200 || response.status === 201)) 
+	  {
+		setisSignUpMode(false);
+		setForm({ email: "", password: "", age: "", username: "" });
+	  }
+	  else if (response.status === 200 || response.status === 201)
+		router.push("/home");
+    } 
+	catch (error) 
+	{
       console.log(error);
       setError("Invalid credentials");
       setForm({ email: "", password: "", age: "", username: "" });
     }
-  }
+}
   fetchData();
 }, [isSignUp, isSignIn])
 

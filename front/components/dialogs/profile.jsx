@@ -5,6 +5,9 @@ import { useEffect, useState } from "react";
 
 export function Profile({ SetProfileOpen }) {
   const [Profile, setProfile] = useState({ age: "", email: "", password: ".........", username: "" })
+  const [initialProfile, setinitialProfile] = useState({ age: "", email: "", password: ".........", username: "" })
+  const [userError, setUserError] = useState("")
+  const [emailError, setEmailError] = useState("")
   async function fetchData(id) {
     const url = 'http://localhost:8080/api/users/' + id;
     let options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
@@ -12,6 +15,7 @@ export function Profile({ SetProfileOpen }) {
       const response = await fetch(url, options);
       const data = await response.json();
       setProfile({age: data[0].age, email: data[0].email, password: ".........", username: data[0].username })
+	  setinitialProfile({age: data[0].age, email: data[0].email, password: ".........", username: data[0].username })
     } catch (error) {
       console.error(error);
     }
@@ -41,12 +45,23 @@ export function Profile({ SetProfileOpen }) {
 
     let payload = Profile;
     const options = {method: 'PATCH', headers: {'Accept': 'application/json, application/problem+json', 'Content-Type': 'application/json'}, body: JSON.stringify(payload)};
-    try {
-      const response = await fetch(url, options);
-      const data = await response.json();
-      console.log(data)
-    } catch (error) {
-      console.error(error);
+    try 
+	{
+		const response = await fetch(url, options);
+		if (!response.ok) {
+			const err = await response.json();
+			throw new Error(err.title);
+		}
+		if (response.status === 200)
+			SetProfileOpen(false)
+    } 
+    catch (error) 
+    {
+      console.log(error);
+	  if (initialProfile.username !== Profile.username)
+      	setUserError("Invalid credentials");
+	  if (initialProfile.email !== Profile.email)
+	  	setEmailError("Invalid credentials");
     }
   }
   return (
@@ -78,8 +93,9 @@ export function Profile({ SetProfileOpen }) {
               </label>
                 <input
                   className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"
-                  value={Profile.username}
-                  onChange={(e) => {
+                  value={userError ? "" : Profile.username}
+				  placeholder= {userError ? userError : ""}
+                  onChange={(e) => { setUserError("");
                     setProfile({ ...Profile, username: e.target.value });
                   }}
                 />
@@ -90,8 +106,9 @@ export function Profile({ SetProfileOpen }) {
               </label>
               <input
                 className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"
-                value={Profile.email}
-                onChange={(e) => {
+                value={emailError ? "" : Profile.email}
+				placeholder= {emailError ? emailError : ""}
+                onChange={(e) => { setEmailError("");
                   setProfile({ ...Profile, email: e.target.value });
                 }}
               />
@@ -110,7 +127,7 @@ export function Profile({ SetProfileOpen }) {
 
           <div className="mt-6 flex gap-3 justify-end pr-1">
             <Button statement="Go back" onClick={() => SetProfileOpen(false)} />
-            <Button statement="Save Changes" onClick={() => { SetProfileOpen(false); handleSave(); }} />
+            <Button statement="Save Changes" onClick={() => { handleSave()}} />
           </div>
         </div>
       </div>
