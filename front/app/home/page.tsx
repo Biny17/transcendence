@@ -1,36 +1,24 @@
 "use client"
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { Background } from './Background';
 import { Navbar } from './Navbar.jsx';
 import { Button } from "../animations/Button.jsx"
 import Chat from '../chat/chat';
-import { ChartComponent } from "../../components/charts/chart"
-import { EngineCanvas } from '@/ThreeWrapper/1.engine/EngineCanvas';
-import { DemoWorld } from '@/ThreeWrapper/2.world/worlds/DemoWorld';
-import ListCard from "@/components/cards/listcard";
 import Online from "@/components/cards/Onlineplayers";
-import LeaderBoard from "@/components/cards/Leaderboard";
 
 export default function Home() {
   const [OptionsOpen, setOptionsOpen] = useState(false);
-  
-//   const testAPI = async () =>{
-// const url = 'http://localhost:8080/hello';
-// const options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
+  const [rerenderKey, setRerenderKey] = useState(0);
 
-//   try {
-//     const response = await fetch(url, options);
-//     const data = await response.json();
-//     alert(data);
-//   } catch (error) {
-//     console.error(error);
-//   }
-// }
+  useEffect(() => {
+    if (!OptionsOpen) 
+      setRerenderKey(rerenderKey + 1);
+  }, [OptionsOpen]);
+  
   return (
-    
-    <main className="relative min-h-screen">
+    <main className="relative min-h-screen" key={rerenderKey}>
       <Background />
       <Navbar OptionsOpen={OptionsOpen} setOptionsOpen={setOptionsOpen} />
 

@@ -45,6 +45,7 @@ useEffect(function() {
       setIsSignUp(false);
       if (!response.ok) {
         const err = await response.json();
+		console.log(err)
         throw new Error(err.title);
       }
       if (isSignUpMode && (response.status === 200 || response.status === 201)) 
