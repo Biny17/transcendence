@@ -112,7 +112,7 @@
   /* background:  radial-gradient(circle at 20% 20%, rgba(62, 14, 92, 0.45), transparent 35%),
     radial-gradient(circle at 80% 0%, rgba(20, 96, 165, 0.45), transparent 30%),
     linear-gradient(135deg, #060816 0%, #0d1b3a 55%, #120a26 100%); */
-  /* backdrop-filter: blur(20px); */
+  /* backdrop-filter: blur(100px); */
 }
 
 /* Auth form */
