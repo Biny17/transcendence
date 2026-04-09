@@ -8,6 +8,8 @@ export function Profile({ SetProfileOpen }) {
   const [initialProfile, setinitialProfile] = useState({ age: "", email: "", password: ".........", username: "" })
   const [userError, setUserError] = useState("")
   const [emailError, setEmailError] = useState("")
+  const [decoded, setDecoded] = useState("")
+
   async function fetchData(id) {
     const url = 'http://localhost:8080/api/users/' + id;
     let options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
@@ -15,11 +17,12 @@ export function Profile({ SetProfileOpen }) {
       const response = await fetch(url, options);
       const data = await response.json();
       setProfile({age: data[0].age, email: data[0].email, password: ".........", username: data[0].username })
-	  setinitialProfile({age: data[0].age, email: data[0].email, password: ".........", username: data[0].username })
+	    setinitialProfile({age: data[0].age, email: data[0].email, password: ".........", username: data[0].username })
     } catch (error) {
       console.error(error);
     }
   }
+
   function getCookie(name) {
     return document.cookie
       .split('; ')
@@ -33,15 +36,12 @@ export function Profile({ SetProfileOpen }) {
     if (!token) return;
     const payload = token.split('.')[1];
     const decoded = JSON.parse(atob(payload));
+    setDecoded(decoded.sub);
     fetchData(decoded.sub);
   }, []);
 
   async function handleSave(){
-    const token = getCookie('auth_token');
-    if (!token) return;
-    const payloadToken = token.split('.')[1];
-    const decoded = JSON.parse(atob(payloadToken));
-    const url = 'http://localhost:8080/api/users/' + decoded.sub;
+    const url = 'http://localhost:8080/api/users/' + decoded;
 
     let payload = Profile;
     const options = {method: 'PATCH', headers: {'Accept': 'application/json, application/problem+json', 'Content-Type': 'application/json'}, body: JSON.stringify(payload)};
@@ -54,7 +54,7 @@ export function Profile({ SetProfileOpen }) {
 		}
 		if (response.status === 200)
 			SetProfileOpen(false)
-    } 
+  } 
     catch (error) 
     {
       console.log(error);

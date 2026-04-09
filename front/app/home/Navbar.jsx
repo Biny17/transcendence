@@ -107,7 +107,7 @@ useEffect(() => {
                   <path fillRule="evenodd" d="M19 10a.75.75 0 0 0-.75-.75H8.704l1.048-.943a.75.75 0 1 0-1.004-1.114l-2.5 2.25a.75.75 0 0 0 0 1.114l2.5 2.25a.75.75 0 1 0 1.004-1.114l-1.048-.943h9.546A.75.75 0 0 0 19 10Z" clipRule="evenodd" />
                 </svg>
             
-                <button className="text-slate-800 font-medium ml-2" onClick={() => router.push("/")}>
+                <button className="text-slate-800 font-medium ml-2" onClick={() => router.push("/login")}>
                   Quitter
                 </button>
               </li>

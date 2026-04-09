@@ -48,20 +48,20 @@ useEffect(function() {
 		console.log(err)
         throw new Error(err.title);
       }
-      if (isSignUpMode && (response.status === 200 || response.status === 201)) 
+    if (isSignUpMode && (response.status === 200 || response.status === 201)) 
 	  {
-		setisSignUpMode(false);
-		setForm({ email: "", password: "", age: "", username: "" });
+      setisSignUpMode(false);
+      setForm({ email: "", password: "", age: "", username: "" });
 	  }
 	  else if (response.status === 200 || response.status === 201)
-		router.push("/home");
+		  router.push("/home");
     } 
 	catch (error) 
 	{
       console.log(error);
       setError("Invalid credentials");
       setForm({ email: "", password: "", age: "", username: "" });
-    }
+  }
 }
   fetchData();
 }, [isSignUp, isSignIn])
