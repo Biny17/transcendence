@@ -12,14 +12,36 @@ const [isSignUp, setIsSignUp] = useState(false);
 const [isSignIn, setIsSignIn] = useState(false);
 const[isSignUpMode, setisSignUpMode] = useState(false);
 const [form, setForm] = useState({ age: "", email: "", password: "", username: "" });
+const [Profile, setProfile] = useState([])
 const [error, setError] = useState("");
 const router = useRouter();
+
+async function fetchVerified() {
+	const url =  'http://localhost:8080/api/users/find?email=' + form.email;
+	const options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
+    try {
+      const response = await fetch(url, options);
+	  const data = await response.json();
+	  console.log(data)
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.title);
+      }
+    if (response.status === 200 ) 
+      setProfile(data[0]);
+	setIsSignIn(true);
+    } 
+  catch (error) {
+      console.log(error);
+    }
+}
+
 const handleSubmit = () => {
   if (!form.email || !form.password) { setError("Remplissez tous les champs !"); return; }
   if (isSignUpMode && !form.age) { setError("Remplissez tous les champs !"); return; }
-    if (isSignUpMode && !form.username) { setError("Choisissez un pseudo !"); return; }
-    else if (isSignUpMode) { setIsSignUp(true); return; }
-    else { setIsSignIn(true); return;}
+  if (isSignUpMode && !form.username) { setError("Choisissez un pseudo !"); return; }
+  else if (isSignUpMode) { setIsSignUp(true); return; }
+  else { fetchVerified(); return; }
 };
 
 useEffect(function() {
@@ -30,7 +52,7 @@ useEffect(function() {
     const url = isSignUp ? 'http://localhost:8080/api/users/add' : 'http://localhost:8080/api/auth/login';
   let payload;
   if (isSignUp)
-    payload = { ...form, age: Number(form.age), verified: true };
+    payload = { ...form, age: Number(form.age), verified: false };
   else
     payload = {email: form.email,password: form.password};
     const options = {
@@ -48,13 +70,13 @@ useEffect(function() {
 		console.log(err)
         throw new Error(err.title);
       }
-    if (isSignUpMode && (response.status === 200 || response.status === 201)) 
+      if (isSignUpMode && (response.status === 200 || response.status === 201)) 
 	  {
       setisSignUpMode(false);
       setForm({ email: "", password: "", age: "", username: "" });
 	  }
-	  else if (response.status === 200 || response.status === 201)
-		  router.push("/home");
+	  else if (Profile.verified && (response.status === 200 || response.status === 201))
+		router.push("/home");
     } 
 	catch (error) 
 	{
