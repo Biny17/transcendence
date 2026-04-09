@@ -43,7 +43,13 @@ export function Profile({ SetProfileOpen }) {
   async function handleSave(){
     const url = 'http://localhost:8080/api/users/' + decoded;
 
-    let payload = Profile;
+    let payload;
+    if (Profile.password === initialProfile.password) {
+      const { password: _password, ...profileWithoutPassword } = Profile;
+      payload = profileWithoutPassword;
+    }
+    else
+      payload = Profile
     const options = {method: 'PATCH', headers: {'Accept': 'application/json, application/problem+json', 'Content-Type': 'application/json'}, body: JSON.stringify(payload)};
     try 
 	{
