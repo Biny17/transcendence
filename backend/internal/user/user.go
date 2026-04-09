@@ -2,6 +2,7 @@ package user
 
 import (
 	"backend/internal/config"
+	"backend/internal/mid"
 	"backend/internal/pkg/routes"
 
 	"backend/ent"
@@ -20,7 +21,7 @@ type UserService struct {
 
 func ProvideAndRegister(i do.Injector) *UserService {
 	us, _ := ProvideUserService(i)
-	us.Register(do.MustInvoke[huma.API](i))
+	us.Register(do.MustInvoke[huma.API](i), do.MustInvoke[*mid.Middlewares](i))
 	return us
 }
 
@@ -31,7 +32,7 @@ func ProvideUserService(i do.Injector) (*UserService, error) {
 	return us, nil
 }
 
-func (us *UserService) Register(api huma.API) {
+func (us *UserService) Register(api huma.API, m *mid.Middlewares) {
 	huma.Register(api, huma.Operation{
 		Method:        http.MethodPost,
 		Path:          routes.AddUser,
@@ -82,8 +83,9 @@ func (us *UserService) Register(api huma.API) {
 		Summary: "Confirm the email with the token and user_id in query",
 	}, us.ConfirmEmail)
 	huma.Register(api, huma.Operation{
-		Method:	http.MethodGet,
-		Path:	routes.Me,
-		Summary: "Use Token in cookie to return information about the user",
+		Method:      http.MethodGet,
+		Path:        routes.Me,
+		Summary:     "Use Token in cookie to return information about the user",
+		Middlewares: huma.Middlewares{m.TokenMid},
 	}, us.Me)
 }
