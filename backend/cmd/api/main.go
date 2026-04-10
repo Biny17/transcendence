@@ -3,6 +3,7 @@ package main
 import (
 	"backend/internal/auth"
 	"backend/internal/config"
+	"backend/internal/friend"
 	"backend/internal/server"
 	"backend/internal/user"
 	"fmt"
@@ -20,6 +21,7 @@ import (
 func addServices(i do.Injector) {
 	do.ProvideValue(i, user.ProvideAndRegister(i))
 	do.ProvideValue(i, auth.ProvideAndRegister(i))
+	do.ProvideValue(i, friend.ProvideAndRegister(i))
 }
 
 func main() {
