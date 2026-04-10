@@ -21,7 +21,7 @@ type UserService struct {
 
 func ProvideAndRegister(i do.Injector) *UserService {
 	us, _ := ProvideUserService(i)
-	us.Register(do.MustInvoke[huma.API](i), do.MustInvoke[*mid.Middlewares](i))
+	us.Register(do.MustInvoke[huma.API](i), do.MustInvoke[*mid.Middleware](i))
 	return us
 }
 
@@ -32,7 +32,7 @@ func ProvideUserService(i do.Injector) (*UserService, error) {
 	return us, nil
 }
 
-func (us *UserService) Register(api huma.API, m *mid.Middlewares) {
+func (us *UserService) Register(api huma.API, m *mid.Middleware) {
 	huma.Register(api, huma.Operation{
 		Method:        http.MethodPost,
 		Path:          routes.AddUser,
