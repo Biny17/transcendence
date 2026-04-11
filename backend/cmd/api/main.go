@@ -3,6 +3,7 @@ package main
 import (
 	"backend/internal/auth"
 	"backend/internal/config"
+	"backend/internal/mid"
 	"backend/internal/server"
 	"backend/internal/user"
 	"fmt"
@@ -18,8 +19,9 @@ import (
 )
 
 func addServices(i do.Injector) {
-	do.ProvideValue(i, user.ProvideAndRegister(i))
 	do.ProvideValue(i, auth.ProvideAndRegister(i))
+	do.Provide(i, mid.ProvideMiddleware)
+	do.ProvideValue(i, user.ProvideAndRegister(i))
 }
 
 func main() {
@@ -53,9 +55,18 @@ func ProvideRouter(i do.Injector) (*chi.Mux, error) {
 }
 
 func ProvideApi(i do.Injector) (huma.API, error) {
+	config := huma.DefaultConfig("transcendence", "0.6.9")
+	config.Components.SecuritySchemes = map[string]*huma.SecurityScheme{
+    "cookieAuth": {
+        Type: "apiKey",
+        In:   "cookie",
+        Name: "auth_token",
+    },
+}
+
 	return humachi.New(
 		do.MustInvoke[*chi.Mux](i),
-		huma.DefaultConfig("transcendence", "1.0.0"),
+		config,
 	), nil
 }
 
