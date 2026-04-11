@@ -7,18 +7,13 @@ import { Navbar } from './Navbar.jsx';
 import { Button } from "../animations/Button.jsx"
 import Chat from '../chat/chat';
 import Online from "@/components/cards/Onlineplayers";
+import SimpleFooter from "@/components/footers/footer";
 
 export default function Home() {
   const [OptionsOpen, setOptionsOpen] = useState(false);
-  const [rerenderKey, setRerenderKey] = useState(0);
 
-  useEffect(() => {
-    if (!OptionsOpen) 
-      setRerenderKey(rerenderKey + 1);
-  }, [OptionsOpen]);
-  
   return (
-    <main className="relative min-h-screen" key={rerenderKey}>
+    <main className="relative min-h-screen">
       <Background />
       <Navbar OptionsOpen={OptionsOpen} setOptionsOpen={setOptionsOpen} />
 
@@ -47,9 +42,10 @@ export default function Home() {
     </div>
   </div>
 </div>
-      <div className="fixed bottom-4 left-4 z-50 h-[55vh] max-h-128 w-80 max-w-[calc(100vw-2rem)]">
+      <div>
         <Chat />
       </div>
+      <div className="absolute inset-x-4 bottom-3 h-16 ..."><SimpleFooter /></div>
     </main>
   );
 }
