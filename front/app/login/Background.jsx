@@ -18,23 +18,23 @@ export function Background({ signInOpen }) {
       <div className="blob blob-4"></div>
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="relative px-20 py-14 text-center">
-          <div className="absolute -top-14 -left-14 h-28 w-28 md:h-32 md:w-32">
+          <div className="dot1 absolute -top-1 -left-1 h-15 w-15 md:h-32 md:w-32 lg:h-28 lg:w-28">
             <DotLottieReact src="https://lottie.host/625715ba-c990-472d-88c9-679feb7fa833/K7RlLzljd1.lottie" loop autoplay />
           </div>
-          <div className="absolute -top-14 -right-14 h-28 w-28 md:h-32 md:w-32">
+          <div className="dot2 absolute -top-1 -right-1  h-15 w-15 md:h-32 md:w-32 lg:h-28 lg:w-28">
             <DotLottieReact src="https://lottie.host/3bc754e9-b96f-4a78-b231-ee8fd8222940/Eff0spwnNq.lottie" loop autoplay />
           </div>
-          <div className="absolute -bottom-14 -left-14 h-28 w-28 md:h-32 md:w-32">
+          <div className="absolute -bottom-1 -left-1  h-15 w-15 md:h-32 md:w-32 lg:h-28 lg:w-28">
             <DotLottieReact src="https://lottie.host/3bc754e9-b96f-4a78-b231-ee8fd8222940/Eff0spwnNq.lottie" loop autoplay />
           </div>
-          <div className="absolute -bottom-14 -right-14 h-28 w-28 md:h-32 md:w-32">
+          <div className="absolute -bottom-1 -right-1  h-15 w-15 md:h-32 md:w-32 lg:h-28 lg:w-28">
             <DotLottieReact src="https://lottie.host/625715ba-c990-472d-88c9-679feb7fa833/K7RlLzljd1.lottie" loop autoplay />
           </div>
             <motion.h1
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: signInOpen ? 0 : 1, scale: signInOpen ? 0.8 : 1 }}
               transition={{ duration: 0.4, ease: "easeOut" }}
-              className="party-title mb-6 text-5xl md:text-7xl lg:text-8xl xl:text-9xl text-white"
+              className="party-title mb-6 text-5xl md:text-7xl lg:text-6xl xl:text-8xl text-white"
             >
               <span className="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">
                 Fun Guys

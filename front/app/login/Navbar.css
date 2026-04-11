@@ -48,7 +48,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 6.8rem;
+  width: 6.8em;
   height: 6.8rem;
   padding: 0.35rem;
   border: 2px solid #facc15;
@@ -245,4 +245,12 @@
   color: #67e8f9;
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+@media (min-width: 0px) and (max-width: 1279px) {
+  .navbar-avatar-btn {
+  width: 3.8em;
+  height: 3.8rem;
+ 
+}
 }

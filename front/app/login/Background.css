@@ -1,3 +1,6 @@
+/* @tailwind base;
+@tailwind components;
+@tailwind utilities; */
 .background {
   position: fixed;
   inset: 0;
@@ -163,5 +166,16 @@
 @media (max-width: 640px) {
   .blob {
     filter: blur(65px);
+  }
+}
+
+@media (min-width: 768px) {
+  .dot1 {
+    top: -70px;
+    right: -4px;
+  }
+  .dot2 {
+    top: -70px;
+    right: -4px;
   }
 }
