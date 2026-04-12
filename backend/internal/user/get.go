@@ -4,9 +4,9 @@ import (
 	"backend/ent"
 	"backend/ent/predicate"
 	"backend/ent/user"
+	"backend/internal/pkg"
 	"context"
 	"log"
-	"strconv"
 	"time"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -108,11 +108,10 @@ func (us *UserService) GetUserById(ctx context.Context, input *UserByIdIn) (*Inf
 }
 
 func (us *UserService) Me(ctx context.Context, input *struct{}) (*InfoOut, error) {
-	id_str := ctx.Value("sub").(string)
-	id, err := strconv.Atoi(id_str)
+	id, err := pkg.ContextUserId(ctx)
 	if err != nil {
 		log.Print(err)
-		return nil, huma.Error400BadRequest("Invalid user id in token")
+		return nil, huma.Error401Unauthorized("Error, try logging in again")
 	}
 	return us.GetUserById(ctx, &UserByIdIn{UserId: id})
 }

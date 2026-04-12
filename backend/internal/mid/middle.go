@@ -3,6 +3,7 @@ package mid
 import (
 	"backend/internal/auth"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -42,6 +43,11 @@ func (mid *Middleware) Auth(ctx huma.Context, next func(huma.Context)) {
 		huma.WriteErr(mid.Api, ctx, 401, "Invalid Token")
 		return
 	}
-	ctx = huma.WithValue(ctx, "sub", sub)
+	sub_int, err := strconv.Atoi(sub)
+	if err != nil {
+		huma.WriteErr(mid.Api, ctx, 401, "Invalid Token")
+		return
+	}
+	ctx = huma.WithValue(ctx, "sub", sub_int)
 	next(ctx)
 }
