@@ -248,3 +248,18 @@
   position: relative;
 }
 
+@media (min-width: 0px) and (max-width: 767px) {
+  .navbar-avatar-btn {
+  width: 3em;
+  height: 3rem;
+ 
+}
+}
+
+
+@media (max-width: 767px) {
+  .dropdown-trigger {
+    right: -10px;
+  }
+}
+

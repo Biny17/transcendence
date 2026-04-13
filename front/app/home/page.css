@@ -1,0 +1,5 @@
+@media (min-width: 0px) and (max-width: 1279px) {
+  .chat {
+    display: none;
+  }
+}

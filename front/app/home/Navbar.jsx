@@ -50,7 +50,7 @@ useEffect(() => {
   return (
     <>
     <div className="navbar">
-      <div className="w-full">
+      <div>
         <KpiCard1 />
       </div>
       <div className="navbar-actions">

@@ -32,12 +32,12 @@ function KpiCard({
   return (
     <StyledCard>
       <CardBody className="p-4">
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center -mt-2 sm:-mt-2 md:-mt-2 lg:-mt-0">
           <Typography
-            className="!font-bold  text-black"
+            className="font-bold text-xs sm:text-sm md:text-sm lg:text-xl text-black ml-[-10px] sm:ml-0" 
           >
             {title}
-            <span className="ml-2 text-xl">{icon}</span>
+            <span className="ml-2">{icon}</span>
           </Typography>
           <div className="flex items-center gap-1">
             {nb}
@@ -58,6 +58,8 @@ const StyledCard = styled(Card)`
   color: var(--stone-800);
   border-radius: 1.5rem !important;
   position: relative;
+  width: 100%;
+  height: 100%;
   box-shadow:
     0.5px 0.5px 0 0 var(--stone-800),
     1px 1px 0 0 var(--stone-800),
@@ -139,33 +141,36 @@ const StyledCard = styled(Card)`
 const data = [
   {
     title: "Game",
-    nb: <button className="min-w-9 rounded-full py-2 px-3.5 text-center text-sm transition-all shadow-sm text-white bg-[#0b1328] focus:bg-[#0b1328] focus:text-white active:bg-[#0b1328] active:text-white ml-2">
+    nb: <button className="min-w-5 w-5 h-5 sm:min-w-9 sm:w-auto sm:h-auto rounded-full py-0.5 px-1.5 sm:py-2 sm:px-3.5 text-center text-[10px] sm:text-sm transition-all shadow-sm text-white bg-[#0b1328] focus:bg-[#0b1328] focus:text-white active:bg-[#0b1328] active:text-white ml-0 sm:ml-0 md:ml-0 lg:ml-2">
       2
     </button>,
-    icon: "🎮",
+    // icon: "🎮",
   },
   {
     title: "Win",
-    nb: <button className="min-w-9 rounded-full py-2 px-3.5 text-center text-sm transition-all shadow-sm text-white bg-[#0b1328] focus:bg-[#0b1328] focus:text-white active:bg-[#0b1328] active:text-white ml-2">
+    nb: <button className="min-w-5 w-5 h-5 sm:min-w-9 sm:w-auto sm:h-auto rounded-full py-0.5 px-1.5 sm:py-2 sm:px-3.5 text-center text-[10px] sm:text-sm transition-all shadow-sm text-white bg-[#0b1328] focus:bg-[#0b1328] focus:text-white active:bg-[#0b1328] active:text-white ml-0 sm:ml-0 md:ml-0 lg:ml-2">
       2
     </button>,
-    icon: "🏆",
+    // icon: "🏆",
   },
   {
     title: "Death",
-    nb: <button className="min-w-9 rounded-full py-2 px-3.5 text-center text-sm transition-all shadow-sm text-white bg-[#0b1328] focus:bg-[#0b1328] focus:text-white active:bg-[#0b1328] active:text-white ml-2">
+    nb: <button className="min-w-5 w-5 h-5 sm:min-w-9 sm:w-auto sm:h-auto rounded-full py-0.5 px-1.5 sm:py-2 sm:px-3.5 text-center text-[10px] sm:text-sm transition-all shadow-sm text-white bg-[#0b1328] focus:bg-[#0b1328] focus:text-white active:bg-[#0b1328] active:text-white ml-0 sm:ml-0 md:ml-0 lg:ml-2">
       2
     </button>,
-    icon: "💀",
+    // icon: "💀",
   },
 ];
 
 function KpiCard1() {
   return (
     <section className="container ">
-      <div className="grid lg:grid-cols-8 md:grid-cols-2 grid-cols-1 items-center md:gap-5 gap-4">
+      <div className="grid grid-flow-col auto-cols-max gap-4">
         {data.map((props, key) => (
-          <KpiCard key={key} {...(props as any)} />
+    <div key={key}
+    className="w-18 h-10 sm:w-40 sm:h-20 md:w-40 md:h-15 lg:w-50 lg:h-18 flex items-center">
+          <KpiCard {...(props as any)} />
+		  </div>
         ))}
       </div>
     </section>
