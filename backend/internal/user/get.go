@@ -4,6 +4,7 @@ import (
 	"backend/ent"
 	"backend/ent/predicate"
 	"backend/ent/user"
+	"backend/internal/pkg"
 	"context"
 	"log"
 	"time"
@@ -22,7 +23,7 @@ type InfoIn struct {
 }
 
 type UserInfo struct {
-	Id       int       `json:"user_id"`
+	Id       int       `json:"id"`
 	Username string    `json:"username"`
 	Email    string    `json:"email"`
 	Verified bool      `json:"verified"`
@@ -106,4 +107,13 @@ func (us *UserService) GetUserById(ctx context.Context, input *UserByIdIn) (*Inf
 		return nil, err
 	}
 	return info_out, nil
+}
+
+func (us *UserService) Me(ctx context.Context, input *struct{}) (*InfoOut, error) {
+	id, err := pkg.ContextUserId(ctx)
+	if err != nil {
+		log.Print(err)
+		return nil, huma.Error401Unauthorized("Error, try logging in again")
+	}
+	return us.GetUserById(ctx, &UserByIdIn{UserId: id})
 }

@@ -2,10 +2,10 @@ package routes
 
 const (
 	ConfirmEmail   = "/api/auth/verify-email"
-	AddUser        = "/api/user/add"
-	DeleteUser     = "/api/user/delete"
-	Login          = "/api/login"
-	User           = "/api/user"
+	AddUser        = "/api/users/add"
+	DeleteUser     = "/api/users/delete"
+	Login          = "/api/auth/login"
+	FindUser       = "/api/users/find"
 	UpdatePwd      = "/api/update/password"
 	UpdateEmail    = "/api/update/email"
 	UpdateUsername = "/api/update/username"
@@ -14,4 +14,5 @@ const (
 	ResendEmail    = "/api/users/resend-email/{id}"
 	FriendRequest  = "/friends/request"
 	SenderId       = "/friends/request/{senderid}"
+	Me             = "/api/users/me"
 )
