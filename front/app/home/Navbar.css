@@ -256,6 +256,14 @@
 }
 }
 
+@media (min-width: 1000px)  {
+  .navbar-avatar-btn {
+  width: 6em;
+  height: 6rem;
+ 
+}
+}
+
 
 @media (max-width: 767px) {
   .dropdown-trigger {

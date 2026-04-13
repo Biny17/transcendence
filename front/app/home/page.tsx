@@ -20,9 +20,9 @@ export default function Home() {
 
   <div className="absolute inset-0 flex items-center justify-center gap-12">
   <div className="flex flex-row items-center gap-12">
-    <div className="flex flex-col items-center gap-6">
+    <div className="baloo_button flex flex-col items-center gap-6">
       {/* <div className="tooltip party-title translate-y-10 translate-x-50" >Hey! Here's the rules: don't die. That's it!</div> */}
-      <div className="w-[120px] h-[120px] sm:w-[200px] sm:h-[200px] md:w-[300px] md:h-[300px] lg:w-[400px] lg:h-[400px]">
+      <div className="w-[200px] h-[200px] sm:w-[200px] sm:h-[200px] md:w-[300px] md:h-[300px] lg:w-[300px] lg:h-[300px]">
         <DotLottieReact
           id="navbar-avatar-animation"
           src="https://lottie.host/4a6712be-c728-4247-a609-65bd86fe8a84/JYUyKJJZH8.lottie"

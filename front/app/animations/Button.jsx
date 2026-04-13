@@ -1,5 +1,3 @@
-import { routerServerGlobal } from 'next/dist/server/lib/router-utils/router-server-context';
-import { useRouter } from 'next/navigation';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -18,15 +16,19 @@ const StyledWrapper = styled.div`
     --stone-50: #fafaf9;
     --stone-800: #292524;
     --yellow-400: #facc15;
+    --button-font-size: 1rem;
+    --button-pad-y: 0.75rem;
+    --button-pad-x: 1.25rem;
+    --button-nudge: 4px;
 
-    font-size: 1rem;
+    font-size: var(--button-font-size);
     cursor: pointer;
     position: relative;
     font-family: "Rubik", sans-serif;
     font-weight: bold;
     line-height: 1;
     padding: 1px;
-    transform: translate(-4px, -4px);
+    transform: translate(calc(-1 * var(--button-nudge)), calc(-1 * var(--button-nudge)));
     outline: 2px solid transparent;
     outline-offset: 5px;
     border-radius: 9999px;
@@ -98,7 +100,7 @@ const StyledWrapper = styled.div`
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 0.75rem 1.25rem;
+        padding: var(--button-pad-y) var(--button-pad-x);
         gap: 0.25rem;
         filter: drop-shadow(0 -1px 0 rgba(255, 255, 255, 0.25));
 
@@ -106,6 +108,33 @@ const StyledWrapper = styled.div`
           transform: translateY(2px);
         }
       }
+    }
+  }
+
+  @media (max-width: 639px) {
+    .button {
+      --button-font-size: 0.72rem;
+      --button-pad-y: 0.45rem;
+      --button-pad-x: 0.85rem;
+      --button-nudge: 2px;
+    }
+  }
+
+  @media (min-width: 640px) and (max-width: 767px) {
+    .button {
+      --button-font-size: 0.8rem;
+      --button-pad-y: 0.5rem;
+      --button-pad-x: 0.95rem;
+      --button-nudge: 2.5px;
+    }
+  }
+
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .button {
+      --button-font-size: 0.9rem;
+      --button-pad-y: 0.6rem;
+      --button-pad-x: 1.1rem;
+      --button-nudge: 3px;
     }
   }
 

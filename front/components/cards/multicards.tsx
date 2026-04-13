@@ -34,7 +34,7 @@ function KpiCard({
       <CardBody className="p-4">
         <div className="flex justify-between items-center -mt-2 sm:-mt-2 md:-mt-2 lg:-mt-0">
           <Typography
-            className="font-bold text-xs sm:text-sm md:text-sm lg:text-xl text-black ml-[-10px] sm:ml-0" 
+            className="font-bold text-xs sm:text-sm md:text-sm lg:text-sm text-black ml-[-10px] sm:ml-0" 
           >
             {title}
             <span className="ml-2">{icon}</span>
@@ -168,7 +168,7 @@ function KpiCard1() {
       <div className="grid grid-flow-col auto-cols-max gap-4">
         {data.map((props, key) => (
     <div key={key}
-    className="w-18 h-10 sm:w-40 sm:h-20 md:w-40 md:h-15 lg:w-50 lg:h-18 flex items-center">
+    className="w-18 h-10 sm:w-40 sm:h-20 md:w-40 md:h-15 lg:w-40 lg:h-15 flex items-center">
           <KpiCard {...(props as any)} />
 		  </div>
         ))}
