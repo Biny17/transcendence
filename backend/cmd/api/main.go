@@ -21,9 +21,9 @@ import (
 
 func addServices(i do.Injector) {
 	do.ProvideValue(i, auth.ProvideAndRegister(i))
-	do.ProvideValue(i, friend.ProvideAndRegister(i))
 	do.Provide(i, mid.ProvideMiddleware)
 	do.ProvideValue(i, user.ProvideAndRegister(i))
+	do.ProvideValue(i, friend.ProvideAndRegister(i))
 }
 
 func main() {

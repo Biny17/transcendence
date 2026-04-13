@@ -2,6 +2,7 @@ package friend
 
 import (
 	"backend/ent"
+	"backend/internal/mid"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/samber/do/v2"
@@ -10,7 +11,8 @@ import (
 func ProvideAndRegister(i do.Injector) *FriendService {
 	friendservice := ProvideFriendService(i)
 	api := do.MustInvoke[huma.API](i)
-	friendservice.Register(api)
+	mid := do.MustInvoke[*mid.Middleware](i)
+	friendservice.Register(api, mid)
 	return friendservice
 }
 

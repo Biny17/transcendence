@@ -1,12 +1,12 @@
 package friend
 
 import (
-	"context"
-	"errors"
-
 	"backend/ent"
 	"backend/ent/friendship"
 	"backend/ent/user"
+	"backend/internal/mid"
+	"context"
+	"errors"
 
 	"github.com/danielgtaylor/huma/v2"
 )
@@ -124,7 +124,23 @@ func (s *FriendService) GetFriendsList(ctx context.Context, userID int) ([]*ent.
 	return friends, nil
 }
 
-func (s *FriendService) Register(api huma.API) {
-	handler := NewHandler(s)
-	handler.Register(api)
+func (s *FriendService) GetPendingRequests(ctx context.Context, userID int) ([]*ent.User, error) {
+	friendships, err := s.client.Friendship.Query().
+		Where(friendship.HasFriendWith(user.ID(userID)), friendship.Status("pending")).
+		WithUser().
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	users := make([]*ent.User, len(friendships))
+	for i, f := range friendships {
+		users[i] = f.Edges.User
+	}
+	return users, nil
+}
+
+func (s *FriendService) Register(api huma.API, m *mid.Middleware) {
+	handler := NewHandler(s, m)
+	handler.Register(api, m)
 }
