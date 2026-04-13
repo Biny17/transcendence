@@ -13,4 +13,5 @@ const (
 	GetUsers       = "/api/users"
 	ResendEmail    = "/api/users/resend-email/{id}"
 	FriendRequest  = "/friends/request"
+	SenderId       = "/friends/request/{senderid}"
 )

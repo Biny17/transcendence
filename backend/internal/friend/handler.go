@@ -22,11 +22,16 @@ func (h *Handler) Register(api huma.API) {
 		Path:        routes.FriendRequest,
 		Summary:     "Send a friend request",
 	}, h.SendFriendRequest)
+	huma.Register(api, huma.Operation{
+		OperationID: "accept-request",
+		Method:      "PATCH",
+		Path:        routes.SenderId,
+		Summary:     "Accept a friend request",
+	}, h.AcceptFriendRequest)
 }
 
 type FriendRequestInput struct {
 	Body struct {
-		UserID int `json:"user_id"`
 		FriendID int `json:"friend_id"`
 	}
 }
@@ -34,7 +39,14 @@ type FriendRequestInput struct {
 
 func (h *Handler) SendFriendRequest(ctx context.Context, input *FriendRequestInput) (*struct{}, error) {
 	// TODO: get user from request
-	userId := input.Body.UserID //hardcoded to be replced
-	err := h.service.SendFriendRequest(ctx, userId, input.Body.FriendID)
-	return nil, err
+	// userId, err := h.auth.GetUserIDFromContext(ctx)
+	// err := h.service.SendFriendRequest(ctx, userId, input.Body.FriendID)
+	//return nil, err
+}
+
+func (h *Handler) AcceptFriendRequest(ctx context.Context, input *FriendRequestInput) (*struct{}, error) {
+	// TODO: get user from request
+	// userId := input.Body.UserID //hardcoded to be replced
+	// err := h.service.AcceptFriendRequest(ctx, userId, input.Body.FriendID)
+	//return nil, err
 }
