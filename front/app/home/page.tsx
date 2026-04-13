@@ -14,7 +14,7 @@ export default function Home() {
   const [OptionsOpen, setOptionsOpen] = useState(false);
 
   return (
-    <main className="relative min-h-screen overflow-hidden">
+    <main className="relative min-h-screen">
       <Background />
       <Navbar OptionsOpen={OptionsOpen} setOptionsOpen={setOptionsOpen} />
 
@@ -38,7 +38,7 @@ export default function Home() {
         <Button statement="Let's play" />
       </motion.div>
     </div>
-    <div className="chat translate-x-185">
+    <div className="chat xl:fixed xl:right-2 xl:top-1/2 xl:-translate-y-1/2">
       <Online />
     </div>
   </div>

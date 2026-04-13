@@ -107,7 +107,7 @@ export default function LeaderBoardCard() {
 		<>
 			{(
 				<div
-					className="w-[600px] h-[800px] z-50 shadow-xl rounded-3xl border-yellow border-20 table-fixed border-double overflow-hidden ml-12"
+					className="leaderboard w-[300px] h-[400px] lg:w-[400px] lg:h-[600px] xl:w-[400px] xl:h-[600px] z-50 shadow-xl rounded-3xl border-yellow border-20 table-fixed border-double overflow-hidden"
 					style={{ fontFamily: "var(--font-party-title), var(--font-geist-sans), sans-serif" }}
 				>
 					<ChatContainer className="h-full flex flex-col">

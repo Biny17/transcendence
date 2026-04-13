@@ -9,7 +9,7 @@ return (
     <div
       data-dialog-backdrop="web-3-dialog"
       data-dialog-backdrop-close="true"
-      className="modal-overlay"
+      className="modal-overlay modal-overlay--leaderboard"
       onClick={() => setLeaderBoardOpen(false)}
     >
       <div
@@ -22,7 +22,7 @@ return (
        <LeaderBoardCard />
 	   </div>
         <div id="rays">
-          <svg fill="none" viewBox="0 0 299 152" height="9em" width="18em" xmlns="http://www.w3.org/2000/svg">
+          <svg fill="none" viewBox="0 0 299 152" height="7em" width="12em" xmlns="http://www.w3.org/2000/svg">
             <path fill="url(#paint0_linear_8_3)" d="M149.5 152H133.42L9.53674e-07 4.70132e-06H149.5L299 4.70132e-06L165.58 152H149.5Z" />
             <defs>
               <linearGradient gradientUnits="userSpaceOnUse" y2="12.1981" x2="150.12" y1={152} x1="149.5" id="paint0_linear_8_3">
@@ -215,7 +215,7 @@ const StyledWrapper = styled.div`
     flex-direction: column;
     align-items: center;
     justify-content: flex-end;
-    height: 100%;
+    // height: 100%;
   }
 
   #rays {

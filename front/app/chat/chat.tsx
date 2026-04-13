@@ -107,7 +107,7 @@ export default function Chat() {
     <>
       {(
         <div
-          className="fixed bottom-100 left-4 w-[360px] h-[520px] z-50 shadow-xl rounded-3xl border-yellow border-20 table-fixed border-double overflow-hidden"
+          className="fixed bottom-100 left-4 w-70 h-96.75 z-50 shadow-xl rounded-3xl border-yellow border-20 table-fixed border-double overflow-hidden xl:bottom-auto xl:top-1/2 xl:-translate-y-1/2"
           style={{ fontFamily: "var(--font-party-title), var(--font-geist-sans), sans-serif" }}
         >
           <ChatContainer className="h-full">

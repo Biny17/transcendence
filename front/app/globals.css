@@ -188,6 +188,12 @@
   backdrop-filter: blur(10px);
 }
 
+.modal-overlay--leaderboard {
+  background: radial-gradient(circle at 20% 20%, rgba(62, 14, 92, 0.45), transparent 35%),
+    radial-gradient(circle at 80% 0%, rgba(20, 96, 165, 0.45), transparent 30%),
+    linear-gradient(135deg, #060816 0%, #0d1b3a 55%, #120a26 100%);
+}
+
 .tooltip:before {
   content: "";
   position: absolute;
@@ -220,4 +226,11 @@
   border-radius: var(--r) var(--r) min(var(--r),100% - var(--p) - var(--b)/4) min(var(--r),var(--p) - var(--b)/4)/var(--r);
   background: #be1e2c; /* the main color */
   position: relative;
+}
+
+@media (min-width: 1024px) and (max-height: 900px) {
+  .leaderboard {
+ 	width: 400px;
+    height: 350px;
+  }
 }

@@ -65,7 +65,7 @@ export function Keyboard({ setKeyboardOpen }) {
       onClick={() => setKeyboardOpen(false)}
     >
       <div
-        className="relative m-2 h-[84vh] w-[88vw] max-h-208 max-w-4xl overflow-hidden rounded-3xl border-20 border-double border-yellow bg-[#0b1328] shadow-xl md:m-4"
+        className="relative m-2 h-[88vh] w-[94vw] max-h-208 max-w-4xl overflow-hidden rounded-3xl border-20 border-double border-yellow bg-[#0b1328] shadow-xl sm:h-[86vh] sm:w-[88vw] md:m-4 md:h-[84vh] md:w-[80vw] lg:h-[82vh] lg:w-[70vw] xl:h-[80vh] xl:w-[60vw]"
         style={{ fontFamily: "var(--font-party-title), var(--font-geist-sans), sans-serif" }}
         data-dialog="web-3-dialog"
         onClick={(event) => event.stopPropagation()}
@@ -73,8 +73,8 @@ export function Keyboard({ setKeyboardOpen }) {
         <div className="flex items-center justify-between border-b bg-yellow px-4 py-3">
           <h5 className="text-lg font-medium text-[#292524]">Keyboard Settings</h5>
         </div>
-        <div className="flex h-[calc(100%-58px)] flex-col justify-between bg-[#05113a] px-4 py-5">
-          <div className="space-y-4">
+        <div className="flex h-[calc(100%-58px)] min-h-0 flex-col bg-[#05113a] px-4 py-5">
+          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto scrollbar-hide pr-1">
             <div className="mb-8">
               <p className="text-sm font-light text-slate-300">
                 Click on a key, then press a keyboard key to rebind it.
@@ -138,7 +138,7 @@ export function Keyboard({ setKeyboardOpen }) {
             </fieldset>
           </div>
 
-          <div className="mt-6 flex gap-3 justify-end pr-1">
+          <div className="mt-6 flex shrink-0 gap-3 justify-end pr-1">
             <Button statement="Go back" onClick={() => setKeyboardOpen(false)} />
             <Button statement="Save Changes" onClick={saveAndClose} />
           </div>

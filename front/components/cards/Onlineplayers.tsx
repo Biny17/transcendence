@@ -107,7 +107,7 @@ export default function Online() {
 	<>
 	  {(
 		<div
-			className="w-[360px] h-[520px] z-50 shadow-xl rounded-3xl border-yellow border-20 table-fixed border-double overflow-hidden ml-12"
+			className="w-70 h-96.75 z-50 shadow-xl rounded-3xl border-yellow border-20 table-fixed border-double overflow-hidden ml-12"
 			style={{ fontFamily: "var(--font-party-title), var(--font-geist-sans), sans-serif" }}
 		>
 		  <ChatContainer className="h-full">
