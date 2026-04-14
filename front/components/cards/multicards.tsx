@@ -34,10 +34,10 @@ function KpiCard({
       <CardBody className="p-4">
         <div className="flex justify-between items-center -mt-2 sm:-mt-2 md:-mt-2 lg:-mt-0">
           <Typography
-            className="font-bold text-xs sm:text-sm md:text-sm lg:text-sm text-black ml-[-10px] sm:ml-0" 
+            className="font-bold text-[10px] sm:text-sm md:text-sm lg:text-sm text-black ml-[-10px] sm:ml-0" 
           >
             {title}
-            <span className="ml-2">{icon}</span>
+            <span className="ml-1">{icon}</span>
           </Typography>
           <div className="flex items-center gap-1">
             {nb}

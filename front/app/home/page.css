@@ -4,7 +4,7 @@
   }
 }
 
-@media (min-width: 0px) and (max-width: 600px) {
+/* @media (min-width: 0px) and (max-width: 600px) {
   .baloo_button {
     transform: translateY(-54px);
   }
@@ -16,8 +16,14 @@
   }
 }
 
+@media (min-width: 1400px) and (max-width: 2000px){
+  .baloo_button {
+    transform: translateY(-80px);
+  }
+}
+
 @media (min-width: 821px) and (min-height: 1000px) {
   .baloo_button {
     transform: translateY(-280px);
   }
-}
+} */

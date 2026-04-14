@@ -38,7 +38,7 @@ export default function Options({setOptionsOpen}) {
   <>
     {(
     <div
-      className="w-60 h-90 lg:w-90 lg:h-100 xl:w-90 xl:h-110 z-50 shadow-xl rounded-3xl border-yellow border-20 table-fixed border-double overflow-hidden"
+      className="w-70 h-100 lg:w-90 lg:h-100 xl:w-90 xl:h-110 z-50 shadow-xl rounded-3xl border-yellow border-20 table-fixed border-double overflow-hidden"
       style={{ fontFamily: "var(--font-party-title), var(--font-geist-sans), sans-serif" }}
     >
       <ChatContainer className="h-full">
