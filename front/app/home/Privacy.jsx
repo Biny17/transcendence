@@ -44,7 +44,7 @@ export default function Privacy({setPrivacyOpen}) {
 	  <ChatContainer className="h-full">
 	  <ChatHeader className="border-b bg-yellow">
 		<ChatHeaderMain >
-		<span className="font-medium">Options</span>
+		<span className="font-medium">Privacy Policy and Terms of Service</span>
 		</ChatHeaderMain>
 	  </ChatHeader>
 		<MenuPrivacy setPrivacyOpen={setPrivacyOpen} />

@@ -2,22 +2,17 @@
 
 import { Button } from "../../app/animations/Button.jsx";
 import { useState } from 'react';
-import { Profile } from "@/components/dialogs/profile";
-import { Keyboard } from "@/components/dialogs/keyboard";
-import  LeaderBoard  from "@/components/cards/Leaderboard.jsx";
+import { PrivacyPolicy } from "@/components/privacy/privacy_policy.jsx";
+import { Terms } from "@/components/privacy/terms.jsx";
 
 export default function MenuPrivacy({setPrivacyOpen}) {
   const options = [
-    "View profile",
-    "Keyboard settings",
-    "About us",
-    "LeaderBoard",
+    "Privacy Policy",
+    "Terms of service",
     "Go back",
   ];
-  const [profileOpen, setProfileOpen] = useState(false);
-  const [KeyboardOpen, setKeyboardOpen] = useState(false);
-  const [AboutusOpen, setAboutusOpen] = useState(false);
-  const [LeaderBoardOpen, setLeaderBoardOpen] = useState(false);
+  const [PrivacyPolicyOpen, setPrivacyPolicyOpen] = useState(false);
+  const [TermsOpen, setTermsOpen] = useState(false);
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center bg-[#05113a]">
@@ -25,25 +20,17 @@ export default function MenuPrivacy({setPrivacyOpen}) {
         {options.map((option, idx) => (
           <div key={idx} className="flex w-full items-center justify-center">
             <div className="w-full max-w-xs flex justify-center">
-              {option === "View profile" && <Button statement={option} onClick={() => setProfileOpen(true)} />}
-			  {option === "Keyboard settings" && <Button statement={option} onClick={() => setKeyboardOpen(true)} />}
-			  {option === "About us" && <Button statement={option} onClick={() => setAboutusOpen(true)} />}
-        {option === "LeaderBoard" && <Button statement={option} onClick={() => setLeaderBoardOpen(true)} />}
-        {option === "Go back" && <Button statement={option} onClick={() => setOptionsOpen(false)} />}
+              {option === "Privacy Policy" && <Button statement={option} onClick={() => setPrivacyPolicyOpen(true)} />}
+			  {option === "Terms of service" && <Button statement={option} onClick={() => setTermsOpen(true)} />}
+        	  {option === "Go back" && <Button statement={option} onClick={() => setPrivacyOpen(false)} />}
             </div>
           </div>
         ))}
-    {profileOpen && (
-      <Profile SetProfileOpen={setProfileOpen}/>
+    {PrivacyPolicyOpen && (
+      <PrivacyPolicy setPrivacyPolicyOpen={setPrivacyPolicyOpen}/>
       )}
-	{KeyboardOpen && (
-      <Keyboard setKeyboardOpen={setKeyboardOpen}/>
-      )}
-	{AboutusOpen && (
-      <Profile SetProfileOpen={setAboutusOpen}/>
-      )}
-    {LeaderBoardOpen && (
-      <LeaderBoard setLeaderBoardOpen={setLeaderBoardOpen}/>
+	{TermsOpen && (
+      <Terms setTermsOpen={setTermsOpen}/>
       )}
       </nav>
     </div>
