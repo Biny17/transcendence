@@ -10,9 +10,11 @@ import Chat from '../chat/chat';
 import Online from "@/components/cards/Onlineplayers";
 import SimpleFooter from "@/components/footers/footer";
 import "./page.css";
+import Privacy  from './Privacy.jsx';
 
 export default function Home() {
   const [OptionsOpen, setOptionsOpen] = useState(false);
+  const [PrivacyOpen, setPrivacyOpen] = useState(false);
 
   return (
     <OrientationGuard>
@@ -48,7 +50,14 @@ export default function Home() {
       <div className= "chat">
         <Chat />
       </div>
-      <div className="absolute inset-x-4 bottom-3 h-16 ..."><SimpleFooter /></div>
+    <div className="absolute inset-x-4 bottom-3 h-16 ...">
+        <SimpleFooter setPrivacyOpen={setPrivacyOpen}/>
+      </div>
+    {PrivacyOpen && (
+        <div className="modal-overlay backdrop-blur-sm">
+            <Privacy setPrivacyOpen={setPrivacyOpen}/>
+        </div>
+    )}
     </main>
     </OrientationGuard>
   );
