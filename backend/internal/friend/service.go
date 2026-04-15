@@ -4,11 +4,8 @@ import (
 	"backend/ent"
 	"backend/ent/friendship"
 	"backend/ent/user"
-	"backend/internal/mid"
 	"context"
 	"errors"
-
-	"github.com/danielgtaylor/huma/v2"
 )
 
 type FriendService struct {
@@ -23,7 +20,8 @@ func (s *FriendService) SendFriendRequest(ctx context.Context, userID, friendID 
 	if userID == friendID {
 		return errors.New("cannot add yourself")
 	}
-	exists, err := s.client.Friendship.
+
+	f, err := s.client.Friendship.
 		Query().
 		Where(
 			friendship.Or(
@@ -37,13 +35,25 @@ func (s *FriendService) SendFriendRequest(ctx context.Context, userID, friendID 
 				),
 			),
 		).
-		Exist(ctx)
+		Only(ctx)
 
-	if err != nil {
-		return err
+	if err == nil {
+		switch f.Status {
+		case "pending":
+			return errors.New("friend request already pending")
+		case "accepted":
+			return errors.New("users are already friends")
+		case "rejected", "deleted":
+			_, err = f.Update().
+				SetUserID(userID).
+				SetFriendID(friendID). 
+				SetStatus("pending").
+				Save(ctx)
+			return err
+		}
 	}
-	if exists {
-		return errors.New("friendship already exists")
+	if !ent.IsNotFound(err) {
+		return err
 	}
 
 	_, err = s.client.Friendship.
@@ -61,8 +71,8 @@ func (s *FriendService) AcceptFriendRequest(ctx context.Context, userID, friendI
 		Query().
 		Where(
 			friendship.And(
-				friendship.HasUserWith(user.ID(friendID)), // sender
-				friendship.HasFriendWith(user.ID(userID)), // receiver
+				friendship.HasUserWith(user.ID(friendID)),
+				friendship.HasFriendWith(user.ID(userID)),
 				friendship.StatusEQ("pending"),
 			),
 		).
@@ -80,6 +90,58 @@ func (s *FriendService) AcceptFriendRequest(ctx context.Context, userID, friendI
 		SetStatus("accepted").
 		Save(ctx)
 
+	return err
+}
+
+func (s *FriendService) RejectFriendRequest(ctx context.Context, userID, friendID int) error {
+	f, err := s.client.Friendship.
+		Query().
+		Where(
+			friendship.And(
+				friendship.HasUserWith(user.ID(friendID)),
+				friendship.HasFriendWith(user.ID(userID)),
+				friendship.StatusEQ("pending"),
+			),
+		).
+		First(ctx)
+
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return errors.New("friend request not found")
+		}
+		return err
+	}
+
+	_, err = f.Update().SetStatus("rejected").Save(ctx)
+	return err
+}
+
+func (s *FriendService) DeleteFriend(ctx context.Context, userID, friendID int) error {
+	f, err := s.client.Friendship.
+		Query().
+		Where(
+			friendship.StatusEQ("accepted"),
+			friendship.Or(
+				friendship.And(
+					friendship.HasUserWith(user.ID(userID)),
+					friendship.HasFriendWith(user.ID(friendID)),
+				),
+				friendship.And(
+					friendship.HasUserWith(user.ID(friendID)),
+					friendship.HasFriendWith(user.ID(userID)),
+				),
+			),
+		).
+		First(ctx)
+
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return errors.New("friendship not found")
+		}
+		return err
+	}
+
+	_, err = f.Update().SetStatus("deleted").Save(ctx)
 	return err
 }
 
@@ -138,9 +200,4 @@ func (s *FriendService) GetPendingRequests(ctx context.Context, userID int) ([]*
 		users[i] = f.Edges.User
 	}
 	return users, nil
-}
-
-func (s *FriendService) Register(api huma.API, m *mid.Middleware) {
-	handler := NewHandler(s, m)
-	handler.Register(api, m)
 }

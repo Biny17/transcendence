@@ -13,8 +13,10 @@ const (
 	GetUsers       = "/api/users"
 	ResendEmail    = "/api/users/resend-email/{id}"
 	FriendRequest  = "/friends/request"
-	SenderId       = "/friends/request/{senderid}"
-	FriendList     = "/friends/request/friendlist"
+	AcceptFriend   = "/friends/accept"
+	GetFriendList  = "/friends/friendlist"
+	GetPendingList = "/friends/pending"
+	RejectFriend   = "/friends/reject"
+	DeleteFriend   = "/friends/delete"
 	Me             = "/api/users/me"
-	PendingList    = "/api/friends/pending"
 )

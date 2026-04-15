@@ -19,7 +19,7 @@ func (Friendship) Fields() []ent.Field {
 	return []ent.Field{
 		field.Time("created_at").
 			Default(time.Now),
-		field.String("status").Default("pending"), // pending, accepted, blocked
+		field.String("status").Default("pending"),
 	}
 }
 
