@@ -144,21 +144,21 @@ const data = [
     nb: <button className="min-w-5 w-5 h-5 sm:min-w-9 sm:w-auto sm:h-auto rounded-full py-0.5 px-1.5 sm:py-2 sm:px-3.5 text-center text-[10px] sm:text-sm transition-all shadow-sm text-white bg-[#0b1328] focus:bg-[#0b1328] focus:text-white active:bg-[#0b1328] active:text-white ml-0 sm:ml-0 md:ml-0 lg:ml-2">
       2
     </button>,
-    // icon: "🎮",
+    icon: "🎮",
   },
   {
     title: "Win",
     nb: <button className="min-w-5 w-5 h-5 sm:min-w-9 sm:w-auto sm:h-auto rounded-full py-0.5 px-1.5 sm:py-2 sm:px-3.5 text-center text-[10px] sm:text-sm transition-all shadow-sm text-white bg-[#0b1328] focus:bg-[#0b1328] focus:text-white active:bg-[#0b1328] active:text-white ml-0 sm:ml-0 md:ml-0 lg:ml-2">
       2
     </button>,
-    // icon: "🏆",
+    icon: "🏆",
   },
   {
     title: "Death",
     nb: <button className="min-w-5 w-5 h-5 sm:min-w-9 sm:w-auto sm:h-auto rounded-full py-0.5 px-1.5 sm:py-2 sm:px-3.5 text-center text-[10px] sm:text-sm transition-all shadow-sm text-white bg-[#0b1328] focus:bg-[#0b1328] focus:text-white active:bg-[#0b1328] active:text-white ml-0 sm:ml-0 md:ml-0 lg:ml-2">
       2
     </button>,
-    // icon: "💀",
+    icon: "💀",
   },
 ];
 

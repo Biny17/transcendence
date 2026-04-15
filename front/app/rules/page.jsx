@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import {Background}  from "@/app/home/Background.jsx";
 import { Button } from "../animations/Button.jsx"
-// import "./comicbookbubble.css";
 import "./comicspeechbubbles.css";
 import TextType from "@/components/effects/Texttype";
 
@@ -32,7 +31,7 @@ export default function Home() {
 					/>
 				</div>
             
-				<div className="w-[120px] h-[120px] sm:w-[200px] sm:h-[200px] md:w-[300px] md:h-[300px] lg:w-[400px] lg:h-[400px] ">
+				<div className="w-[120px] h-[120px] sm:w-[200px] sm:h-[200px] md:w-[300px] md:h-[300px] lg:w-[400px] lg:h-[400px]">
 			
 				<DotLottieReact
 					id="navbar-avatar-animation"
