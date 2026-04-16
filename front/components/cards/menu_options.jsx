@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Profile } from "@/components/dialogs/profile";
 import { Keyboard } from "@/components/dialogs/keyboard";
 import  LeaderBoard  from "@/components/cards/Leaderboard.jsx";
+import  YourFriends  from "@/components/friends/friends_cards.jsx";
 
 export default function MenuOptions({setOptionsOpen}) {
   const options = [
@@ -12,12 +13,14 @@ export default function MenuOptions({setOptionsOpen}) {
     "Keyboard settings",
     "About us",
     "LeaderBoard",
+    "Your Friends",
     "Go back",
   ];
   const [profileOpen, setProfileOpen] = useState(false);
   const [KeyboardOpen, setKeyboardOpen] = useState(false);
   const [AboutusOpen, setAboutusOpen] = useState(false);
   const [LeaderBoardOpen, setLeaderBoardOpen] = useState(false);
+  const [YourFriendsOpen, setYourFriendsOpen] = useState(false);
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center bg-[#05113a]">
@@ -29,11 +32,12 @@ export default function MenuOptions({setOptionsOpen}) {
 			  {option === "Keyboard settings" && <Button statement={option} onClick={() => setKeyboardOpen(true)} />}
 			  {option === "About us" && <Button statement={option} onClick={() => setAboutusOpen(true)} />}
         {option === "LeaderBoard" && <Button statement={option} onClick={() => setLeaderBoardOpen(true)} />}
+        {option === "Your Friends" && <Button statement={option} onClick={() => setYourFriendsOpen(true)} />}
         {option === "Go back" && <Button statement={option} onClick={() => setOptionsOpen(false)} />}
             </div>
           </div>
         ))}
-    {profileOpen && (
+  {profileOpen && (
       <Profile SetProfileOpen={setProfileOpen}/>
       )}
 	{KeyboardOpen && (
@@ -42,8 +46,11 @@ export default function MenuOptions({setOptionsOpen}) {
 	{AboutusOpen && (
       <Profile SetProfileOpen={setAboutusOpen}/>
       )}
-    {LeaderBoardOpen && (
+  {LeaderBoardOpen && (
       <LeaderBoard setLeaderBoardOpen={setLeaderBoardOpen}/>
+      )}
+  {YourFriendsOpen && (
+      <YourFriends setYourFriendsOpen={setYourFriendsOpen}/>
       )}
       </nav>
     </div>
