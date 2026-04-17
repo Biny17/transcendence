@@ -1,5 +1,5 @@
 "use client";
-
+import { Button } from "../../app/animations/Button.jsx";
 import { useState, useEffect} from "react";
 export default function FriendList(props) {
   // const players = [
@@ -15,6 +15,15 @@ export default function FriendList(props) {
 
   const [players, setPlayers] = useState([])
   const [Img, setImg] = useState([])
+  const [Added, setAdded] = useState([])
+
+  function handleAdd(idx) {
+    setAdded((prev) => {
+      const updated = [...prev];
+      updated[idx] = !updated[idx];
+      return updated;
+    });
+  }
   async function fetchUsers() {
   const url = 'http://localhost:8080/api/users'
   const options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
@@ -71,10 +80,18 @@ players.sort((a, b) => b.win - a.win);
                 className="relative inline-block h-12 w-12 rounded-full! object-cover object-center"
               />
             </div>
-            <div>
+            <div className="flex-1">
               <h6 className="font-medium text-white">{player.username}</h6>
-               <span className="font-bold w-6 text-center">Wins: {player.win}</span>
-			   
+              <span className="font-bold w-6 text-center">Wins: {player.win}</span>
+            </div>
+            <div className="ml-auto">
+              {!props.FriendsDisplay && (
+                <Button
+                  statement={Added[idx] ? "Added" : "Add"}
+                  isAdded={Added[idx]}
+                  onClick={() => handleAdd(idx)}
+                />
+              )}
             </div>
           </div>
         ))}

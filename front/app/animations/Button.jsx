@@ -1,10 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
 
-export const Button = ({ statement, onClick }) => {
+export const Button = ({ statement, onClick, isAdded  }) => {
   return (
     <StyledWrapper>
-      <button className="button" onClick={onClick}>
+      <button className={`button ${isAdded ? "is-added" : ""}`} onClick={onClick}>
         <div><span>{statement}</span></div>
       </button>
     </StyledWrapper>
@@ -16,6 +16,7 @@ const StyledWrapper = styled.div`
     --stone-50: #fafaf9;
     --stone-800: #292524;
     --yellow-400: #facc15;
+    --yellow-700: #e5d39d;
     --button-font-size: 1rem;
     --button-pad-y: 0.75rem;
     --button-pad-x: 1.25rem;
@@ -107,6 +108,12 @@ const StyledWrapper = styled.div`
         &:active {
           transform: translateY(2px);
         }
+      }
+    }
+
+    &.is-added {
+      & > div {
+        background-color: var(--yellow-700);
       }
     }
   }
