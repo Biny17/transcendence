@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect} from "react";
+import { useEffect, useState } from "react";
+import { Badge } from "@material-tailwind/react";
+
 export default function ListCard() {
   // const players = [
   //   {  name: "Tania Andrew", img: "https://docs.material-tailwind.com/img/face-1.jpg", win: 20 },
@@ -12,34 +14,44 @@ export default function ListCard() {
   //   { name: "Lucas", img: "https://randomuser.me/api/portraits/men/3.jpg", win: 7 },
   //   { name: "Sophie", img: "https://randomuser.me/api/portraits/women/4.jpg", win: 6 },
   // ];
+  const [players, setPlayers] = useState([]);
+  const [img, setImg] = useState([]);
 
-  const [players, setPlayers] = useState([])
-  const [Img, setImg] = useState([])
   async function fetchData() {
-  const url = 'http://localhost:8080/api/users'
-  const options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
-  try {
-    const response = await fetch(url, options);
-    const data = await response.json();
-    setPlayers(data)
-  } catch (error) {
-    console.error(error);
+    const url = "http://localhost:8080/api/users";
+    const options = {
+      method: "GET",
+      headers: { Accept: "application/json, application/problem+json" },
+    };
+    try {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      setPlayers(data);
+    } catch (error) {
+      console.error(error);
+    }
   }
-}
 
 async function fetchImg() {
-  const url = 'https://picsum.photos/v2/list?page=2&limit=30'
-  const options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
+  const url = "https://picsum.photos/v2/list?page=2&limit=30";
+  const options = {
+    method: "GET",
+    headers: { Accept: "application/json, application/problem+json" },
+  };
   try {
     const response = await fetch(url, options);
     const data = await response.json();
-    setImg(data)
+    setImg(data);
   } catch (error) {
     console.error(error);
   }
 }
 
-useEffect(() =>{fetchData(); fetchImg()}, [])
+useEffect(() => {
+  fetchData();
+  fetchImg();
+}, []);
+
 players.sort((a, b) => b.win - a.win);
   return (
     <div className="w-full h-full flex flex-col items-center justify-center bg-[#0b1328]">
@@ -53,15 +65,22 @@ players.sort((a, b) => b.win - a.win);
           >
             <div className="mr-4 flex items-center gap-2">
               <span className="font-bold w-6 text-center">{idx + 1}</span>
-              <img
-                alt={player.username}
-                src={Img[idx]?.download_url || Img[idx]?.url }
-                className="relative inline-block h-12 w-12 rounded-full! object-cover object-center"
-              />
+              <Badge
+                color="green"
+                // withBorder
+                overlap="circular"
+                placement="top-bottom"
+              >
+                <img
+                  alt={player.username}
+                  src={img[idx]?.download_url || img[idx]?.url}
+                  className="relative inline-block h-12 w-12 rounded-full object-cover object-center"
+                />
+              </Badge>
             </div>
             <div>
               <h6 className="font-medium text-white">{player.username}</h6>
-               <span className="font-bold w-6 text-center">Wins: {player.win}</span>
+              <span className="font-bold w-6 text-center">Wins: {player.win}</span>
             </div>
           </div>
         ))}

@@ -5,6 +5,7 @@
 
 @custom-variant dark (&:is(.dark *));
 @source "../.flowbite-react/class-list.json";
+@source "../node_modules/@material-tailwind/react";
 
 @theme inline {
   --color-background: var(--background);
