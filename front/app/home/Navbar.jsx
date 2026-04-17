@@ -7,11 +7,13 @@ import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import KpiCard1, { KpiCard } from "@/components/cards/multicards";
 import { useRouter } from 'next/navigation';
 import Options from "@/components/cards/Options";
+import { Avatar, Typography } from "@material-tailwind/react";
 
 export const Navbar = ({OptionsOpen, setOptionsOpen}) => {
 const [dropdownOpen, setDropdownOpen] = useState(false);
 const [error, setError] = useState("");
 const [username, setUserName] = useState('');
+  const [Img, setImg] = useState([])
 const router = useRouter();
 
 // const handleSubmit = () => {
@@ -19,6 +21,19 @@ const router = useRouter();
 //     if (isSignUpMode && !form.username) { setError("Choisissez un pseudo !"); return; }
 // 	else {router.push("/picks")}
 // }
+
+async function fetchImg() {
+  const url = 'https://picsum.photos/v2/list?page=2&limit=30'
+  const options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
+  try {
+    const response = await fetch(url, options);
+    const data = await response.json();
+    setImg(data)
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 async function fetchData(id) {
   const url = 'http://localhost:8080/api/users/' + id;
   const options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
@@ -45,6 +60,7 @@ useEffect(() => {
   const payload = token.split('.')[1];
   const decoded = JSON.parse(atob(payload));
   fetchData(decoded.sub);
+  fetchImg()
 }, []);
 
   return (
@@ -77,13 +93,17 @@ useEffect(() => {
                 role="menuitem"
                 className="cursor-pointer text-slate-800 flex w-full text-sm items-center rounded-md p-3 transition-all hover:bg-slate-100 focus:bg-slate-100 active:bg-slate-100"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-slate-400">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-5.5-2.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0ZM10 12a5.99 5.99 0 0 0-4.793 2.39A6.483 6.483 0 0 0 10 16.5a6.483 6.483 0 0 0 4.793-2.11A5.99 5.99 0 0 0 10 12Z" clipRule="evenodd" />
-                </svg>
+					<div className="flex items-center gap-4">
+				<Avatar src={Img[2]?.download_url || Img[2]?.url} alt="avatar" />
+				<div>
+				<Typography variant="h6"> {username}</Typography>
+
+				</div>
+      				</div>
             
-                <p className="text-slate-800 font-medium ml-2">
+                {/* <p className="text-slate-800 font-medium ml-2">
                 {username}
-                </p>
+                </p> */}
               </li>
               <li
                 role="menuitem"
