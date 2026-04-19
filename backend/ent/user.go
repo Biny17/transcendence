@@ -46,9 +46,13 @@ type UserEdges struct {
 	Friendships []*Friendship `json:"friendships,omitempty"`
 	// FriendOf holds the value of the friend_of edge.
 	FriendOf []*Friendship `json:"friend_of,omitempty"`
+	// SendMessages holds the value of the send_messages edge.
+	SendMessages []*Message `json:"send_messages,omitempty"`
+	// Conversations holds the value of the conversations edge.
+	Conversations []*Conversation `json:"conversations,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [5]bool
 }
 
 // MailVerifOrErr returns the MailVerif value or an error if the edge
@@ -78,6 +82,24 @@ func (e UserEdges) FriendOfOrErr() ([]*Friendship, error) {
 		return e.FriendOf, nil
 	}
 	return nil, &NotLoadedError{edge: "friend_of"}
+}
+
+// SendMessagesOrErr returns the SendMessages value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) SendMessagesOrErr() ([]*Message, error) {
+	if e.loadedTypes[3] {
+		return e.SendMessages, nil
+	}
+	return nil, &NotLoadedError{edge: "send_messages"}
+}
+
+// ConversationsOrErr returns the Conversations value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) ConversationsOrErr() ([]*Conversation, error) {
+	if e.loadedTypes[4] {
+		return e.Conversations, nil
+	}
+	return nil, &NotLoadedError{edge: "conversations"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -182,6 +204,16 @@ func (_m *User) QueryFriendships() *FriendshipQuery {
 // QueryFriendOf queries the "friend_of" edge of the User entity.
 func (_m *User) QueryFriendOf() *FriendshipQuery {
 	return NewUserClient(_m.config).QueryFriendOf(_m)
+}
+
+// QuerySendMessages queries the "send_messages" edge of the User entity.
+func (_m *User) QuerySendMessages() *MessageQuery {
+	return NewUserClient(_m.config).QuerySendMessages(_m)
+}
+
+// QueryConversations queries the "conversations" edge of the User entity.
+func (_m *User) QueryConversations() *ConversationQuery {
+	return NewUserClient(_m.config).QueryConversations(_m)
 }
 
 // Update returns a builder for updating this User.
