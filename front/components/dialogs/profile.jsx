@@ -2,6 +2,7 @@
 
 import { Button } from "@/app/animations/Button.jsx";
 import { useEffect, useState } from "react";
+import { useRef } from "react";
 
 export function Profile({ SetProfileOpen }) {
   const [Profile, setProfile] = useState({ age: "", email: "", password: ".........", username: "" })
@@ -9,6 +10,7 @@ export function Profile({ SetProfileOpen }) {
   const [userError, setUserError] = useState("")
   const [emailError, setEmailError] = useState("")
   const [decoded, setDecoded] = useState("")
+  const inputRef = useRef(null);
 
   async function fetchData(id) {
     const url = 'http://localhost:8080/api/users/' + id;
@@ -133,6 +135,14 @@ export function Profile({ SetProfileOpen }) {
 
           <div className="mt-6 flex gap-3 justify-end pr-1">
             <Button statement="Go back" onClick={() => SetProfileOpen(false)} />
+            <Button statement="Upload un avatar" onClick={() => inputRef.current.click()}/>
+            <input
+              ref={inputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              // onChange={handleFileSelect}
+            />
             <Button statement="Save Changes" onClick={() => { handleSave()}} />
           </div>
         </div>
