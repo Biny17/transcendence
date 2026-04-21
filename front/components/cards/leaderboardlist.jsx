@@ -3,17 +3,17 @@
 import { useEffect, useState } from "react";
 import { Badge } from "@material-tailwind/react";
 
-export default function ListCard() {
-  // const players = [
-  //   {  name: "Tania Andrew", img: "https://docs.material-tailwind.com/img/face-1.jpg", win: 20 },
-  //   {  name: "Alexander", img: "https://docs.material-tailwind.com/img/face-2.jpg", win: 18 },
-  //   {  name: "Emma Willever", img: "https://docs.material-tailwind.com/img/face-3.jpg", win: 15 },
-  //   { name: "Candice", img: "https://docs.material-tailwind.com/img/face-1.jpg", win: 10 },
-  //   { name: "John Doe", img: "https://randomuser.me/api/portraits/men/1.jpg", win: 9 },
-  //   { name: "Jane Smith", img: "https://randomuser.me/api/portraits/women/2.jpg", win: 8 },
-  //   { name: "Lucas", img: "https://randomuser.me/api/portraits/men/3.jpg", win: 7 },
-  //   { name: "Sophie", img: "https://randomuser.me/api/portraits/women/4.jpg", win: 6 },
-  // ];
+export default function LeaderBoardList() {
+  const play = [
+    {  username: "Tania Andrew", img: "https://docs.material-tailwind.com/img/face-1.jpg", win: 20 },
+    {  username: "Alexander", img: "https://docs.material-tailwind.com/img/face-2.jpg", win: 18 },
+    {  username: "Emma Willever", img: "https://docs.material-tailwind.com/img/face-3.jpg", win: 15 },
+    { username: "Candice", img: "https://docs.material-tailwind.com/img/face-1.jpg", win: 10 },
+    { username: "John Doe", img: "https://randomuser.me/api/portraits/men/1.jpg", win: 9 },
+    { username: "Jane Smith", img: "https://randomuser.me/api/portraits/women/2.jpg", win: 8 },
+    { username: "Lucas", img: "https://randomuser.me/api/portraits/men/3.jpg", win: 7 },
+    { username: "Sophie", img: "https://randomuser.me/api/portraits/women/4.jpg", win: 6 },
+  ];
   const [players, setPlayers] = useState([]);
   const [img, setImg] = useState([]);
   const [UserName, setUserName] = useState("");
@@ -27,7 +27,7 @@ export default function ListCard() {
     try {
       const response = await fetch(url, options);
       const data = await response.json();
-      setPlayers(data);
+      setPlayers([...data, ...play]);
     } catch (error) {
       console.error(error);
     }
@@ -47,36 +47,11 @@ async function fetchImg() {
     console.error(error);
   }
 }
-async function fetchUserById(id) {
-  const url = 'http://localhost:8080/api/users/' + id;
-  const options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
-  try {
-    const response = await fetch(url, options);
-    const data = await response.json();
-    setUserName(data[0].username);
-  } catch (error) {
-    console.error(error);
-  }
-}
-
-function getCookie(name) {
-  return document.cookie
-    .split('; ')
-    .find(row => row.startsWith(name + '='))
-    ?.split('=')[1];
-}
 
 useEffect(() => {
-  const token = getCookie('auth_token');
-  if (!token) return;
-
-  const payload = token.split('.')[1];
-  const decoded = JSON.parse(atob(payload));
-  fetchUserById(decoded.sub);
   fetchData();
   fetchImg();
 }, []);
-
 players.sort((a, b) => b.win - a.win);
   return (
     <div className="w-full h-full flex flex-col items-center justify-center bg-[#0b1328]">

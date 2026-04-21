@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-, "components/cards/multicards.tsx", "components/dialogs/profile.jsx", "components/cards/Options.jsx", "components/cards/menu_options.jsx", "components/cards/listcard.jsx", "../middleware.ts", "app/rules/page.jsx", "components/friends/friends_cards.jsx"  ],
+, "components/cards/multicards.tsx", "components/dialogs/profile.jsx", "components/cards/Options.jsx", "components/cards/menu_options.jsx", "components/cards/listcard.jsx", "../middleware.ts", "app/rules/page.jsx", "components/friends/friends_cards.jsx", "components/cards/leaderboardlist.jsx"  ],
   "exclude": ["node_modules"]
 }

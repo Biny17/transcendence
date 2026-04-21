@@ -29,7 +29,7 @@ import { ChatMessages } from "@/components/chat/chat-messages";
 import { PrimaryMessage } from "@/components/examples/primary-message";
 import { AdditionalMessage } from "@/components/examples/additional-message";
 import { DateItem } from "@/components/examples/date-item";
-import ListCard from "@/components/cards/listcard";
+import LeaderBoardList from "@/components/cards/leaderboardlist.jsx";
 type Message = {
   id: string;
   role: "user" | "assistant";
@@ -125,7 +125,7 @@ export default function LeaderBoardCard() {
 						</ChatHeader>
 						<div className="flex-1 w-full h-0 bg-indigo p-0 overflow-y-auto">
 							<div className="w-full h-full">
-								<ListCard />
+								<LeaderBoardList />
 							</div>
 						</div>
 					</ChatContainer>
