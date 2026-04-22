@@ -8,6 +8,7 @@
     "@radix-ui/themes": "^3.3.0",
     "comicaljs": "^0.3.105",
     "gsap": "^3.14.2",
+    "lottie-react": "^2.4.1",
     "next": "^16.2.4",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",

@@ -11,10 +11,14 @@ import Online from "@/components/cards/Onlineplayers";
 import SimpleFooter from "@/components/footers/footer";
 import "./page.css";
 import Privacy  from './Privacy.jsx';
+import  LeaderBoard  from "@/components/cards/Leaderboard.jsx";
+import  YourFriends  from "@/components/friends/friends_cards.jsx";
 
 export default function Home() {
   const [OptionsOpen, setOptionsOpen] = useState(false);
   const [PrivacyOpen, setPrivacyOpen] = useState(false);
+  const [LeaderBoardOpen, setLeaderBoardOpen] = useState(false);
+  const [YourFriendsOpen, setYourFriendsOpen] = useState(false);
 
   return (
     <OrientationGuard>
@@ -39,7 +43,11 @@ export default function Home() {
         animate={{ opacity: OptionsOpen ? 0 : 1, y: OptionsOpen ? 20 : 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
       >
+      <div className="grid grid-flow-col auto-cols-max gap-4">
+        <Button statement="Your Friends" onClick={() => setYourFriendsOpen(true)}/>
         <Button statement="Let's play" />
+        <Button statement="LeaderBoard" onClick={() => setLeaderBoardOpen(true)}/>
+      </div>
       </motion.div>
     </div>
     <div className="chat xl:fixed xl:right-2 xl:top-1/2 xl:-translate-y-1/2">
@@ -58,6 +66,12 @@ export default function Home() {
             <Privacy setPrivacyOpen={setPrivacyOpen}/>
         </div>
     )}
+    {LeaderBoardOpen && (
+          <LeaderBoard setLeaderBoardOpen={setLeaderBoardOpen}/>
+          )}
+      {YourFriendsOpen && (
+          <YourFriends setYourFriendsOpen={setYourFriendsOpen}/>
+          )}
     </main>
     </OrientationGuard>
   );

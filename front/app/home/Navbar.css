@@ -73,8 +73,6 @@
 }
 
 .dropdown-menu {
-  background-color: white;
-  border: 1px solid #e5e7eb;
   border-radius: 0.25rem;
   box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
   width: 11rem;
@@ -229,7 +227,6 @@
   text-underline-offset: 2px;
 }
 
-/* HTML: <div class="tooltip">This is the same as #5 but with another shape for the tail </div> */
 .tooltip {
   color: #fff;
   font-size: 18px;
@@ -237,14 +234,13 @@
   text-align: center;
 }
 .tooltip { 
-  --b: 3em; /* tail dimension */
-
-  --p: 47%;  /* main position (0%:left 100%:right) */
-  --r: 1.2em; /* the radius */
+  --b: 3em; 
+  --p: 47%;  
+  --r: 1.2em;
 
   padding: 1em;
   border-radius: var(--r) var(--r) min(var(--r),100% - var(--p) - var(--b)/4) min(var(--r),var(--p) - var(--b)/4)/var(--r);
-  background: #be1e2c; /* the main color */
+  background: #be1e2c;
   position: relative;
 }
 
@@ -269,5 +265,42 @@
   .dropdown-trigger {
     right: -10px;
   }
+}
+
+.dropdown-wrapper .dropdown-menu ul[data-popover="profile-menu"] {
+  background: #05113a ;
+
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35) ;
+  padding: 0.45rem ;
+}
+
+/* items */
+.dropdown-wrapper .dropdown-menu li[role="menuitem"] {
+  color: #e2e8f0 ;
+  border-radius: 12px ;
+}
+
+/* hover/focus/active */
+.dropdown-wrapper .dropdown-menu li[role="menuitem"]:hover,
+.dropdown-wrapper .dropdown-menu li[role="menuitem"]:focus,
+.dropdown-wrapper .dropdown-menu li[role="menuitem"]:active {
+  background: rgba(96, 165, 250, 0.16) ;
+}
+
+/* icônes */
+.dropdown-wrapper .dropdown-menu li[role="menuitem"] svg {
+  color: white ;
+}
+
+/* texte des boutons dans le menu */
+.dropdown-wrapper .dropdown-menu li[role="menuitem"] button {
+  color: #e2e8f0 ;
+  font-weight: 600;
+}
+
+/* séparateur */
+.dropdown-wrapper .dropdown-menu hr {
+  border-color: #334155 ;
+  margin: 0.4rem 0 ;
 }
 

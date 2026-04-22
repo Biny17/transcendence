@@ -87,7 +87,7 @@ useEffect(() => {
                   role="menu"
                   data-popover="profile-menu"
                   data-popover-placement="bottom"
-                  className="z-10 min-w-45 overflow-auto rounded-lg border border-slate-200 bg-white p-1.5 shadow-lg focus:outline-none"
+                  className="z-10 min-w-45 overflow-auto rounded-4xl border border-slate-200 bg-white p-1.5 shadow-lg focus:outline-none"
                 >
               <li
                 role="menuitem"

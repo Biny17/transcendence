@@ -88,8 +88,8 @@
 }
 
 .dropdown-menu {
-  background-color: white;
-  border: 1px solid #e5e7eb;
+  /* background-color: white;
+  border: 1px solid #e5e7eb; */
   border-radius: 0.25rem;
   box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
   width: 11rem;
@@ -210,12 +210,12 @@
   padding-top: 0;
 }
 .auth-button {
-  background-color: #facc15;    /* fond blanc */
-  color: #333;               /* texte foncé */
-  border: 1px solid #facc15;    /* bordure grise */
+  background-color: #facc15;
+  color: #333;               
+  border: 1px solid #facc15;    
 }
 .auth-button:hover {
-  background-color: #facc15; /* fond au survol */
+  background-color: #facc15; 
 }
 .auth-button.auth-button-google {
   display: flex;
@@ -254,3 +254,41 @@
  
 }
 }
+
+.dropdown-wrapper .dropdown-menu ul[data-popover="profile-menu"] {
+  background: #05113a ;
+
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35) ;
+  padding: 0.45rem ;
+}
+
+/* items */
+.dropdown-wrapper .dropdown-menu li[role="menuitem"] {
+  color: #e2e8f0 ;
+  border-radius: 12px ;
+}
+
+/* hover/focus/active */
+.dropdown-wrapper .dropdown-menu li[role="menuitem"]:hover,
+.dropdown-wrapper .dropdown-menu li[role="menuitem"]:focus,
+.dropdown-wrapper .dropdown-menu li[role="menuitem"]:active {
+  background: rgba(96, 165, 250, 0.16) ;
+}
+
+/* icônes */
+.dropdown-wrapper .dropdown-menu li[role="menuitem"] svg {
+  color: white ;
+}
+
+/* texte des boutons dans le menu */
+.dropdown-wrapper .dropdown-menu li[role="menuitem"] button {
+  color: #e2e8f0 ;
+  font-weight: 600;
+}
+
+/* séparateur */
+.dropdown-wrapper .dropdown-menu hr {
+  border-color: #334155 ;
+  margin: 0.4rem 0 ;
+}
+
