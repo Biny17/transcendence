@@ -8,7 +8,7 @@ export function Background({ signInOpen }) {
 	<>
     <div className="background">
 		 <DotLottieReact
-      src="https://lottie.host/1e6411ca-df14-4327-82a1-de9f5ebacc6b/rKObaLwEn8.lottie"
+      src="/celebrations.json"
 	  
       autoplay
     />
@@ -19,16 +19,16 @@ export function Background({ signInOpen }) {
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="relative px-20 py-14 text-center">
           <div className="dot1 absolute -top-1 -left-1 h-15 w-15 md:h-32 md:w-32 lg:h-28 lg:w-28">
-            <DotLottieReact src="https://lottie.host/625715ba-c990-472d-88c9-679feb7fa833/K7RlLzljd1.lottie" loop autoplay />
+            <DotLottieReact src="/mascot.json" loop autoplay />
           </div>
           <div className="dot2 absolute -top-1 -right-1  h-15 w-15 md:h-32 md:w-32 lg:h-28 lg:w-28">
-            <DotLottieReact src="https://lottie.host/3bc754e9-b96f-4a78-b231-ee8fd8222940/Eff0spwnNq.lottie" loop autoplay />
+            <DotLottieReact src="/mascot-cartoon.json" loop autoplay />
           </div>
           <div className="absolute -bottom-1 -left-1  h-15 w-15 md:h-32 md:w-32 lg:h-28 lg:w-28">
-            <DotLottieReact src="https://lottie.host/3bc754e9-b96f-4a78-b231-ee8fd8222940/Eff0spwnNq.lottie" loop autoplay />
+            <DotLottieReact src="/mascot-cartoon.json" loop autoplay />
           </div>
           <div className="absolute -bottom-1 -right-1  h-15 w-15 md:h-32 md:w-32 lg:h-28 lg:w-28">
-            <DotLottieReact src="https://lottie.host/625715ba-c990-472d-88c9-679feb7fa833/K7RlLzljd1.lottie" loop autoplay />
+            <DotLottieReact src="/mascot.json" loop autoplay />
           </div>
             <motion.h1
               initial={{ opacity: 0, scale: 0.8 }}

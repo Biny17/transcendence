@@ -74,7 +74,7 @@ useEffect(() => {
           <button type="button" className="navbar-avatar-btn">
             <div className="navbar-avatar-btn-lottie">
               <DotLottieReact
-                src="https://lottie.host/68494cc9-2ce5-4d40-84b7-abb8a108d2bf/yzcYwpJRcC.lottie"
+                src="/sloth-meditate.json"
                 loop
                 autoplay
               />

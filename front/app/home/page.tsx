@@ -29,7 +29,7 @@ export default function Home() {
       <div className="w-[200px] h-[200px] sm:w-[200px] sm:h-[200px] md:w-[300px] md:h-[300px] lg:w-[300px] lg:h-[300px] xl:w-[500px] xl:h-[500px]" >
         <DotLottieReact
           id="navbar-avatar-animation"
-          src="https://lottie.host/4a6712be-c728-4247-a609-65bd86fe8a84/JYUyKJJZH8.lottie"
+          src="/cute-bear.json"
           loop
           autoplay
         />
