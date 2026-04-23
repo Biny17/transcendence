@@ -3,6 +3,7 @@
 import { Button } from "@/app/animations/Button.jsx";
 import { useEffect, useState } from "react";
 import { useRef } from "react";
+import { useRouter } from 'next/navigation';
 
 export function Profile({ SetProfileOpen }) {
   const [Profile, setProfile] = useState({ age: "", email: "", password: ".........", username: "" })
@@ -11,6 +12,7 @@ export function Profile({ SetProfileOpen }) {
   const [emailError, setEmailError] = useState("")
   const [decoded, setDecoded] = useState("")
   const inputRef = useRef(null);
+  const router = useRouter();
 
   async function fetchData(id) {
     const url = 'http://localhost:8080/api/users/' + id;
@@ -72,6 +74,31 @@ export function Profile({ SetProfileOpen }) {
 	  	setEmailError("Invalid credentials");
     }
   }
+
+async function handleDelete() {
+  const url = 'http://localhost:8080/api/users/delete?user_id='+ decoded;
+  const options = {
+    method: 'DELETE',
+    headers: {
+      'Accept': 'application/problem+json',
+      'Content-Type': 'application/json'
+    },
+  };
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+			const err = await response.json();
+			throw new Error(err.title);
+		}
+    if (response.status === 200)
+    {
+      SetProfileOpen(false)
+      router.push("/login")
+    }
+  } catch (error) {
+    console.error(error);
+  }
+}
   return (
     <div
       data-dialog-backdrop="web-3-dialog"
@@ -80,7 +107,7 @@ export function Profile({ SetProfileOpen }) {
       onClick={() => SetProfileOpen(false)}
     >
       <div
-        className="relative m-4 h-130 max-w-5xl overflow-hidden rounded-3xl border-20 border-double border-yellow bg-[#0b1328] shadow-xl"
+        className="relative w-[min(92vw,700px)] h-[min(88vh,600px)] overflow-hidden rounded-3xl border-20 border-double border-yellow bg-[#0b1328] shadow-xl"
         style={{ fontFamily: "var(--font-party-title), var(--font-geist-sans), sans-serif" }}
         data-dialog="web-3-dialog"
         onClick={(event) => event.stopPropagation()}
@@ -133,7 +160,7 @@ export function Profile({ SetProfileOpen }) {
             </fieldset>
           </div>
 
-          <div className="mt-6 flex gap-3 justify-end pr-1">
+          <div className="mt-6 flex flex-wrap gap-3 justify-end pr-1">
             <Button statement="Go back" onClick={() => SetProfileOpen(false)} />
             <Button statement="Upload un avatar" onClick={() => inputRef.current.click()}/>
             <input
@@ -143,7 +170,8 @@ export function Profile({ SetProfileOpen }) {
               style={{ display: 'none' }}
               // onChange={handleFileSelect}
             />
-            <Button statement="Save Changes" onClick={() => { handleSave()}} />
+            <Button statement="Delete Profile" onClick={() => {handleDelete()}} />
+            <Button statement="Save Changes" onClick={() => {handleSave()}} />
           </div>
         </div>
       </div>
