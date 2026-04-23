@@ -67,7 +67,7 @@ useEffect(function () {
       <div className= "chat">
         <Chat />
       </div>
-    <div className="absolute inset-x-4 bottom-5 h-14 ...">
+    <div className="absolute inset-x-4 bottom-5 h-16 ...">
         <SimpleFooter setPrivacyOpen={setPrivacyOpen}/>
       </div>
     {PrivacyOpen && (

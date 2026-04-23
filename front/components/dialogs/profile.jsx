@@ -107,7 +107,7 @@ async function handleDelete() {
       onClick={() => SetProfileOpen(false)}
     >
       <div
-        className="relative w-[min(92vw,700px)] h-[min(88vh,600px)] overflow-hidden rounded-3xl border-20 border-double border-yellow bg-[#0b1328] shadow-xl"
+        className="relative w-[min(92vw,800px)] h-[min(88vh,600px)] overflow-hidden rounded-3xl border-20 border-double border-yellow bg-[#0b1328] shadow-xl"
         style={{ fontFamily: "var(--font-party-title), var(--font-geist-sans), sans-serif" }}
         data-dialog="web-3-dialog"
         onClick={(event) => event.stopPropagation()}
