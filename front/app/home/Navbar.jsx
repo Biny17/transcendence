@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import './Navbar.css';
 import './Background.css';
@@ -8,13 +8,16 @@ import KpiCard1, { KpiCard } from "@/components/cards/multicards";
 import { useRouter } from 'next/navigation';
 import Options from "@/components/cards/Options";
 import { Avatar, Typography } from "@material-tailwind/react";
+import Sloth from "@/public/sloth-meditate.json";
+import lottie from "lottie-web";
 
 export const Navbar = ({OptionsOpen, setOptionsOpen}) => {
 const [dropdownOpen, setDropdownOpen] = useState(false);
 const [error, setError] = useState("");
 const [username, setUserName] = useState('');
-  const [Img, setImg] = useState([])
+const [Img, setImg] = useState([])
 const router = useRouter();
+const slothRef = useRef(null);
 
 // const handleSubmit = () => {
 //     if (!form.email || !form.password) { setError("Remplissez tous les champs !"); return; }
@@ -63,6 +66,13 @@ useEffect(() => {
   fetchImg()
 }, []);
 
+useEffect(function(){
+    lottie.loadAnimation({
+      container: slothRef.current,
+      loop: true,
+      autoplay: true,
+      animationData: Sloth,
+    })},[])
   return (
     <>
     <div className="navbar">
@@ -73,11 +83,7 @@ useEffect(() => {
         <div className="dropdown-trigger" onMouseEnter={() => setDropdownOpen(true)} onMouseLeave={() => setDropdownOpen(false)}>
           <button type="button" className="navbar-avatar-btn">
             <div className="navbar-avatar-btn-lottie">
-              <DotLottieReact
-                src="/sloth-meditate.json"
-                loop
-                autoplay
-              />
+              <div ref={slothRef}/>
             </div>
           </button>
           {dropdownOpen && (

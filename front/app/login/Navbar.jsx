@@ -1,10 +1,12 @@
 "use client"
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './Navbar.css';
 import './Background.css';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { useRouter } from 'next/navigation';
 import { Button } from "../animations/Button.jsx"
+import lottie from "lottie-web";
+import Sloth from "@/public/sloth-meditate.json";
 
 export const Navbar = ({ signInOpen, setSignInOpen }) => {
 const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -15,6 +17,8 @@ const [form, setForm] = useState({ age: "", email: "", password: "", username: "
 const [Profile, setProfile] = useState([])
 const [error, setError] = useState("");
 const router = useRouter();
+const slothRef = useRef(null) 
+
 
 async function fetchVerified() {
 	const url =  'http://localhost:8080/api/users/find?email=' + form.email;
@@ -88,6 +92,18 @@ useEffect(function() {
   fetchData();
 }, [isSignUp, isSignIn])
 
+useEffect(function () {
+  const anim = lottie.loadAnimation({
+    container: slothRef.current,
+    loop: true,
+    autoplay: true,
+    animationData: Sloth,
+  });
+  return () => {
+    anim.destroy();
+  };
+}, []);
+
   return (
     <>
     <div className="navbar">
@@ -97,12 +113,8 @@ useEffect(function() {
         <div className="dropdown-trigger" onMouseEnter={() => setDropdownOpen(true)} onMouseLeave={() => setDropdownOpen(false)}>
           <button type="button" className="navbar-avatar-btn">
             <div className="navbar-avatar-btn-lottie">
-              <DotLottieReact
-                src="/sloth-meditate.json"
-                loop
-                autoplay
-              />
-            </div>
+              <div ref={slothRef}/>
+          </div>
           </button>
           {dropdownOpen && (
             <div className="dropdown-wrapper">

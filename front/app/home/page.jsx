@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { Background } from './Background';
@@ -13,13 +13,28 @@ import "./page.css";
 import Privacy  from './Privacy.jsx';
 import  LeaderBoard  from "@/components/cards/Leaderboard.jsx";
 import  YourFriends  from "@/components/friends/friends_cards.jsx";
+import lottie from "lottie-web";
+import Bear from "@/public/cute-bear.json";
 
 export default function Home() {
   const [OptionsOpen, setOptionsOpen] = useState(false);
   const [PrivacyOpen, setPrivacyOpen] = useState(false);
   const [LeaderBoardOpen, setLeaderBoardOpen] = useState(false);
   const [YourFriendsOpen, setYourFriendsOpen] = useState(false);
+  const bearRef = useRef(null);
 
+useEffect(function () {
+  const anim = lottie.loadAnimation({
+    container: bearRef.current,
+    loop: true,
+    autoplay: true,
+    animationData: Bear,
+  });
+
+  return () => {
+    anim.destroy();
+  };
+}, []);
   return (
     <OrientationGuard>
     <main className="relative min-h-screen">
@@ -29,14 +44,8 @@ export default function Home() {
   <div className="absolute inset-0 flex items-center justify-center gap-12">
   <div className="flex flex-row items-center gap-12">
     <div className="baloo_button fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-6">
-
       <div className="w-[200px] h-[200px] sm:w-[200px] sm:h-[200px] md:w-[300px] md:h-[300px] lg:w-[300px] lg:h-[300px] xl:w-[500px] xl:h-[500px]" >
-        <DotLottieReact
-          id="navbar-avatar-animation"
-          src="/cute-bear.json"
-          loop
-          autoplay
-        />
+        <div ref={bearRef}/>
       </div>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
