@@ -21,5 +21,7 @@ const (
 	Me                  = "/api/users/me"
 	Chat                = "/api/chat/ws"
 	CreateConversation  = "/api/chat/conversation"
+	GetConversations    = "/api/chat/conversations"
 	ConversationHistory = "/api/chat/conversation/{id}/messages"
 )
+

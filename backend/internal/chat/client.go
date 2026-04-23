@@ -59,8 +59,30 @@ func (c *Client) ReadPump() {
 			continue
 		}
 
+		ctx := context.Background()
+
+		// Ensure user is participant
+		isPart, err := IsParticipant(ctx, c.Hub.DB, payload.ConversationID, c.UserID)
+		if err != nil || !isPart {
+			log.Printf("user %d not participant of conversation %d", c.UserID, payload.ConversationID)
+			continue
+		}
+
+		// Ensure they are still friends
+		areFriends, err := AreParticipantsFriends(ctx, c.Hub.DB, payload.ConversationID, c.UserID)
+		if err != nil || !areFriends {
+			log.Printf("user %d and the other participant are not friends in conversation %d", c.UserID, payload.ConversationID)
+			errMsg, _ := json.Marshal(map[string]interface{}{
+				"type":    "error",
+				"code":    "not_friends",
+				"message": "You must be friends to send messages",
+			})
+			c.Send <- errMsg
+			continue
+		}
+
 		// Save the message to the database
-		msg, err := SaveMessage(context.Background(), c.Hub.DB, payload.ConversationID, c.UserID, payload.Content)
+		msg, err := SaveMessage(ctx, c.Hub.DB, payload.ConversationID, c.UserID, payload.Content)
 		if err != nil {
 			log.Printf("failed to save message: %v", err)
 			continue
