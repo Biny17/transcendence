@@ -2,6 +2,7 @@ package main
 
 import (
 	"backend/internal/auth"
+	"backend/internal/chat"
 	"backend/internal/config"
 	"backend/internal/friend"
 	"backend/internal/mid"
@@ -24,6 +25,7 @@ func addServices(i do.Injector) {
 	do.Provide(i, mid.ProvideMiddleware)
 	do.ProvideValue(i, user.ProvideAndRegister(i))
 	do.ProvideValue(i, friend.ProvideAndRegister(i))
+	do.ProvideValue(i, chat.ProvideAndRegister(i))
 }
 
 func main() {
