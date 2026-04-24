@@ -34,5 +34,10 @@ func (User) Edges() []ent.Edge {
 		edge.To("mail_verif", MailVerif.Type).
 			Unique().
 			Annotations(entsql.OnDelete(entsql.Cascade)),
+		
+		edge.To("friendships", Friendship.Type),
+		edge.To("friend_of", Friendship.Type),
+		edge.To("send_messages", Message.Type),
+		edge.To("conversations", Conversation.Type),
 	}
 }

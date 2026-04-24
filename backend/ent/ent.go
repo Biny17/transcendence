@@ -3,7 +3,10 @@
 package ent
 
 import (
+	"backend/ent/conversation"
+	"backend/ent/friendship"
 	"backend/ent/mailverif"
+	"backend/ent/message"
 	"backend/ent/user"
 	"context"
 	"errors"
@@ -74,8 +77,11 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			mailverif.Table: mailverif.ValidColumn,
-			user.Table:      user.ValidColumn,
+			conversation.Table: conversation.ValidColumn,
+			friendship.Table:   friendship.ValidColumn,
+			mailverif.Table:    mailverif.ValidColumn,
+			message.Table:      message.ValidColumn,
+			user.Table:         user.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

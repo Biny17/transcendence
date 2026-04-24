@@ -42,9 +42,17 @@ type User struct {
 type UserEdges struct {
 	// MailVerif holds the value of the mail_verif edge.
 	MailVerif *MailVerif `json:"mail_verif,omitempty"`
+	// Friendships holds the value of the friendships edge.
+	Friendships []*Friendship `json:"friendships,omitempty"`
+	// FriendOf holds the value of the friend_of edge.
+	FriendOf []*Friendship `json:"friend_of,omitempty"`
+	// SendMessages holds the value of the send_messages edge.
+	SendMessages []*Message `json:"send_messages,omitempty"`
+	// Conversations holds the value of the conversations edge.
+	Conversations []*Conversation `json:"conversations,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [5]bool
 }
 
 // MailVerifOrErr returns the MailVerif value or an error if the edge
@@ -56,6 +64,42 @@ func (e UserEdges) MailVerifOrErr() (*MailVerif, error) {
 		return nil, &NotFoundError{label: mailverif.Label}
 	}
 	return nil, &NotLoadedError{edge: "mail_verif"}
+}
+
+// FriendshipsOrErr returns the Friendships value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) FriendshipsOrErr() ([]*Friendship, error) {
+	if e.loadedTypes[1] {
+		return e.Friendships, nil
+	}
+	return nil, &NotLoadedError{edge: "friendships"}
+}
+
+// FriendOfOrErr returns the FriendOf value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) FriendOfOrErr() ([]*Friendship, error) {
+	if e.loadedTypes[2] {
+		return e.FriendOf, nil
+	}
+	return nil, &NotLoadedError{edge: "friend_of"}
+}
+
+// SendMessagesOrErr returns the SendMessages value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) SendMessagesOrErr() ([]*Message, error) {
+	if e.loadedTypes[3] {
+		return e.SendMessages, nil
+	}
+	return nil, &NotLoadedError{edge: "send_messages"}
+}
+
+// ConversationsOrErr returns the Conversations value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) ConversationsOrErr() ([]*Conversation, error) {
+	if e.loadedTypes[4] {
+		return e.Conversations, nil
+	}
+	return nil, &NotLoadedError{edge: "conversations"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -150,6 +194,26 @@ func (_m *User) Value(name string) (ent.Value, error) {
 // QueryMailVerif queries the "mail_verif" edge of the User entity.
 func (_m *User) QueryMailVerif() *MailVerifQuery {
 	return NewUserClient(_m.config).QueryMailVerif(_m)
+}
+
+// QueryFriendships queries the "friendships" edge of the User entity.
+func (_m *User) QueryFriendships() *FriendshipQuery {
+	return NewUserClient(_m.config).QueryFriendships(_m)
+}
+
+// QueryFriendOf queries the "friend_of" edge of the User entity.
+func (_m *User) QueryFriendOf() *FriendshipQuery {
+	return NewUserClient(_m.config).QueryFriendOf(_m)
+}
+
+// QuerySendMessages queries the "send_messages" edge of the User entity.
+func (_m *User) QuerySendMessages() *MessageQuery {
+	return NewUserClient(_m.config).QuerySendMessages(_m)
+}
+
+// QueryConversations queries the "conversations" edge of the User entity.
+func (_m *User) QueryConversations() *ConversationQuery {
+	return NewUserClient(_m.config).QueryConversations(_m)
 }
 
 // Update returns a builder for updating this User.

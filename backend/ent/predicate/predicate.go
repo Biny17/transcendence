@@ -6,8 +6,17 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// Conversation is the predicate function for conversation builders.
+type Conversation func(*sql.Selector)
+
+// Friendship is the predicate function for friendship builders.
+type Friendship func(*sql.Selector)
+
 // MailVerif is the predicate function for mailverif builders.
 type MailVerif func(*sql.Selector)
+
+// Message is the predicate function for message builders.
+type Message func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

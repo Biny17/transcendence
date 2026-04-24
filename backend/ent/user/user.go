@@ -30,6 +30,14 @@ const (
 	FieldVerifiedEmail = "verified_email"
 	// EdgeMailVerif holds the string denoting the mail_verif edge name in mutations.
 	EdgeMailVerif = "mail_verif"
+	// EdgeFriendships holds the string denoting the friendships edge name in mutations.
+	EdgeFriendships = "friendships"
+	// EdgeFriendOf holds the string denoting the friend_of edge name in mutations.
+	EdgeFriendOf = "friend_of"
+	// EdgeSendMessages holds the string denoting the send_messages edge name in mutations.
+	EdgeSendMessages = "send_messages"
+	// EdgeConversations holds the string denoting the conversations edge name in mutations.
+	EdgeConversations = "conversations"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// MailVerifTable is the table that holds the mail_verif relation/edge.
@@ -39,6 +47,32 @@ const (
 	MailVerifInverseTable = "mail_verifs"
 	// MailVerifColumn is the table column denoting the mail_verif relation/edge.
 	MailVerifColumn = "user_id"
+	// FriendshipsTable is the table that holds the friendships relation/edge.
+	FriendshipsTable = "friendships"
+	// FriendshipsInverseTable is the table name for the Friendship entity.
+	// It exists in this package in order to avoid circular dependency with the "friendship" package.
+	FriendshipsInverseTable = "friendships"
+	// FriendshipsColumn is the table column denoting the friendships relation/edge.
+	FriendshipsColumn = "user_friendships"
+	// FriendOfTable is the table that holds the friend_of relation/edge.
+	FriendOfTable = "friendships"
+	// FriendOfInverseTable is the table name for the Friendship entity.
+	// It exists in this package in order to avoid circular dependency with the "friendship" package.
+	FriendOfInverseTable = "friendships"
+	// FriendOfColumn is the table column denoting the friend_of relation/edge.
+	FriendOfColumn = "user_friend_of"
+	// SendMessagesTable is the table that holds the send_messages relation/edge.
+	SendMessagesTable = "messages"
+	// SendMessagesInverseTable is the table name for the Message entity.
+	// It exists in this package in order to avoid circular dependency with the "message" package.
+	SendMessagesInverseTable = "messages"
+	// SendMessagesColumn is the table column denoting the send_messages relation/edge.
+	SendMessagesColumn = "user_send_messages"
+	// ConversationsTable is the table that holds the conversations relation/edge. The primary key declared below.
+	ConversationsTable = "user_conversations"
+	// ConversationsInverseTable is the table name for the Conversation entity.
+	// It exists in this package in order to avoid circular dependency with the "conversation" package.
+	ConversationsInverseTable = "conversations"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -52,6 +86,12 @@ var Columns = []string{
 	FieldHash,
 	FieldVerifiedEmail,
 }
+
+var (
+	// ConversationsPrimaryKey and ConversationsColumn2 are the table columns denoting the
+	// primary key for the conversations relation (M2M).
+	ConversationsPrimaryKey = []string{"user_id", "conversation_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -125,10 +165,94 @@ func ByMailVerifField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newMailVerifStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByFriendshipsCount orders the results by friendships count.
+func ByFriendshipsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newFriendshipsStep(), opts...)
+	}
+}
+
+// ByFriendships orders the results by friendships terms.
+func ByFriendships(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newFriendshipsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByFriendOfCount orders the results by friend_of count.
+func ByFriendOfCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newFriendOfStep(), opts...)
+	}
+}
+
+// ByFriendOf orders the results by friend_of terms.
+func ByFriendOf(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newFriendOfStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// BySendMessagesCount orders the results by send_messages count.
+func BySendMessagesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSendMessagesStep(), opts...)
+	}
+}
+
+// BySendMessages orders the results by send_messages terms.
+func BySendMessages(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSendMessagesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByConversationsCount orders the results by conversations count.
+func ByConversationsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newConversationsStep(), opts...)
+	}
+}
+
+// ByConversations orders the results by conversations terms.
+func ByConversations(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newConversationsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newMailVerifStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(MailVerifInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2O, false, MailVerifTable, MailVerifColumn),
+	)
+}
+func newFriendshipsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(FriendshipsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, FriendshipsTable, FriendshipsColumn),
+	)
+}
+func newFriendOfStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(FriendOfInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, FriendOfTable, FriendOfColumn),
+	)
+}
+func newSendMessagesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SendMessagesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SendMessagesTable, SendMessagesColumn),
+	)
+}
+func newConversationsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ConversationsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, ConversationsTable, ConversationsPrimaryKey...),
 	)
 }

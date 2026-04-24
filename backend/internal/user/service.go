@@ -2,6 +2,7 @@ package user
 
 import (
 	"backend/internal/config"
+	"backend/internal/mid"
 	"backend/internal/pkg/routes"
 
 	"backend/ent"
@@ -21,7 +22,7 @@ type UserService struct {
 
 func ProvideAndRegister(i do.Injector) *UserService {
 	us, _ := ProvideUserService(i)
-	us.Register(do.MustInvoke[huma.API](i))
+	us.Register(do.MustInvoke[huma.API](i), do.MustInvoke[*mid.Middleware](i))
 	return us
 }
 
@@ -34,59 +35,63 @@ func ProvideUserService(i do.Injector) (*UserService, error) {
 	return us, nil
 }
 
-func (us *UserService) Register(api huma.API) {
+func (us *UserService) Register(api huma.API, m *mid.Middleware) {
 	huma.Register(api, huma.Operation{
 		Method:        http.MethodPost,
 		Path:          routes.AddUser,
-		Summary:       "Add new user to the database",
+		Summary:       "USER ADD",
 		DefaultStatus: 201,
 	}, us.AddUser)
 	huma.Register(api, huma.Operation{
 		Method:        http.MethodDelete,
 		Path:          routes.DeleteUser,
-		Summary:       "Delete user from the database",
+		Summary:       "USER DELETE",
 		DefaultStatus: 200,
 	}, us.DelUser)
 	huma.Register(api, huma.Operation{
 		Method:  http.MethodGet,
 		Path:    routes.FindUser,
-		Summary: "Query information from email, username, id",
+		Summary: "USER QUERY",
 		Description: `Provide either user_id, email or username as query
 			to get specific user information. If no query is given, it will return all users`,
 	}, us.QueryUser)
 	huma.Register(api, huma.Operation{
 		Method:  http.MethodGet,
 		Path:    routes.UserById,
-		Summary: "Get user by ID in path",
+		Summary: "USER BY ID",
 	}, us.GetUserById)
 	huma.Register(api, huma.Operation{
 		Method:  http.MethodPut,
 		Path:    routes.UserById,
-		Summary: "Replace user by ID",
+		Summary: "USER REPLACE",
 	}, us.PutUser)
 	huma.Register(api, huma.Operation{
 		Method:  http.MethodPatch,
 		Path:    routes.UserById,
-		Summary: "Update user by ID",
+		Summary: "USER UPDATE",
 	}, us.PatchUser)
 	huma.Register(api, huma.Operation{
 		Method:  http.MethodGet,
 		Path:    routes.GetUsers,
-		Summary: "Get all users",
+		Summary: "USER ALL",
 	}, us.AllUsers)
 	huma.Register(api, huma.Operation{
 		Method:  http.MethodGet,
 		Path:    "/api/users/resend-email/{id}",
-		Summary: "Send a new link to verify the email",
+		Summary: "MAIL NEW LINK",
 	}, us.ResendEmail)
 	huma.Register(api, huma.Operation{
 		Method:  http.MethodGet,
 		Path:    routes.ConfirmEmail,
-		Summary: "Confirm the email with the token and user_id in query",
+		Summary: "MAIL CONFIRM",
 	}, us.ConfirmEmail)
 	huma.Register(api, huma.Operation{
-		Method:	http.MethodGet,
-		Path:	routes.Me,
-		Summary: "Use Token in cookie to return information about the user",
+		Method:      http.MethodGet,
+		Path:        routes.Me,
+		Summary:     "ME",
+		Middlewares: huma.Middlewares{m.Auth},
+		Security: []map[string][]string{
+			{"cookieAuth": {}},
+		},
 	}, us.Me)
 }

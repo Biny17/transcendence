@@ -49,7 +49,7 @@ func (auth *AuthService) Register(i do.Injector) {
 	huma.Register(api, huma.Operation{
 		Method:        http.MethodPost,
 		Path:          routes.Login,
-		Summary:       "Login with email or username",
+		Summary:       "LOGIN",
 		DefaultStatus: 200,
 	}, auth.VerifyPwd)
 }

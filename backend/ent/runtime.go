@@ -3,7 +3,10 @@
 package ent
 
 import (
+	"backend/ent/conversation"
+	"backend/ent/friendship"
 	"backend/ent/mailverif"
+	"backend/ent/message"
 	"backend/ent/schema"
 	"backend/ent/user"
 	"time"
@@ -13,6 +16,22 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	conversationFields := schema.Conversation{}.Fields()
+	_ = conversationFields
+	// conversationDescCreatedAt is the schema descriptor for created_at field.
+	conversationDescCreatedAt := conversationFields[0].Descriptor()
+	// conversation.DefaultCreatedAt holds the default value on creation for the created_at field.
+	conversation.DefaultCreatedAt = conversationDescCreatedAt.Default.(func() time.Time)
+	friendshipFields := schema.Friendship{}.Fields()
+	_ = friendshipFields
+	// friendshipDescCreatedAt is the schema descriptor for created_at field.
+	friendshipDescCreatedAt := friendshipFields[0].Descriptor()
+	// friendship.DefaultCreatedAt holds the default value on creation for the created_at field.
+	friendship.DefaultCreatedAt = friendshipDescCreatedAt.Default.(func() time.Time)
+	// friendshipDescStatus is the schema descriptor for status field.
+	friendshipDescStatus := friendshipFields[1].Descriptor()
+	// friendship.DefaultStatus holds the default value on creation for the status field.
+	friendship.DefaultStatus = friendshipDescStatus.Default.(string)
 	mailverifFields := schema.MailVerif{}.Fields()
 	_ = mailverifFields
 	// mailverifDescUserID is the schema descriptor for user_id field.
@@ -27,6 +46,16 @@ func init() {
 	mailverifDescExpiringAt := mailverifFields[2].Descriptor()
 	// mailverif.DefaultExpiringAt holds the default value on creation for the expiring_at field.
 	mailverif.DefaultExpiringAt = mailverifDescExpiringAt.Default.(func() time.Time)
+	messageFields := schema.Message{}.Fields()
+	_ = messageFields
+	// messageDescContent is the schema descriptor for content field.
+	messageDescContent := messageFields[0].Descriptor()
+	// message.ContentValidator is a validator for the "content" field. It is called by the builders before save.
+	message.ContentValidator = messageDescContent.Validators[0].(func(string) error)
+	// messageDescCreatedAt is the schema descriptor for created_at field.
+	messageDescCreatedAt := messageFields[1].Descriptor()
+	// message.DefaultCreatedAt holds the default value on creation for the created_at field.
+	message.DefaultCreatedAt = messageDescCreatedAt.Default.(func() time.Time)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescUsername is the schema descriptor for username field.

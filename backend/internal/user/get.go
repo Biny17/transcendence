@@ -4,13 +4,12 @@ import (
 	"backend/ent"
 	"backend/ent/predicate"
 	"backend/ent/user"
+	"backend/internal/pkg"
 	"context"
 	"log"
-	"strconv"
 	"time"
 
 	"github.com/danielgtaylor/huma/v2"
-	"github.com/lestrrat-go/jwx/v3/jwt"
 )
 
 type UserByIdIn struct {
@@ -30,6 +29,7 @@ type UserInfo struct {
 	Verified bool      `json:"verified"`
 	Age      int       `json:"age"`
 	Created  time.Time `json:"created_at"`
+	Edges    ent.UserEdges `json:"edges"`
 }
 
 type InfoOut struct {
@@ -53,6 +53,7 @@ func (us *UserService) AllUsers(ctx context.Context, input *struct{}) (*InfoOut,
 			Verified: user.VerifiedEmail,
 			Age:      user.Age,
 			Created:  user.CreatedAt,
+			Edges: 	  user.Edges,	
 		})
 	}
 	return &InfoOut{Body: user_infos}, nil
@@ -108,28 +109,11 @@ func (us *UserService) GetUserById(ctx context.Context, input *UserByIdIn) (*Inf
 	return info_out, nil
 }
 
-type MeInput struct {
-	Cooken string `cookie:"auth_token"`
-}
-
-func (us *UserService) Me(ctx context.Context, input *MeInput) (*InfoOut, error) {
-	// verifiedToken, err := jwt.Parse(input.Cooken, jwt.WithKey(jwa.RS256(), pubkey))
-	// if err != nil {
-	// 	fmt.Printf("failed to verify JWS: %s\n", err)
-	// 	return nil, huma.Error400BadRequest("failed to recognized JWT")
-	// }
-	token, err := jwt.Parse([]byte(input.Cooken), jwt.WithVerify(false))
+func (us *UserService) Me(ctx context.Context, input *struct{}) (*InfoOut, error) {
+	id, err := pkg.ContextUserId(ctx)
 	if err != nil {
-		return nil, huma.Error400BadRequest("failed to recognized JWT")
-	}
-	id_str, exists := token.Subject()
-	if exists == false {
-		return nil, huma.Error400BadRequest("invalid JWT: missing sub claim")
-	} 
-	id, error := strconv.Atoi(id_str)
-	if error != nil {
 		log.Print(err)
-		return nil, huma.Error400BadRequest("invalid JWT: sub claim is not an integer")
+		return nil, huma.Error401Unauthorized("Error, try logging in again")
 	}
 	return us.GetUserById(ctx, &UserByIdIn{UserId: id})
 }
