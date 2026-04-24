@@ -1,10 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
 
-export const Button = ({ statement, onClick, isAdded  }) => {
+export const Button = ({ statement, onClick, isAdded, size = "default", className = "", type = "button" }) => {
+  const buttonClassName = `button ${isAdded ? "is-added" : ""} ${size === "compact" ? "is-compact" : ""}`.trim();
+
   return (
-    <StyledWrapper>
-      <button className={`button ${isAdded ? "is-added" : ""}`} onClick={onClick}>
+    <StyledWrapper className={className}>
+      <button type={type} className={buttonClassName} onClick={onClick}>
         <div><span>{statement}</span></div>
       </button>
     </StyledWrapper>
@@ -116,6 +118,13 @@ const StyledWrapper = styled.div`
         background-color: var(--yellow-700);
       }
     }
+  }
+
+  .button.is-compact {
+    --button-font-size: 0.72rem;
+    --button-pad-y: 0.38rem;
+    --button-pad-x: 0.72rem;
+    --button-nudge: 2px;
   }
 
   @media (max-width: 639px) {

@@ -19,15 +19,21 @@ export default function FriendList(props) {
   const [UserName,setUserName] = useState("")
 
   function handleAdd(idx) {
+
     setAdded((prev) => {
       const updated = [...prev];
       updated[idx] = !updated[idx];
       return updated;
     });
   }
-  async function fetchUsers() {
+
+    async function fetchUsers() {
   const url = 'http://localhost:8080/api/users'
-  const options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
+  const options = {
+    method: 'GET',
+    credentials: 'include',
+    headers: {Accept: 'application/json, application/problem+json'}
+  };
   try {
     const response = await fetch(url, options);
     const data = await response.json();
@@ -36,10 +42,57 @@ export default function FriendList(props) {
     console.error(error);
   }
 }
+  async function fetchSendRequest(id) {
+  const url = 'http://localhost:8080/api/friends/request';
+  const options = {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      Accept: 'application/json, application/problem+json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ friend_id: id }),
+  };
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.title || 'Failed to delete friend');
+      }
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function fetchDelete(id) {
+  const url = 'http://localhost:8080/api/friends/delete';
+  const options = {
+    method: 'DELETE',
+    credentials: 'include',
+    headers: {
+      Accept: 'application/json, application/problem+json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ friend_id: id }),
+  };
+  try {
+    const response = await fetch(url, options);
+  if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.title || 'Failed to delete friend');
+      }
+  } catch (error) {
+    console.error(error);
+  }
+}
 
  async function fetchFriends() {
-  const url = 'http://localhost:8080/api/users'
-  const options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
+  const url = 'http://localhost:8080/api/friends/friendlist';
+  const options = {
+    method: 'GET',
+    credentials: 'include',
+    headers: {Accept: 'application/json, application/problem+json'}
+  };
   try {
     const response = await fetch(url, options);
     const data = await response.json();
@@ -62,7 +115,11 @@ async function fetchImg() {
 }
 async function fetchData(id) {
   const url = 'http://localhost:8080/api/users/' + id;
-  const options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
+  const options = {
+    method: 'GET',
+    credentials: 'include',
+    headers: {Accept: 'application/json, application/problem+json'}
+  };
   try {
     const response = await fetch(url, options);
     const data = await response.json();
@@ -88,14 +145,14 @@ useEffect(() => {
   fetchData(decoded.sub);
 }, []);
 
-useEffect(() =>{props.FriendsDisplay ? fetchFriends():fetchUsers(); fetchImg()}, [])
-players.sort((a, b) => b.win - a.win);
+useEffect(() =>{props.FriendsDisplay ? fetchFriends():fetchUsers(); fetchImg()}, [props.FriendsDisplay])
+// players.sort((a, b) => b.win - a.win);
   return (
     <div className="w-full h-full flex flex-col items-center justify-center bg-[#0b1328]">
       <nav
         className="flex flex-col gap-4 w-full h-full overflow-y-auto scrollbar-hide p-2 box-border pb-12 max-h-[calc(100%-8px)]"
       >
-        {players
+        {(Array.isArray(players) ? players : [])
         .filter((player) => player.username !== UserName)
         .map((player, idx) => (
           <div
@@ -119,7 +176,15 @@ players.sort((a, b) => b.win - a.win);
                 <Button
                   statement={Added[idx] ? "Added" : "Add"}
                   isAdded={Added[idx]}
-                  onClick={() => handleAdd(idx)}
+                 onClick={() => {
+                    if (!Added[idx]) {
+                    handleAdd(idx);
+                   fetchSendRequest(player. id);
+                    } else {
+                    handleAdd(idx);
+                    fetchDelete(player. id);
+                    }
+                }}
                 />
               )}
             </div>

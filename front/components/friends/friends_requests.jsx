@@ -6,14 +6,12 @@ import {
   ChatHeader,
   ChatHeaderMain,
 } from "@/components/chat/chat-header";
-import FriendList from "@/components/friends/friends_list.jsx";
+import FriendsRequestsList from "@/components/friends/friendsrequestslist.jsx";
 import { Button } from "../../app/animations/Button.jsx";
-import FriendsRequests from "@/components/friends/friends_requests.jsx";
+// import FriendsRequests from "@/components/friends/friends_requests.jsx";
 
-export default function YourFriends(props) {
+export default function FriendsRequests(props) {
   
-const[FriendsDisplay, setFriendsDisplay] = useState(true);
-const[FriendsRequestsOpen, setFriendsRequestsOpen] = useState(false);
   return (
     <div
       data-dialog-backdrop="web-3-dialog"
@@ -21,7 +19,7 @@ const[FriendsRequestsOpen, setFriendsRequestsOpen] = useState(false);
       className="modal-overlay"
       onClick={(event) => {
         event.stopPropagation();
-        props.setYourFriendsOpen(false);
+        props.setFriendsRequestsOpen(false);
       }}
     >
       <div
@@ -36,29 +34,20 @@ const[FriendsRequestsOpen, setFriendsRequestsOpen] = useState(false);
           <ChatContainer className="h-full flex flex-col">
             <ChatHeader className="border-b bg-yellow">
               <ChatHeaderMain>
-                <span className="font-medium">{FriendsDisplay ? "Your Friends" : "Add Friends"}</span>
+                <span className="font-medium"> Friends Requests </span>
               </ChatHeaderMain>
             </ChatHeader>
             <div className="flex-1 w-full h-0 bg-indigo p-0 overflow-y-auto">
               <div className="w-full h-full">
-                <FriendList FriendsDisplay={FriendsDisplay} />
+                <FriendsRequestsList  />
               </div>
             </div>
             <div className="flex gap-3 justify-center py-3 bg-indigo">
-              {FriendsDisplay && (
-                <Fragment>
-                <Button statement="Add Friends" onClick={() => { setFriendsDisplay(false); }} />
-                <Button statement="Friends Requests" onClick={() => { setFriendsRequestsOpen(true); }} />
-                </Fragment>
-              )}
-              <Button statement="Go back" onClick={() => { FriendsDisplay ? props.setYourFriendsOpen(false) : setFriendsDisplay(true); }} />
+              <Button statement="Go back" onClick={() => { props.setFriendsRequestsOpen(false) }} />
             </div>
           </ChatContainer>
         </div>
       </div>
-     {FriendsRequestsOpen && (
-      <FriendsRequests setFriendsRequestsOpen={setFriendsRequestsOpen}/>
-      )}
     </div>
   );
 }
