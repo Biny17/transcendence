@@ -14,9 +14,12 @@ export default function FriendList(props) {
   // ];
 
   const [players, setPlayers] = useState([])
+  const [friends, setFriends] = useState([])
   const [Img, setImg] = useState([])
   const [Added, setAdded] = useState([])
   const [UserName,setUserName] = useState("")
+  const [Requests,setRequests] = useState("")
+  const [deleted, setDeleted] = useState(false)
 
   function handleAdd(idx) {
 
@@ -81,6 +84,7 @@ async function fetchDelete(id) {
         const err = await response.json();
         throw new Error(err.title || 'Failed to delete friend');
       }
+      setDeleted(!deleted)
   } catch (error) {
     console.error(error);
   }
@@ -97,6 +101,37 @@ async function fetchDelete(id) {
     const response = await fetch(url, options);
     const data = await response.json();
     setPlayers(data)
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// async function findPendingRequests(){
+//   const url = 'http://localhost:8080/api/friends/pending'
+//   const options = {
+//     method: 'GET',
+//     credentials: 'include',
+//     headers: {Accept: 'application/json, application/problem+json'}
+//   };
+//   try {
+//     const response = await fetch(url, options);
+//     const data = await response.json();
+//     setRequests(data)
+//   } catch (error) {
+//     console.error(error);
+//   }
+// }
+async function alreadyFriends() {
+  const url = 'http://localhost:8080/api/friends/friendlist';
+  const options = {
+    method: 'GET',
+    credentials: 'include',
+    headers: {Accept: 'application/json, application/problem+json'}
+  };
+  try {
+    const response = await fetch(url, options);
+    const data = await response.json();
+    setFriends(data)
   } catch (error) {
     console.error(error);
   }
@@ -145,7 +180,8 @@ useEffect(() => {
   fetchData(decoded.sub);
 }, []);
 
-useEffect(() =>{props.FriendsDisplay ? fetchFriends():fetchUsers(); fetchImg()}, [props.FriendsDisplay])
+useEffect(() =>{props.FriendsDisplay ? fetchFriends():fetchUsers(); fetchImg();}, [props.FriendsDisplay, props.FriendsRequestsOpen, deleted])
+useEffect(() => {alreadyFriends()})
 // players.sort((a, b) => b.win - a.win);
   return (
     <div className="w-full h-full flex flex-col items-center justify-center bg-[#0b1328]">
@@ -153,8 +189,12 @@ useEffect(() =>{props.FriendsDisplay ? fetchFriends():fetchUsers(); fetchImg()},
         className="flex flex-col gap-4 w-full h-full overflow-y-auto scrollbar-hide p-2 box-border pb-12 max-h-[calc(100%-8px)]"
       >
         {(Array.isArray(players) ? players : [])
-        .filter((player) => player.username !== UserName)
-        .map((player, idx) => (
+          .filter((player) =>
+            props.FriendsDisplay
+              ? player.username !== UserName
+              : player.username !== UserName && !friends.some((friend) => friend.id === player.id)
+          )
+          .map((player, idx) => (
           <div
             key={idx}
             className="flex w-full items-center rounded-lg p-4 bg-[#0b1328] text-white shadow-md border border-slate-700 transition-all hover:bg-[#162447] focus:bg-[#162447] active:bg-[#162447]"
@@ -174,19 +214,17 @@ useEffect(() =>{props.FriendsDisplay ? fetchFriends():fetchUsers(); fetchImg()},
             <div className="ml-auto">
               {!props.FriendsDisplay && (
                 <Button
-                  statement={Added[idx] ? "Added" : "Add"}
+                  statement={Added[idx] ? "Pending" : "Add"}
                   isAdded={Added[idx]}
                  onClick={() => {
                     if (!Added[idx]) {
                     handleAdd(idx);
                    fetchSendRequest(player. id);
-                    } else {
-                    handleAdd(idx);
-                    fetchDelete(player. id);
                     }
                 }}
                 />
               )}
+              {props.FriendsDisplay && <Button statement="Delete" onClick={() => {fetchDelete(player.id)}} />}
             </div>
           </div>
         ))}

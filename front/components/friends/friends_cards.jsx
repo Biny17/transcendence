@@ -41,7 +41,7 @@ const[FriendsRequestsOpen, setFriendsRequestsOpen] = useState(false);
             </ChatHeader>
             <div className="flex-1 w-full h-0 bg-indigo p-0 overflow-y-auto">
               <div className="w-full h-full">
-                <FriendList FriendsDisplay={FriendsDisplay} />
+                <FriendList FriendsDisplay={FriendsDisplay} FriendsRequestsOpen={FriendsRequestsOpen}/>
               </div>
             </div>
             <div className="flex gap-3 justify-center py-3 bg-indigo">

@@ -17,6 +17,7 @@ export default function FriendsRequestsList(props) {
   const [Img, setImg] = useState([])
   const [Added, setAdded] = useState([])
   const [UserName,setUserName] = useState("")
+  const [FriendsClick,setFriendsClick] = useState(false)
 
   function handleAdd(idx) {
     setAdded((prev) => {
@@ -68,6 +69,7 @@ async function fetchAccept(id) {
         const err = await response.json();
         throw new Error(err.title);
       }
+    setFriendsClick(!FriendsClick)
   } catch (error) {
     console.error(error);
   }
@@ -87,6 +89,7 @@ async function fetchDecline(id) {
         const err = await response.json();
         throw new Error(err.title);
       }
+    setFriendsClick(!FriendsClick)
   } catch (error) {
     console.error(error);
   }
@@ -108,7 +111,7 @@ async function fetchDecline(id) {
 //   fetchData(decoded.sub);
 // }, []);
 
-useEffect(() =>{ fetchFriends(); fetchImg()}, [])
+useEffect(() =>{ fetchFriends(); fetchImg()}, [FriendsClick])
   return (
     <div className="w-full h-full flex flex-col items-center justify-center bg-[#0b1328]">
       <nav

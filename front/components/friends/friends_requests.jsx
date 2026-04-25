@@ -39,7 +39,7 @@ export default function FriendsRequests(props) {
             </ChatHeader>
             <div className="flex-1 w-full h-0 bg-indigo p-0 overflow-y-auto">
               <div className="w-full h-full">
-                <FriendsRequestsList  />
+                <FriendsRequestsList  setFriendsRequestsOpen={props.setFriendsRequestsOpen}/>
               </div>
             </div>
             <div className="flex gap-3 justify-center py-3 bg-indigo">
