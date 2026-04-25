@@ -1,4 +1,5 @@
 "use client";
+import { request } from "http";
 import { Button } from "../../app/animations/Button.jsx";
 import { useState, useEffect} from "react";
 export default function FriendList(props) {
@@ -18,7 +19,7 @@ export default function FriendList(props) {
   const [Img, setImg] = useState([])
   const [Added, setAdded] = useState([])
   const [UserName,setUserName] = useState("")
-  const [Requests,setRequests] = useState("")
+  const [Requests,setRequests] = useState([])
   const [deleted, setDeleted] = useState(false)
 
   function handleAdd(idx) {
@@ -106,21 +107,21 @@ async function fetchDelete(id) {
   }
 }
 
-// async function findPendingRequests(){
-//   const url = 'http://localhost:8080/api/friends/pending'
-//   const options = {
-//     method: 'GET',
-//     credentials: 'include',
-//     headers: {Accept: 'application/json, application/problem+json'}
-//   };
-//   try {
-//     const response = await fetch(url, options);
-//     const data = await response.json();
-//     setRequests(data)
-//   } catch (error) {
-//     console.error(error);
-//   }
-// }
+async function findPendingRequests(){
+  const url = 'http://localhost:8080/api/friends/pending'
+  const options = {
+    method: 'GET',
+    credentials: 'include',
+    headers: {Accept: 'application/json, application/problem+json'}
+  };
+  try {
+    const response = await fetch(url, options);
+    const data = await response.json();
+    setRequests(data)
+  } catch (error) {
+    console.error(error);
+  }
+}
 async function alreadyFriends() {
   const url = 'http://localhost:8080/api/friends/friendlist';
   const options = {
@@ -180,7 +181,7 @@ useEffect(() => {
   fetchData(decoded.sub);
 }, []);
 
-useEffect(() =>{props.FriendsDisplay ? fetchFriends():fetchUsers(); fetchImg();}, [props.FriendsDisplay, props.FriendsRequestsOpen, deleted])
+useEffect(() =>{props.FriendsDisplay ? fetchFriends():fetchUsers(); findPendingRequests(); fetchImg();}, [props.FriendsDisplay, props.FriendsRequestsOpen, deleted])
 useEffect(() => {alreadyFriends()})
 // players.sort((a, b) => b.win - a.win);
   return (
@@ -192,7 +193,8 @@ useEffect(() => {alreadyFriends()})
           .filter((player) =>
             props.FriendsDisplay
               ? player.username !== UserName
-              : player.username !== UserName && !friends.some((friend) => friend.id === player.id)
+              : player.username !== UserName && !friends.some((friend) => friend.id === player.id) 
+              && !Requests.some((request) => request.id === player.id)
           )
           .map((player, idx) => (
           <div
