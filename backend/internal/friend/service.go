@@ -201,3 +201,19 @@ func (s *FriendService) GetPendingRequests(ctx context.Context, userID int) ([]*
 	}
 	return users, nil
 }
+
+func (s *FriendService) GetSentRequests(ctx context.Context, userID int) ([]*ent.User, error) {
+	friendships, err := s.client.Friendship.Query().
+		Where(friendship.HasUserWith(user.ID(userID)), friendship.Status("pending")).
+		WithFriend().
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	users := make([]*ent.User, len(friendships))
+	for i, f := range friendships {
+		users[i] = f.Edges.Friend
+	}
+	return users, nil
+}

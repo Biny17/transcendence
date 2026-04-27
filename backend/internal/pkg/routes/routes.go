@@ -16,6 +16,7 @@ const (
 	AcceptFriend        = "/api/friends/accept"
 	GetFriendList       = "/api/friends/friendlist"
 	GetPendingList      = "/api/friends/pending"
+	GetSentList         = "/api/friends/sent"
 	RejectFriend        = "/api/friends/reject"
 	DeleteFriend        = "/api/friends/delete"
 	Me                  = "/api/users/me"
