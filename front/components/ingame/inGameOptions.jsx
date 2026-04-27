@@ -19,7 +19,7 @@ useEffect(() => {
 }, []);
 
 return(
-<Fragment>menu_options
+<Fragment>
 {OptionsOpen && <div className="modal-overlay backdrop-blur-sm">
     <div onClick={e => e.stopPropagation()}>
         <OptionsIngame setOptionsOpen={setOptionsOpen}/>
