@@ -64,7 +64,7 @@ useEffect(() => {
   const decoded = JSON.parse(atob(payload));
   fetchData(decoded.sub);
   fetchImg()
-}, []);
+}, [OptionsOpen]);
 
 useEffect(function(){
     lottie.loadAnimation({

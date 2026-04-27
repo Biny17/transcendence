@@ -11,7 +11,6 @@ export default function MenuOptions({setOptionsOpen}) {
   const options = [
     "View profile",
     "Keyboard settings",
-    "About us",
     "LeaderBoard",
     "Your Friends",
     "Go back",
@@ -30,7 +29,6 @@ export default function MenuOptions({setOptionsOpen}) {
             <div className="w-full max-w-xs flex justify-center">
               {option === "View profile" && <Button statement={option} onClick={() => setProfileOpen(true)} />}
 			  {option === "Keyboard settings" && <Button statement={option} onClick={() => setKeyboardOpen(true)} />}
-			  {option === "About us" && <Button statement={option} onClick={() => setAboutusOpen(true)} />}
         {option === "LeaderBoard" && <Button statement={option} onClick={() => setLeaderBoardOpen(true)} />}
         {option === "Your Friends" && <Button statement={option} onClick={() => setYourFriendsOpen(true)} />}
         {option === "Go back" && <Button statement={option} onClick={() => setOptionsOpen(false)} />}
@@ -42,9 +40,6 @@ export default function MenuOptions({setOptionsOpen}) {
       )}
 	{KeyboardOpen && (
       <Keyboard setKeyboardOpen={setKeyboardOpen}/>
-      )}
-	{AboutusOpen && (
-      <Profile SetProfileOpen={setAboutusOpen}/>
       )}
   {LeaderBoardOpen && (
       <LeaderBoard setLeaderBoardOpen={setLeaderBoardOpen}/>
