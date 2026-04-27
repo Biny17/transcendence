@@ -30,7 +30,7 @@ const[FriendsRequestsOpen, setFriendsRequestsOpen] = useState(false);
         onClick={(event) => event.stopPropagation()}
       >
         <div
-          className="w-[min(92vw,400px)] h-[min(88vh,600px)] z-50 shadow-xl rounded-3xl border-yellow border-20 table-fixed border-double overflow-hidden"
+          className="w-[min(92vw,600px)] h-[min(88vh,600px)] z-50 shadow-xl rounded-3xl border-yellow border-20 table-fixed border-double overflow-hidden"
           style={{ fontFamily: "var(--font-party-title), var(--font-geist-sans), sans-serif" }}
         >
           <ChatContainer className="h-full flex flex-col">

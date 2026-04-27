@@ -54,7 +54,7 @@ export function Profile({ SetProfileOpen }) {
     }
     else
       payload = Profile
-    const options = {method: 'PATCH', headers: {'Accept': 'application/json, application/problem+json', 'Content-Type': 'application/json'}, body: JSON.stringify(payload)};
+    const options = {method: 'PATCH', credentials: 'include', headers: {'Accept': 'application/json, application/problem+json', 'Content-Type': 'application/json'}, body: JSON.stringify(payload)};
     try 
 	{
 		const response = await fetch(url, options);
@@ -79,6 +79,7 @@ async function handleDelete() {
   const url = 'http://localhost:8080/api/users/delete?user_id='+ decoded;
   const options = {
     method: 'DELETE',
+    credentials: 'include',
     headers: {
       'Accept': 'application/problem+json',
       'Content-Type': 'application/json'
