@@ -20,6 +20,7 @@ export default function FriendList(props) {
   const [Added, setAdded] = useState([])
   const [UserName,setUserName] = useState("")
   const [Requests,setRequests] = useState([])
+  const [SentRequests,setSentRequests] = useState([])
   const [deleted, setDeleted] = useState(false)
 
   function handleAdd(idx) {
@@ -122,6 +123,23 @@ async function findPendingRequests(){
     console.error(error);
   }
 }
+
+async function findSentRequests(){
+  const url = 'http://localhost:8080/api/friends/sent'
+  const options = {
+    method: 'GET',
+    credentials: 'include',
+    headers: {Accept: 'application/json, application/problem+json'}
+  };
+  try {
+    const response = await fetch(url, options);
+    const data = await response.json();
+    setSentRequests(data)
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 async function alreadyFriends() {
   const url = 'http://localhost:8080/api/friends/friendlist';
   const options = {
@@ -182,7 +200,7 @@ useEffect(() => {
 }, []);
 
 useEffect(() =>{props.FriendsDisplay ? fetchFriends():fetchUsers(); findPendingRequests(); fetchImg();}, [props.FriendsDisplay, props.FriendsRequestsOpen, deleted])
-useEffect(() => {alreadyFriends()})
+useEffect(() => {alreadyFriends(); findSentRequests();})
 // players.sort((a, b) => b.win - a.win);
   return (
     <div className="w-full h-full flex flex-col items-center justify-center bg-[#0b1328]">
@@ -196,7 +214,9 @@ useEffect(() => {alreadyFriends()})
               : player.username !== UserName && !friends.some((friend) => friend.id === player.id) 
               && !Requests.some((request) => request.id === player.id)
           )
-          .map((player, idx) => (
+          .map((player, idx) => {
+            const isPending = SentRequests.some((req) => req.username === player.username);
+            return (
           <div
             key={idx}
             className="flex w-full items-center rounded-lg p-4 bg-[#0b1328] text-white shadow-md border border-slate-700 transition-all hover:bg-[#162447] focus:bg-[#162447] active:bg-[#162447]"
@@ -216,12 +236,12 @@ useEffect(() => {alreadyFriends()})
             <div className="ml-auto">
               {!props.FriendsDisplay && (
                 <Button
-                  statement={Added[idx] ? "Pending" : "Add"}
-                  isAdded={Added[idx]}
+                  statement={isPending || Added[idx] ? "Pending" : "Add"}
+                  isAdded={isPending || Added[idx]}
                  onClick={() => {
-                    if (!Added[idx]) {
+                    if (!isPending && !Added[idx]) {
                     handleAdd(idx);
-                   fetchSendRequest(player. id);
+                   fetchSendRequest(player.id);
                     }
                 }}
                 />
@@ -229,7 +249,8 @@ useEffect(() => {alreadyFriends()})
               {props.FriendsDisplay && <Button statement="Delete" onClick={() => {fetchDelete(player.id)}} />}
             </div>
           </div>
-        ))}
+        );
+      })}
       </nav>
     </div>
   );
