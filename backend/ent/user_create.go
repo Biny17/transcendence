@@ -3,8 +3,10 @@
 package ent
 
 import (
+	"backend/ent/conversation"
 	"backend/ent/friendship"
 	"backend/ent/mailverif"
+	"backend/ent/message"
 	"backend/ent/user"
 	"context"
 	"errors"
@@ -127,6 +129,36 @@ func (_c *UserCreate) AddFriendOf(v ...*Friendship) *UserCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddFriendOfIDs(ids...)
+}
+
+// AddSendMessageIDs adds the "send_messages" edge to the Message entity by IDs.
+func (_c *UserCreate) AddSendMessageIDs(ids ...int) *UserCreate {
+	_c.mutation.AddSendMessageIDs(ids...)
+	return _c
+}
+
+// AddSendMessages adds the "send_messages" edges to the Message entity.
+func (_c *UserCreate) AddSendMessages(v ...*Message) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddSendMessageIDs(ids...)
+}
+
+// AddConversationIDs adds the "conversations" edge to the Conversation entity by IDs.
+func (_c *UserCreate) AddConversationIDs(ids ...int) *UserCreate {
+	_c.mutation.AddConversationIDs(ids...)
+	return _c
+}
+
+// AddConversations adds the "conversations" edges to the Conversation entity.
+func (_c *UserCreate) AddConversations(v ...*Conversation) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddConversationIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -307,6 +339,38 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(friendship.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.SendMessagesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SendMessagesTable,
+			Columns: []string{user.SendMessagesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(message.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ConversationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.ConversationsTable,
+			Columns: user.ConversationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(conversation.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

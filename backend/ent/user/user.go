@@ -34,6 +34,10 @@ const (
 	EdgeFriendships = "friendships"
 	// EdgeFriendOf holds the string denoting the friend_of edge name in mutations.
 	EdgeFriendOf = "friend_of"
+	// EdgeSendMessages holds the string denoting the send_messages edge name in mutations.
+	EdgeSendMessages = "send_messages"
+	// EdgeConversations holds the string denoting the conversations edge name in mutations.
+	EdgeConversations = "conversations"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// MailVerifTable is the table that holds the mail_verif relation/edge.
@@ -57,6 +61,18 @@ const (
 	FriendOfInverseTable = "friendships"
 	// FriendOfColumn is the table column denoting the friend_of relation/edge.
 	FriendOfColumn = "user_friend_of"
+	// SendMessagesTable is the table that holds the send_messages relation/edge.
+	SendMessagesTable = "messages"
+	// SendMessagesInverseTable is the table name for the Message entity.
+	// It exists in this package in order to avoid circular dependency with the "message" package.
+	SendMessagesInverseTable = "messages"
+	// SendMessagesColumn is the table column denoting the send_messages relation/edge.
+	SendMessagesColumn = "user_send_messages"
+	// ConversationsTable is the table that holds the conversations relation/edge. The primary key declared below.
+	ConversationsTable = "user_conversations"
+	// ConversationsInverseTable is the table name for the Conversation entity.
+	// It exists in this package in order to avoid circular dependency with the "conversation" package.
+	ConversationsInverseTable = "conversations"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -70,6 +86,12 @@ var Columns = []string{
 	FieldHash,
 	FieldVerifiedEmail,
 }
+
+var (
+	// ConversationsPrimaryKey and ConversationsColumn2 are the table columns denoting the
+	// primary key for the conversations relation (M2M).
+	ConversationsPrimaryKey = []string{"user_id", "conversation_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -171,6 +193,34 @@ func ByFriendOf(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newFriendOfStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// BySendMessagesCount orders the results by send_messages count.
+func BySendMessagesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSendMessagesStep(), opts...)
+	}
+}
+
+// BySendMessages orders the results by send_messages terms.
+func BySendMessages(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSendMessagesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByConversationsCount orders the results by conversations count.
+func ByConversationsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newConversationsStep(), opts...)
+	}
+}
+
+// ByConversations orders the results by conversations terms.
+func ByConversations(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newConversationsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newMailVerifStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -190,5 +240,19 @@ func newFriendOfStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(FriendOfInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, FriendOfTable, FriendOfColumn),
+	)
+}
+func newSendMessagesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SendMessagesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SendMessagesTable, SendMessagesColumn),
+	)
+}
+func newConversationsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ConversationsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, ConversationsTable, ConversationsPrimaryKey...),
 	)
 }

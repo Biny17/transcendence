@@ -8,6 +8,17 @@ import (
 )
 
 var (
+	// ConversationsColumns holds the columns for the "conversations" table.
+	ConversationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+	}
+	// ConversationsTable holds the schema information for the "conversations" table.
+	ConversationsTable = &schema.Table{
+		Name:       "conversations",
+		Columns:    ConversationsColumns,
+		PrimaryKey: []*schema.Column{ConversationsColumns[0]},
+	}
 	// FriendshipsColumns holds the columns for the "friendships" table.
 	FriendshipsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -64,6 +75,41 @@ var (
 			},
 		},
 	}
+	// MessagesColumns holds the columns for the "messages" table.
+	MessagesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "content", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "conversation_messages", Type: field.TypeInt},
+		{Name: "user_send_messages", Type: field.TypeInt},
+	}
+	// MessagesTable holds the schema information for the "messages" table.
+	MessagesTable = &schema.Table{
+		Name:       "messages",
+		Columns:    MessagesColumns,
+		PrimaryKey: []*schema.Column{MessagesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "messages_conversations_messages",
+				Columns:    []*schema.Column{MessagesColumns[3]},
+				RefColumns: []*schema.Column{ConversationsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "messages_users_send_messages",
+				Columns:    []*schema.Column{MessagesColumns[4]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "message_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{MessagesColumns[2]},
+			},
+		},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -81,11 +127,39 @@ var (
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 	}
+	// UserConversationsColumns holds the columns for the "user_conversations" table.
+	UserConversationsColumns = []*schema.Column{
+		{Name: "user_id", Type: field.TypeInt},
+		{Name: "conversation_id", Type: field.TypeInt},
+	}
+	// UserConversationsTable holds the schema information for the "user_conversations" table.
+	UserConversationsTable = &schema.Table{
+		Name:       "user_conversations",
+		Columns:    UserConversationsColumns,
+		PrimaryKey: []*schema.Column{UserConversationsColumns[0], UserConversationsColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "user_conversations_user_id",
+				Columns:    []*schema.Column{UserConversationsColumns[0]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "user_conversations_conversation_id",
+				Columns:    []*schema.Column{UserConversationsColumns[1]},
+				RefColumns: []*schema.Column{ConversationsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		ConversationsTable,
 		FriendshipsTable,
 		MailVerifsTable,
+		MessagesTable,
 		UsersTable,
+		UserConversationsTable,
 	}
 )
 
@@ -93,4 +167,8 @@ func init() {
 	FriendshipsTable.ForeignKeys[0].RefTable = UsersTable
 	FriendshipsTable.ForeignKeys[1].RefTable = UsersTable
 	MailVerifsTable.ForeignKeys[0].RefTable = UsersTable
+	MessagesTable.ForeignKeys[0].RefTable = ConversationsTable
+	MessagesTable.ForeignKeys[1].RefTable = UsersTable
+	UserConversationsTable.ForeignKeys[0].RefTable = UsersTable
+	UserConversationsTable.ForeignKeys[1].RefTable = ConversationsTable
 }

@@ -37,5 +37,7 @@ func (User) Edges() []ent.Edge {
 		
 		edge.To("friendships", Friendship.Type),
 		edge.To("friend_of", Friendship.Type),
+		edge.To("send_messages", Message.Type),
+		edge.To("conversations", Conversation.Type),
 	}
 }

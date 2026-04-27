@@ -3,8 +3,10 @@
 package ent
 
 import (
+	"backend/ent/conversation"
 	"backend/ent/friendship"
 	"backend/ent/mailverif"
+	"backend/ent/message"
 	"backend/ent/predicate"
 	"backend/ent/user"
 	"context"
@@ -184,6 +186,36 @@ func (_u *UserUpdate) AddFriendOf(v ...*Friendship) *UserUpdate {
 	return _u.AddFriendOfIDs(ids...)
 }
 
+// AddSendMessageIDs adds the "send_messages" edge to the Message entity by IDs.
+func (_u *UserUpdate) AddSendMessageIDs(ids ...int) *UserUpdate {
+	_u.mutation.AddSendMessageIDs(ids...)
+	return _u
+}
+
+// AddSendMessages adds the "send_messages" edges to the Message entity.
+func (_u *UserUpdate) AddSendMessages(v ...*Message) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddSendMessageIDs(ids...)
+}
+
+// AddConversationIDs adds the "conversations" edge to the Conversation entity by IDs.
+func (_u *UserUpdate) AddConversationIDs(ids ...int) *UserUpdate {
+	_u.mutation.AddConversationIDs(ids...)
+	return _u
+}
+
+// AddConversations adds the "conversations" edges to the Conversation entity.
+func (_u *UserUpdate) AddConversations(v ...*Conversation) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddConversationIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdate) Mutation() *UserMutation {
 	return _u.mutation
@@ -235,6 +267,48 @@ func (_u *UserUpdate) RemoveFriendOf(v ...*Friendship) *UserUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveFriendOfIDs(ids...)
+}
+
+// ClearSendMessages clears all "send_messages" edges to the Message entity.
+func (_u *UserUpdate) ClearSendMessages() *UserUpdate {
+	_u.mutation.ClearSendMessages()
+	return _u
+}
+
+// RemoveSendMessageIDs removes the "send_messages" edge to Message entities by IDs.
+func (_u *UserUpdate) RemoveSendMessageIDs(ids ...int) *UserUpdate {
+	_u.mutation.RemoveSendMessageIDs(ids...)
+	return _u
+}
+
+// RemoveSendMessages removes "send_messages" edges to Message entities.
+func (_u *UserUpdate) RemoveSendMessages(v ...*Message) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveSendMessageIDs(ids...)
+}
+
+// ClearConversations clears all "conversations" edges to the Conversation entity.
+func (_u *UserUpdate) ClearConversations() *UserUpdate {
+	_u.mutation.ClearConversations()
+	return _u
+}
+
+// RemoveConversationIDs removes the "conversations" edge to Conversation entities by IDs.
+func (_u *UserUpdate) RemoveConversationIDs(ids ...int) *UserUpdate {
+	_u.mutation.RemoveConversationIDs(ids...)
+	return _u
+}
+
+// RemoveConversations removes "conversations" edges to Conversation entities.
+func (_u *UserUpdate) RemoveConversations(v ...*Conversation) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveConversationIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -439,6 +513,96 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.SendMessagesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SendMessagesTable,
+			Columns: []string{user.SendMessagesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(message.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedSendMessagesIDs(); len(nodes) > 0 && !_u.mutation.SendMessagesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SendMessagesTable,
+			Columns: []string{user.SendMessagesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(message.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SendMessagesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SendMessagesTable,
+			Columns: []string{user.SendMessagesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(message.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ConversationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.ConversationsTable,
+			Columns: user.ConversationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(conversation.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedConversationsIDs(); len(nodes) > 0 && !_u.mutation.ConversationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.ConversationsTable,
+			Columns: user.ConversationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(conversation.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ConversationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.ConversationsTable,
+			Columns: user.ConversationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(conversation.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -613,6 +777,36 @@ func (_u *UserUpdateOne) AddFriendOf(v ...*Friendship) *UserUpdateOne {
 	return _u.AddFriendOfIDs(ids...)
 }
 
+// AddSendMessageIDs adds the "send_messages" edge to the Message entity by IDs.
+func (_u *UserUpdateOne) AddSendMessageIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.AddSendMessageIDs(ids...)
+	return _u
+}
+
+// AddSendMessages adds the "send_messages" edges to the Message entity.
+func (_u *UserUpdateOne) AddSendMessages(v ...*Message) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddSendMessageIDs(ids...)
+}
+
+// AddConversationIDs adds the "conversations" edge to the Conversation entity by IDs.
+func (_u *UserUpdateOne) AddConversationIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.AddConversationIDs(ids...)
+	return _u
+}
+
+// AddConversations adds the "conversations" edges to the Conversation entity.
+func (_u *UserUpdateOne) AddConversations(v ...*Conversation) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddConversationIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdateOne) Mutation() *UserMutation {
 	return _u.mutation
@@ -664,6 +858,48 @@ func (_u *UserUpdateOne) RemoveFriendOf(v ...*Friendship) *UserUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveFriendOfIDs(ids...)
+}
+
+// ClearSendMessages clears all "send_messages" edges to the Message entity.
+func (_u *UserUpdateOne) ClearSendMessages() *UserUpdateOne {
+	_u.mutation.ClearSendMessages()
+	return _u
+}
+
+// RemoveSendMessageIDs removes the "send_messages" edge to Message entities by IDs.
+func (_u *UserUpdateOne) RemoveSendMessageIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.RemoveSendMessageIDs(ids...)
+	return _u
+}
+
+// RemoveSendMessages removes "send_messages" edges to Message entities.
+func (_u *UserUpdateOne) RemoveSendMessages(v ...*Message) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveSendMessageIDs(ids...)
+}
+
+// ClearConversations clears all "conversations" edges to the Conversation entity.
+func (_u *UserUpdateOne) ClearConversations() *UserUpdateOne {
+	_u.mutation.ClearConversations()
+	return _u
+}
+
+// RemoveConversationIDs removes the "conversations" edge to Conversation entities by IDs.
+func (_u *UserUpdateOne) RemoveConversationIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.RemoveConversationIDs(ids...)
+	return _u
+}
+
+// RemoveConversations removes "conversations" edges to Conversation entities.
+func (_u *UserUpdateOne) RemoveConversations(v ...*Conversation) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveConversationIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -891,6 +1127,96 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(friendship.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.SendMessagesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SendMessagesTable,
+			Columns: []string{user.SendMessagesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(message.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedSendMessagesIDs(); len(nodes) > 0 && !_u.mutation.SendMessagesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SendMessagesTable,
+			Columns: []string{user.SendMessagesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(message.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SendMessagesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SendMessagesTable,
+			Columns: []string{user.SendMessagesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(message.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ConversationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.ConversationsTable,
+			Columns: user.ConversationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(conversation.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedConversationsIDs(); len(nodes) > 0 && !_u.mutation.ConversationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.ConversationsTable,
+			Columns: user.ConversationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(conversation.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ConversationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.ConversationsTable,
+			Columns: user.ConversationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(conversation.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
