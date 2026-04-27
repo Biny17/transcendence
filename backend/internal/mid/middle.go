@@ -1,7 +1,7 @@
 package mid
 
 import (
-	"backend/internal/auth"
+	"backend/internal/pkg"
 	"log"
 	"strconv"
 	"time"
@@ -21,11 +21,7 @@ type Middleware struct {
 func ProvideMiddleware(i do.Injector) (*Middleware, error) {
 	var mid Middleware
 	mid.Api = do.MustInvoke[huma.API](i)
-	key, err := do.MustInvoke[*auth.AuthService](i).PubKey.Clone()
-	if err != nil {
-		return nil, err
-	}
-	mid.PubKey = key
+	mid.PubKey = do.MustInvokeNamed[jwk.Key](i, pkg.DoPublicKey)
 	return &mid, nil
 }
 
