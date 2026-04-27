@@ -88,7 +88,7 @@ func (h *Handler) DeleteFriend(ctx context.Context, input *struct {
 		return nil, huma.Error400BadRequest("Failed to delete friend", err)
 	}
 	return nil, nil
-}	
+}
 
 func (h *Handler) GetPendingRequests(ctx context.Context, input *struct{}) (*FriendListOutput, error) {
 	userId, err := pkg.ContextUserId(ctx)
@@ -102,6 +102,28 @@ func (h *Handler) GetPendingRequests(ctx context.Context, input *struct{}) (*Fri
 
 	output := make([]FriendOutput, len(pending))
 	for i, f := range pending {
+		output[i] = FriendOutput{
+			Username: f.Username,
+			Email:    f.Email,
+			ID:       f.ID,
+		}
+	}
+
+	return &FriendListOutput{Body: output}, nil
+}
+
+func (h *Handler) GetSentRequests(ctx context.Context, input *struct{}) (*FriendListOutput, error) {
+	userId, err := pkg.ContextUserId(ctx)
+	if err != nil {
+		return nil, huma.Error401Unauthorized("Unauthorized", err)
+	}
+	sent, err := h.service.GetSentRequests(ctx, userId)
+	if err != nil {
+		return nil, huma.Error500InternalServerError("Failed to get sent requests", err)
+	}
+
+	output := make([]FriendOutput, len(sent))
+	for i, f := range sent {
 		output[i] = FriendOutput{
 			Username: f.Username,
 			Email:    f.Email,

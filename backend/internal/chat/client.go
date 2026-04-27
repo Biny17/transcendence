@@ -65,6 +65,12 @@ func (c *Client) ReadPump() {
 		isPart, err := IsParticipant(ctx, c.Hub.DB, payload.ConversationID, c.UserID)
 		if err != nil || !isPart {
 			log.Printf("user %d not participant of conversation %d", c.UserID, payload.ConversationID)
+			errMsg, _ := json.Marshal(map[string]interface{}{
+				"type":    "error",
+				"code":    "not_participant",
+				"message": "You are not a participant in this conversation",
+			})
+			c.Send <- errMsg
 			continue
 		}
 

@@ -2,8 +2,9 @@ package friend
 
 import (
 	"backend/internal/mid"
-	"github.com/danielgtaylor/huma/v2"
 	"backend/internal/pkg/routes"
+
+	"github.com/danielgtaylor/huma/v2"
 )
 
 func (h *Handler) Register(api huma.API, m *mid.Middleware) {
@@ -35,7 +36,14 @@ func (h *Handler) Register(api huma.API, m *mid.Middleware) {
 		Middlewares: huma.Middlewares{m.Auth},
 		Summary:     "Get pending friend requests",
 	}, h.GetPendingRequests)
-		huma.Register(api, huma.Operation{
+	huma.Register(api, huma.Operation{
+		OperationID: "get-sent-requests",
+		Method:      "GET",
+		Path:        routes.GetSentList,
+		Middlewares: huma.Middlewares{m.Auth},
+		Summary:     "Get sent friend requests",
+	}, h.GetSentRequests)
+	huma.Register(api, huma.Operation{
 		OperationID: "reject-request",
 		Method:      "DELETE",
 		Path:        routes.RejectFriend,
