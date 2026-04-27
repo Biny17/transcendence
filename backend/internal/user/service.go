@@ -64,11 +64,19 @@ func (us *UserService) Register(api huma.API, m *mid.Middleware) {
 		Method:  http.MethodPut,
 		Path:    routes.UserById,
 		Summary: "USER REPLACE",
+		Middlewares: huma.Middlewares{m.Auth},
+		Security: []map[string][]string{
+			{"cookieAuth": {}},
+		},
 	}, us.PutUser)
 	huma.Register(api, huma.Operation{
 		Method:  http.MethodPatch,
 		Path:    routes.UserById,
 		Summary: "USER UPDATE",
+		Middlewares: huma.Middlewares{m.Auth},
+		Security: []map[string][]string{
+			{"cookieAuth": {}},
+		},
 	}, us.PatchUser)
 	huma.Register(api, huma.Operation{
 		Method:  http.MethodGet,

@@ -29,7 +29,6 @@ type UserInfo struct {
 	Verified bool      `json:"verified"`
 	Age      int       `json:"age"`
 	Created  time.Time `json:"created_at"`
-	Edges    ent.UserEdges `json:"edges"`
 }
 
 type InfoOut struct {
@@ -53,7 +52,6 @@ func (us *UserService) AllUsers(ctx context.Context, input *struct{}) (*InfoOut,
 			Verified: user.VerifiedEmail,
 			Age:      user.Age,
 			Created:  user.CreatedAt,
-			Edges: 	  user.Edges,	
 		})
 	}
 	return &InfoOut{Body: user_infos}, nil
