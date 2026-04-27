@@ -35,7 +35,7 @@ func (User) Edges() []ent.Edge {
 			Unique().
 			Annotations(entsql.OnDelete(entsql.Cascade)),
 		
-		edge.To("friendships", Friendship.Type),
+		edge.To("friendships", Friendship.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("friend_of", Friendship.Type),
 		edge.To("send_messages", Message.Type),
 		edge.To("conversations", Conversation.Type),
