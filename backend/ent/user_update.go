@@ -137,6 +137,20 @@ func (_u *UserUpdate) SetNillableVerifiedEmail(v *bool) *UserUpdate {
 	return _u
 }
 
+// SetPpPath sets the "pp_path" field.
+func (_u *UserUpdate) SetPpPath(v string) *UserUpdate {
+	_u.mutation.SetPpPath(v)
+	return _u
+}
+
+// SetNillablePpPath sets the "pp_path" field if the given value is not nil.
+func (_u *UserUpdate) SetNillablePpPath(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetPpPath(*v)
+	}
+	return _u
+}
+
 // SetMailVerifID sets the "mail_verif" edge to the MailVerif entity by ID.
 func (_u *UserUpdate) SetMailVerifID(id int) *UserUpdate {
 	_u.mutation.SetMailVerifID(id)
@@ -393,6 +407,9 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.VerifiedEmail(); ok {
 		_spec.SetField(user.FieldVerifiedEmail, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.PpPath(); ok {
+		_spec.SetField(user.FieldPpPath, field.TypeString, value)
 	}
 	if _u.mutation.MailVerifCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -728,6 +745,20 @@ func (_u *UserUpdateOne) SetNillableVerifiedEmail(v *bool) *UserUpdateOne {
 	return _u
 }
 
+// SetPpPath sets the "pp_path" field.
+func (_u *UserUpdateOne) SetPpPath(v string) *UserUpdateOne {
+	_u.mutation.SetPpPath(v)
+	return _u
+}
+
+// SetNillablePpPath sets the "pp_path" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillablePpPath(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetPpPath(*v)
+	}
+	return _u
+}
+
 // SetMailVerifID sets the "mail_verif" edge to the MailVerif entity by ID.
 func (_u *UserUpdateOne) SetMailVerifID(id int) *UserUpdateOne {
 	_u.mutation.SetMailVerifID(id)
@@ -1014,6 +1045,9 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	}
 	if value, ok := _u.mutation.VerifiedEmail(); ok {
 		_spec.SetField(user.FieldVerifiedEmail, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.PpPath(); ok {
+		_spec.SetField(user.FieldPpPath, field.TypeString, value)
 	}
 	if _u.mutation.MailVerifCleared() {
 		edge := &sqlgraph.EdgeSpec{

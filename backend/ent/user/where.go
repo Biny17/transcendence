@@ -90,6 +90,11 @@ func VerifiedEmail(v bool) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldVerifiedEmail, v))
 }
 
+// PpPath applies equality check predicate on the "pp_path" field. It's identical to PpPathEQ.
+func PpPath(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldPpPath, v))
+}
+
 // UsernameEQ applies the EQ predicate on the "username" field.
 func UsernameEQ(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldUsername, v))
@@ -438,6 +443,71 @@ func VerifiedEmailEQ(v bool) predicate.User {
 // VerifiedEmailNEQ applies the NEQ predicate on the "verified_email" field.
 func VerifiedEmailNEQ(v bool) predicate.User {
 	return predicate.User(sql.FieldNEQ(FieldVerifiedEmail, v))
+}
+
+// PpPathEQ applies the EQ predicate on the "pp_path" field.
+func PpPathEQ(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldPpPath, v))
+}
+
+// PpPathNEQ applies the NEQ predicate on the "pp_path" field.
+func PpPathNEQ(v string) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldPpPath, v))
+}
+
+// PpPathIn applies the In predicate on the "pp_path" field.
+func PpPathIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldIn(FieldPpPath, vs...))
+}
+
+// PpPathNotIn applies the NotIn predicate on the "pp_path" field.
+func PpPathNotIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldPpPath, vs...))
+}
+
+// PpPathGT applies the GT predicate on the "pp_path" field.
+func PpPathGT(v string) predicate.User {
+	return predicate.User(sql.FieldGT(FieldPpPath, v))
+}
+
+// PpPathGTE applies the GTE predicate on the "pp_path" field.
+func PpPathGTE(v string) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldPpPath, v))
+}
+
+// PpPathLT applies the LT predicate on the "pp_path" field.
+func PpPathLT(v string) predicate.User {
+	return predicate.User(sql.FieldLT(FieldPpPath, v))
+}
+
+// PpPathLTE applies the LTE predicate on the "pp_path" field.
+func PpPathLTE(v string) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldPpPath, v))
+}
+
+// PpPathContains applies the Contains predicate on the "pp_path" field.
+func PpPathContains(v string) predicate.User {
+	return predicate.User(sql.FieldContains(FieldPpPath, v))
+}
+
+// PpPathHasPrefix applies the HasPrefix predicate on the "pp_path" field.
+func PpPathHasPrefix(v string) predicate.User {
+	return predicate.User(sql.FieldHasPrefix(FieldPpPath, v))
+}
+
+// PpPathHasSuffix applies the HasSuffix predicate on the "pp_path" field.
+func PpPathHasSuffix(v string) predicate.User {
+	return predicate.User(sql.FieldHasSuffix(FieldPpPath, v))
+}
+
+// PpPathEqualFold applies the EqualFold predicate on the "pp_path" field.
+func PpPathEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldPpPath, v))
+}
+
+// PpPathContainsFold applies the ContainsFold predicate on the "pp_path" field.
+func PpPathContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldPpPath, v))
 }
 
 // HasMailVerif applies the HasEdge predicate on the "mail_verif" edge.

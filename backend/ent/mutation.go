@@ -2054,6 +2054,7 @@ type UserMutation struct {
 	salt                 *string
 	hash                 *string
 	verified_email       *bool
+	pp_path              *string
 	clearedFields        map[string]struct{}
 	mail_verif           *int
 	clearedmail_verif    bool
@@ -2444,6 +2445,42 @@ func (m *UserMutation) ResetVerifiedEmail() {
 	m.verified_email = nil
 }
 
+// SetPpPath sets the "pp_path" field.
+func (m *UserMutation) SetPpPath(s string) {
+	m.pp_path = &s
+}
+
+// PpPath returns the value of the "pp_path" field in the mutation.
+func (m *UserMutation) PpPath() (r string, exists bool) {
+	v := m.pp_path
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPpPath returns the old "pp_path" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldPpPath(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPpPath is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPpPath requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPpPath: %w", err)
+	}
+	return oldValue.PpPath, nil
+}
+
+// ResetPpPath resets all changes to the "pp_path" field.
+func (m *UserMutation) ResetPpPath() {
+	m.pp_path = nil
+}
+
 // SetMailVerifID sets the "mail_verif" edge to the MailVerif entity by id.
 func (m *UserMutation) SetMailVerifID(id int) {
 	m.mail_verif = &id
@@ -2733,7 +2770,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 8)
 	if m.username != nil {
 		fields = append(fields, user.FieldUsername)
 	}
@@ -2754,6 +2791,9 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.verified_email != nil {
 		fields = append(fields, user.FieldVerifiedEmail)
+	}
+	if m.pp_path != nil {
+		fields = append(fields, user.FieldPpPath)
 	}
 	return fields
 }
@@ -2777,6 +2817,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Hash()
 	case user.FieldVerifiedEmail:
 		return m.VerifiedEmail()
+	case user.FieldPpPath:
+		return m.PpPath()
 	}
 	return nil, false
 }
@@ -2800,6 +2842,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldHash(ctx)
 	case user.FieldVerifiedEmail:
 		return m.OldVerifiedEmail(ctx)
+	case user.FieldPpPath:
+		return m.OldPpPath(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -2857,6 +2901,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetVerifiedEmail(v)
+		return nil
+	case user.FieldPpPath:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPpPath(v)
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
@@ -2942,6 +2993,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldVerifiedEmail:
 		m.ResetVerifiedEmail()
+		return nil
+	case user.FieldPpPath:
+		m.ResetPpPath()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
