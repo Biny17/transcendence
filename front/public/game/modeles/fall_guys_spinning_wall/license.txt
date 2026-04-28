@@ -1,0 +1,11 @@
+Model Information:
+* title:	Fall Guys Spinning Wall
+* source:	https://sketchfab.com/3d-models/fall-guys-spinning-wall-955470d959a34e76be52a7fa3c681910
+* author:	KDSpritzy (https://sketchfab.com/KDSpritzy)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Fall Guys Spinning Wall" (https://sketchfab.com/3d-models/fall-guys-spinning-wall-955470d959a34e76be52a7fa3c681910) by KDSpritzy (https://sketchfab.com/KDSpritzy) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

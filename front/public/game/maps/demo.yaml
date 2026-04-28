@@ -1,0 +1,66 @@
+# $schema: /schemas/map.schema.json
+# -----------------------------------------------------------
+# Demo map — flat arena with a few platforms.
+# Intended for DemoWorld / development testing.
+# -----------------------------------------------------------
+id: demo
+
+sky:
+  preset: day
+
+fog:
+  kind: linear
+  color: 0x88aacc
+  near: 60
+  far: 200
+
+lights:
+  - type: ambient
+    color: 0xffeedd
+    intensity: 0.5
+
+  - type: directional
+    color: 0xfff5e0
+    intensity: 1.2
+    position: { x: 30, y: 50, z: 20 }
+    castShadow: true
+    shadow:
+      mapSize: 2048
+      near: 1
+      far: 300
+      camera: { left: -30, right: 30, top: 30, bottom: -30 }
+      bias: -0.0002
+
+  - type: hemisphere
+    skyColor: 0x87ceeb
+    groundColor: 0x8b7355
+    intensity: 0.4
+
+objects:
+  # ── Ground ───────────────────────────────────────────────────────────────────
+  - id: floor
+    component: /game/components/stone_floor.yaml
+    type: map
+    position: { x: 0, y: -0.25, z: 0 }
+
+  # ── Static raised platform in the centre ─────────────────────────────────────
+  - id: center_platform
+    component: /game/components/stone_floor.yaml
+    type: map
+    position: { x: 0, y: 2, z: 0 }
+    scale: { x: 0.4, y: 1, z: 0.4 }    # 8×0.5×8 world units after scale
+
+  # ── Spawn points ─────────────────────────────────────────────────────────────
+  - id: spawn_1
+    component: /game/components/spawn_point.yaml
+    type: map
+    position: { x: -6, y: 0.5, z: 0 }
+    extraData:
+      teamId: 0
+
+  - id: spawn_2
+    component: /game/components/spawn_point.yaml
+    type: map
+    position: { x:  6, y: 0.5, z: 0 }
+    extraData:
+      teamId: 1

@@ -114,7 +114,7 @@ export class LightFactory {
 		const light = new THREE.DirectionalLight(config.color, config.intensity)
 		if (config.name) light.name = config.name
 		light.position.set(config.position.x, config.position.y, config.position.z)
-		light.target.position.set(config.target.x, config.target.y, config.target.z)
+		if (config.target) light.target.position.set(config.target.x, config.target.y, config.target.z)
 		if (config.castShadow && config.shadow?.mapSize && config.shadow?.camera) {
 			light.castShadow = true
 			light.shadow.mapSize.width = config.shadow.mapSize.width
@@ -204,7 +204,7 @@ export class LightFactory {
 		)
 		if (config.name) light.name = config.name
 		light.position.set(config.position.x, config.position.y, config.position.z)
-		light.target.position.set(config.target.x, config.target.y, config.target.z)
+		if (config.target) light.target.position.set(config.target.x, config.target.y, config.target.z)
 		if (config.castShadow && config.shadow?.mapSize && config.shadow?.camera) {
 			light.castShadow = true
 			light.shadow.mapSize.width = config.shadow.mapSize.width

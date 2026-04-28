@@ -1,0 +1,11 @@
+Model Information:
+* title:	Fall Guys Roller
+* source:	https://sketchfab.com/3d-models/fall-guys-roller-267cf105c92f474aa6f727b5c6199673
+* author:	KDSpritzy (https://sketchfab.com/KDSpritzy)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Fall Guys Roller" (https://sketchfab.com/3d-models/fall-guys-roller-267cf105c92f474aa6f727b5c6199673) by KDSpritzy (https://sketchfab.com/KDSpritzy) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

@@ -1,0 +1,55 @@
+# $schema: /schemas/component.schema.json
+# -----------------------------------------------------------
+# A floating metal platform with 4 low side barriers.
+# Physics: kinematic (moved by MovingPlatformModule).
+# Hitboxes: 5 boxes — 1 surface + 4 barriers (compound collider).
+# Animations: one waypoint loop declared here; actual world
+#   positions are defined per-instance in the map file (relative
+#   offsets → MovingPlatformModule converts to world coords).
+# -----------------------------------------------------------
+id: metal_platform
+
+mesh:
+        primitive: box
+        size: { x: 4, y: 0.4, z: 4 }
+        textures:
+                map: /textures/metal_albedo.png
+                normalMap: /textures/metal_normal.png # scratches and rivets
+                roughnessMap: /textures/metal_rough.png
+                metalnessMap: /textures/metal_metal.png
+
+physics:
+        bodyType: kinematic
+        gravityScale: 0
+        friction: 0.9
+        restitution: 0.0
+
+hitboxes:
+        # ── Walking surface ─────────────────────────────────────────────────────────
+        - shape: box
+          size: full
+          collidesWith: [player, npc]
+
+        # ── Trigger zone above the platform (detect when player is on it) ────────────
+        - shape: box
+          size: { x: 3.8, y: 2.0, z: 3.8 }
+          offset: { x: 0, y: 1.2, z: 0 }
+          isSensor: true
+          tag: on_platform # → onSensorEnter('on_platform', playerId)
+
+animations:
+        # Positions are RELATIVE to where this instance is placed in the map.
+        # { x:0, y:0, z:0 } = stay at spawn point, { x:0, y:4, z:0 } = 4 units above spawn.
+        float:
+                kind: waypoints
+                autoPlay: true
+                loop: true
+                speed: 1.5
+                pauseAtWaypoint: 0.4
+                waypoints:
+                        - position: { x: 0, y: 0, z: 0 }
+                          rotation: { x: 0, y: 0, z: 0 }
+                        - position: { x: 0, y: 4, z: 0 }
+                          rotation: { x: 0, y: 0, z: 0 }
+                        - position: { x: 0, y: 0, z: 0 }
+                          rotation: { x: 0, y: 0, z: 0 }

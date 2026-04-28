@@ -1,0 +1,246 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "/schemas/map.schema.json",
+  "title": "Map Definition",
+  "description": "Level layout: object instances, lights, skybox, and fog. Load with MapLoader.loadFile().",
+  "type": "object",
+  "required": ["id", "objects"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique map identifier"
+    },
+
+    "sky": {
+      "description": "Scene background — pick one form",
+      "oneOf": [
+        {
+          "title": "Preset",
+          "type": "object",
+          "required": ["preset"],
+          "additionalProperties": false,
+          "properties": {
+            "preset": {
+              "type": "string",
+              "enum": ["day"],
+              "description": "Named skybox preset"
+            }
+          }
+        },
+        {
+          "title": "Equirectangular image",
+          "type": "object",
+          "required": ["equirect"],
+          "additionalProperties": false,
+          "properties": {
+            "equirect": {
+              "type": "string",
+              "description": "Path to equirectangular image. Use .hdr for HDR tone-mapping, .png for SDR."
+            }
+          }
+        },
+        {
+          "title": "Cubemap (6 faces)",
+          "type": "object",
+          "required": ["cubemap"],
+          "additionalProperties": false,
+          "properties": {
+            "cubemap": {
+              "type": "object",
+              "required": ["px", "nx", "py", "ny", "pz", "nz"],
+              "additionalProperties": false,
+              "properties": {
+                "px": { "type": "string", "description": "+X (right)" },
+                "nx": { "type": "string", "description": "-X (left)"  },
+                "py": { "type": "string", "description": "+Y (top)"   },
+                "ny": { "type": "string", "description": "-Y (bottom)"},
+                "pz": { "type": "string", "description": "+Z (front)" },
+                "nz": { "type": "string", "description": "-Z (back)"  }
+              }
+            }
+          }
+        }
+      ]
+    },
+
+    "fog": {
+      "type": "object",
+      "required": ["color"],
+      "additionalProperties": false,
+      "properties": {
+        "kind":    { "type": "string", "enum": ["linear", "exponential"], "description": "Default: linear" },
+        "color":   { "type": "integer", "description": "Fog color as hex integer" },
+        "near":    { "type": "number",  "description": "Linear fog start distance" },
+        "far":     { "type": "number",  "description": "Linear fog end distance" },
+        "density": { "type": "number",  "minimum": 0, "description": "Exponential fog density" }
+      }
+    },
+
+    "lights": {
+      "type": "array",
+      "description": "Lights added to the scene on spawn, removed on dispose",
+      "items": { "$ref": "#/$defs/lightDef" }
+    },
+
+    "objects": {
+      "type": "array",
+      "description": "Object instances to spawn. Each references a component file.",
+      "items": { "$ref": "#/$defs/mapObjectInstance" }
+    }
+  },
+
+  "$defs": {
+    "vec3": {
+      "type": "object",
+      "required": ["x", "y", "z"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "z": { "type": "number" }
+      }
+    },
+
+    "shadowDef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mapSize":     { "type": "integer", "description": "Shadow map resolution, e.g. 2048 (square)" },
+        "near":        { "type": "number" },
+        "far":         { "type": "number" },
+        "bias":        { "type": "number", "description": "Reduces shadow acne (typically small negative)" },
+        "normalBias":  { "type": "number" },
+        "radius":      { "type": "number", "description": "Soft shadow blur radius" },
+        "camera": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Orthographic frustum for directional shadow",
+          "properties": {
+            "left":   { "type": "number" },
+            "right":  { "type": "number" },
+            "top":    { "type": "number" },
+            "bottom": { "type": "number" }
+          }
+        }
+      }
+    },
+
+    "lightDef": {
+      "description": "Light definition — pick one type",
+      "oneOf": [
+        {
+          "title": "Ambient light",
+          "type": "object",
+          "required": ["type"],
+          "additionalProperties": false,
+          "properties": {
+            "type":      { "const": "ambient" },
+            "color":     { "type": "integer" },
+            "intensity": { "type": "number" },
+            "name":      { "type": "string" }
+          }
+        },
+        {
+          "title": "Directional light",
+          "type": "object",
+          "required": ["type"],
+          "additionalProperties": false,
+          "properties": {
+            "type":       { "const": "directional" },
+            "color":      { "type": "integer" },
+            "intensity":  { "type": "number" },
+            "position":   { "$ref": "#/$defs/vec3" },
+            "target":     { "$ref": "#/$defs/vec3" },
+            "castShadow": { "type": "boolean" },
+            "shadow":     { "$ref": "#/$defs/shadowDef" },
+            "name":       { "type": "string" }
+          }
+        },
+        {
+          "title": "Point light",
+          "type": "object",
+          "required": ["type"],
+          "additionalProperties": false,
+          "properties": {
+            "type":       { "const": "point" },
+            "color":      { "type": "integer" },
+            "intensity":  { "type": "number" },
+            "position":   { "$ref": "#/$defs/vec3" },
+            "distance":   { "type": "number", "minimum": 0 },
+            "decay":      { "type": "number", "minimum": 0 },
+            "castShadow": { "type": "boolean" },
+            "shadow":     { "$ref": "#/$defs/shadowDef" },
+            "name":       { "type": "string" }
+          }
+        },
+        {
+          "title": "Spot light",
+          "type": "object",
+          "required": ["type"],
+          "additionalProperties": false,
+          "properties": {
+            "type":       { "const": "spot" },
+            "color":      { "type": "integer" },
+            "intensity":  { "type": "number" },
+            "position":   { "$ref": "#/$defs/vec3" },
+            "target":     { "$ref": "#/$defs/vec3" },
+            "angle":      { "type": "number", "minimum": 0, "maximum": 1.5708, "description": "Half-angle in radians (max π/2)" },
+            "penumbra":   { "type": "number", "minimum": 0, "maximum": 1 },
+            "distance":   { "type": "number", "minimum": 0 },
+            "decay":      { "type": "number", "minimum": 0 },
+            "castShadow": { "type": "boolean" },
+            "shadow":     { "$ref": "#/$defs/shadowDef" },
+            "name":       { "type": "string" }
+          }
+        },
+        {
+          "title": "Hemisphere light",
+          "type": "object",
+          "required": ["type"],
+          "additionalProperties": false,
+          "properties": {
+            "type":        { "const": "hemisphere" },
+            "skyColor":    { "type": "integer", "description": "Color of light from above" },
+            "groundColor": { "type": "integer", "description": "Color of light from below" },
+            "intensity":   { "type": "number" },
+            "name":        { "type": "string" }
+          }
+        }
+      ]
+    },
+
+    "mapObjectInstance": {
+      "type": "object",
+      "required": ["id", "component", "position"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique instance ID — used as ObjectManager name and physics body key"
+        },
+        "component": {
+          "type": "string",
+          "description": "Path to a component .yaml or .json file (e.g. /game/components/platform.yaml)"
+        },
+        "type": {
+          "type": "string",
+          "description": "ObjectManager managed type. Default: 'map'. Modules query by this: ctx.objects.getByType('moving_platform')."
+        },
+        "position": { "$ref": "#/$defs/vec3" },
+        "rotation": {
+          "$ref": "#/$defs/vec3",
+          "description": "Euler angles in radians"
+        },
+        "scale": {
+          "$ref": "#/$defs/vec3",
+          "description": "Multiplies mesh scale. Also affects 'auto'/'full' hitbox sizing."
+        },
+        "extraData": {
+          "type": "object",
+          "description": "Arbitrary data forwarded to ManagedObject.extraData (e.g. fallDelay for falling platforms)"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,31 @@
+# $schema: /game/components/component.schema.json
+# ---
+id: fallguys_map
+meshes:
+        - gltf: /game/modeles/fall_guys_map/scene.gltf
+          offset:
+                  x: 0
+                  "y": -10.8
+                  z: 0
+physics:
+        bodyType: static
+        restitution: 0.1
+hitboxes:
+        - shape: box
+          size:
+                  x: 163.7
+                  "y": 2.8
+                  z: 46.5
+          offset:
+                  x: -65.7
+                  "y": -1
+                  z: 8.7
+        - shape: box
+          size:
+                  x: 88.2
+                  "y": 1
+                  z: 20.7
+          offset:
+                  x: -185
+                  "y": -26.9
+                  z: 8.8

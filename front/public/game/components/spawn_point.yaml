@@ -1,0 +1,18 @@
+# $schema: /schemas/component.schema.json
+# -----------------------------------------------------------
+# Invisible spawn marker — no mesh rendered, no physics body.
+# RespawnModule reads extraData.spawnpoint set via the map instance.
+# The sensor zone lets the module confirm a player is at spawn.
+# -----------------------------------------------------------
+id: spawn_point
+
+mesh:
+  primitive: box
+  size: { x: 0.1, y: 0.1, z: 0.1 }
+  color: 0                             # invisible (alpha handled by renderer settings)
+
+hitboxes:
+  - shape: box
+    size: { x: 1.5, y: 2.0, z: 1.5 }
+    isSensor: true
+    tag: spawn_zone

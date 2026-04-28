@@ -1,0 +1,11 @@
+Model Information:
+* title:	Fall Guys - Jump Club
+* source:	https://sketchfab.com/3d-models/fall-guys-jump-club-96c5a4cb6c0e43f596aac08574ae82d1
+* author:	MardyFG (https://sketchfab.com/MardyFG)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Fall Guys - Jump Club" (https://sketchfab.com/3d-models/fall-guys-jump-club-96c5a4cb6c0e43f596aac08574ae82d1) by MardyFG (https://sketchfab.com/MardyFG) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

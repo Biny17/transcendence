@@ -1,0 +1,231 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "/schemas/component.schema.json",
+  "title": "Map Component",
+  "description": "Reusable 3D object definition (prefab). Referenced by map files via the 'component' field.",
+  "type": "object",
+  "required": ["id", "mesh"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Identifier — used for logging and cache keys"
+    },
+    "mesh": {
+      "description": "Visual representation — pick one form",
+      "oneOf": [
+        {
+          "title": "GLTF mesh",
+          "type": "object",
+          "required": ["gltf"],
+          "additionalProperties": false,
+          "properties": {
+            "gltf": {
+              "type": "string",
+              "description": "Path to .gltf or .glb file. Textures and animations are embedded."
+            }
+          }
+        },
+        {
+          "title": "Primitive mesh",
+          "type": "object",
+          "required": ["primitive"],
+          "additionalProperties": false,
+          "properties": {
+            "primitive": {
+              "type": "string",
+              "enum": ["box", "sphere", "plane", "cylinder"],
+              "description": "Primitive shape type"
+            },
+            "size": {
+              "$ref": "#/$defs/vec3",
+              "description": "Base size in world units. Instance scale in the map file multiplies this."
+            },
+            "color": {
+              "type": "integer",
+              "description": "Flat tint color as hex integer (e.g. 16711680 = 0xFF0000)"
+            },
+            "textures": { "$ref": "#/$defs/textureDef" }
+          }
+        }
+      ]
+    },
+    "physics": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "bodyType": {
+          "type": "string",
+          "enum": ["dynamic", "static", "kinematic"],
+          "description": "static = immovable, kinematic = moved by code, dynamic = moved by physics"
+        },
+        "gravityScale": { "type": "number", "description": "0 = no gravity, 1 = normal gravity" },
+        "mass":         { "type": "number", "minimum": 0 },
+        "restitution":  { "type": "number", "minimum": 0, "maximum": 1, "description": "Bounciness" },
+        "friction":     { "type": "number", "minimum": 0 }
+      }
+    },
+    "hitboxes": {
+      "type": "array",
+      "description": "List of collision shapes on this object. Multiple = compound collider on one rigid body.",
+      "items": { "$ref": "#/$defs/hitboxDef" }
+    },
+    "animations": {
+      "type": "object",
+      "description": "Named animations. autoPlay entries start on spawn; others are triggered via playAnimation(id, key).",
+      "additionalProperties": { "$ref": "#/$defs/animationDef" }
+    }
+  },
+
+  "$defs": {
+    "vec3": {
+      "type": "object",
+      "required": ["x", "y", "z"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "z": { "type": "number" }
+      }
+    },
+
+    "textureDef": {
+      "description": "Texture definition — pick one form",
+      "oneOf": [
+        {
+          "title": "Shorthand string (same PNG on all faces)",
+          "type": "string",
+          "description": "Path to a single PNG — applied to all faces"
+        },
+        {
+          "title": "All-faces",
+          "type": "object",
+          "required": ["all"],
+          "additionalProperties": false,
+          "properties": {
+            "all": { "type": "string", "description": "Same image applied to all faces" }
+          }
+        },
+        {
+          "title": "PBR map set (UV-unwrapped)",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "map":          { "type": "string", "description": "Base color / albedo map" },
+            "normalMap":    { "type": "string", "description": "Surface normal detail (fakes bumps without geometry)" },
+            "roughnessMap": { "type": "string", "description": "Roughness channel (white = rough, black = shiny)" },
+            "metalnessMap": { "type": "string", "description": "Metalness channel (white = metal)" },
+            "emissiveMap":  { "type": "string", "description": "Self-illumination map" },
+            "aoMap":        { "type": "string", "description": "Ambient occlusion (pre-baked shadow in crevices)" }
+          }
+        },
+        {
+          "title": "Per-face images (box primitives only)",
+          "type": "object",
+          "required": ["faces"],
+          "additionalProperties": false,
+          "properties": {
+            "faces": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "Different image per face. BoxGeometry order: +X/-X/+Y/-Y/+Z/-Z",
+              "properties": {
+                "px": { "type": "string", "description": "+X (right)" },
+                "nx": { "type": "string", "description": "-X (left)"  },
+                "py": { "type": "string", "description": "+Y (top)"   },
+                "ny": { "type": "string", "description": "-Y (bottom)"},
+                "pz": { "type": "string", "description": "+Z (front)" },
+                "nz": { "type": "string", "description": "-Z (back)"  }
+              }
+            }
+          }
+        }
+      ]
+    },
+
+    "hitboxDef": {
+      "type": "object",
+      "required": ["shape"],
+      "additionalProperties": false,
+      "properties": {
+        "shape": {
+          "type": "string",
+          "enum": ["box", "sphere", "capsule"]
+        },
+        "size": {
+          "description": "auto = mesh bbox | full = animation-inclusive bbox | Vec3 = explicit half-extents",
+          "oneOf": [
+            { "type": "string", "enum": ["auto", "full"] },
+            { "$ref": "#/$defs/vec3" }
+          ]
+        },
+        "radius": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Radius for sphere / capsule shapes"
+        },
+        "height": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Half-height for capsule (excluding end caps)"
+        },
+        "offset": {
+          "$ref": "#/$defs/vec3",
+          "description": "Offset from the object origin in world units"
+        },
+        "collidesWith": {
+          "type": "array",
+          "description": "Collision layer names. Omit to collide with all layers.",
+          "items": {
+            "type": "string",
+            "enum": ["player", "npc", "map", "map_decor"]
+          }
+        },
+        "isSensor": {
+          "type": "boolean",
+          "description": "If true: no physics force — fires zone enter/exit events only"
+        },
+        "tag": {
+          "type": "string",
+          "description": "Event tag emitted on zone enter/exit (isSensor only)"
+        }
+      }
+    },
+
+    "animationDef": {
+      "description": "Animation definition — waypoints (position loop) or GLTF clip",
+      "oneOf": [
+        {
+          "title": "Waypoint animation",
+          "type": "object",
+          "required": ["kind", "waypoints"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": { "const": "waypoints" },
+            "waypoints": {
+              "type": "array",
+              "minItems": 2,
+              "items": { "$ref": "#/$defs/vec3" },
+              "description": "Positions RELATIVE to the object's spawn position in the map. {x:0,y:0,z:0} = stay at origin."
+            },
+            "speed":           { "type": "number", "minimum": 0, "description": "World units per second" },
+            "loop":            { "type": "boolean" },
+            "autoPlay":        { "type": "boolean", "description": "Start automatically on spawn" },
+            "pauseAtWaypoint": { "type": "number",  "minimum": 0, "description": "Seconds to pause at each waypoint" }
+          }
+        },
+        {
+          "title": "GLTF clip animation",
+          "type": "object",
+          "required": ["kind"],
+          "additionalProperties": false,
+          "properties": {
+            "kind":     { "const": "clip" },
+            "autoPlay": { "type": "boolean", "description": "Start automatically on spawn" },
+            "loop":     { "type": "boolean" }
+          }
+        }
+      ]
+    }
+  }
+}

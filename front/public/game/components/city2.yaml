@@ -1,0 +1,26 @@
+# $schema: /game/components/component.schema.json
+# ---
+id: city2
+meshes:
+        - gltf: /game/modeles/city2/scene.gltf
+          scale:
+                  x: 60
+                  "y": 60
+                  z: 60
+          offset:
+                  x: 0
+                  "y": -21.7
+                  z: 70
+physics:
+        bodyType: static
+        restitution: 0.1
+hitboxes:
+        - shape: box
+          size:
+                  x: 700
+                  "y": 0.1
+                  z: 500
+          offset:
+                  x: 0
+                  "y": -0.02
+                  z: 0

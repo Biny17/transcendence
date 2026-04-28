@@ -1,0 +1,23 @@
+# $schema: /schemas/component.schema.json
+# -----------------------------------------------------------
+# A flat wall segment — static, PBR textures.
+# Default size is tall and thin; scale in the map file to fit.
+# -----------------------------------------------------------
+id: stone_wall
+
+mesh:
+  primitive: box
+  size: { x: 4, y: 6, z: 0.4 }
+  textures:
+    map:          /textures/stone_albedo.png
+    normalMap:    /textures/stone_normal.png   # fakes chiseled-stone surface detail
+    roughnessMap: /textures/stone_rough.png
+
+physics:
+  bodyType: static
+  friction: 0.6
+
+hitboxes:
+  - shape: box
+    size: full
+    collidesWith: [player, npc]

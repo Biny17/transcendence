@@ -1,10 +1,11 @@
 services:
   web:
     image: oven/bun:latest
-    working_dir: /app
+    working_dir: /app/front
     volumes:
-      - ./front:/app
-      - /app/node_modules
+      - ./front:/app/front
+      - ./shared:/app/front/shared
+      - /app/front/node_modules
     ports:
       - "3001:3000"
     environment:
@@ -17,10 +18,11 @@ services:
 
   game-server:
     image: oven/bun:latest
-    working_dir: /app
+    working_dir: /app/server
     volumes:
-      - ./front:/app
-      - /app/node_modules
+      - ./server:/app/server
+      - ./shared:/app/server/shared
+      - /app/server/node_modules
     ports:
       - "3002:3002"
     environment:
@@ -28,7 +30,7 @@ services:
       - NODE_ENV=development
     depends_on:
       - api
-    entrypoint: sh -c "cd server && bun install && cd .. && bun server/index.ts"
+    entrypoint: sh -c "bun install && bun --watch src/index.ts"
     restart: unless-stopped
 
   api:

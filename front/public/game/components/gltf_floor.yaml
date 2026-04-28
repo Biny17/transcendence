@@ -1,0 +1,20 @@
+# $schema: /game/components/component.schema.json
+# -----------------------------------------------------------
+# Floor section using the existing GLTF model.
+# Textures are embedded in the .gltf — no textures block needed.
+# A single auto-sized box covers the whole mesh for collision.
+# -----------------------------------------------------------
+id: gltf_floor
+
+mesh:
+  gltf: /map/modules/floor/scene.gltf
+
+physics:
+  bodyType: static
+  friction: 0.8
+  restitution: 0.1
+
+hitboxes:
+  - shape: box
+    size: auto                        # computed from mesh bounding box at load time
+    collidesWith: [player, npc]

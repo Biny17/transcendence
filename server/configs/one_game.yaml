@@ -1,0 +1,40 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# LobbySequenceConfig — no_life_one_game
+# Single game, one winner. Everyone else loses their life and spectates.
+# ─────────────────────────────────────────────────────────────────────────────
+
+id: one_game
+globalLives: 1
+
+phases:
+        - id: lobby_wait
+          type: wait
+          waitFor: PLAYER_READY
+          quorum: 100%
+          timeout: 30
+
+        - id: Parkour
+          type: game
+          beforeStart:
+                  - id: load_parkour
+                    type: wait
+                    waitFor: WORLD_LOADED
+                    quorum: 100%
+                    timeout: 30
+          gameModeSelect:
+                  - condition: "true"
+                    pick: fixed
+                    candidates:
+                            - modeId: Parkour
+                              winCondition:
+                                      type: quorum_win
+                                      trigger: player_won
+                                      quorum: 1
+                              elimination:
+                                      livesLost: 1
+
+        - id: lobby_end
+          type: end
+
+lobbyWinCondition:
+        type: last_with_lives

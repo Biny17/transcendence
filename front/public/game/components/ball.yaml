@@ -1,0 +1,18 @@
+# $schema: /game/components/component.schema.json
+# ---
+id: ball
+mesh:
+  primitive: sphere
+  size:
+    x: 1.5
+    'y': 1
+    z: 1
+  color: 15098112
+physics:
+  bodyType: static
+  restitution: 0.1
+hitboxes:
+  - shape: sphere
+    radius: 0.9
+    collidesWith:
+      - player

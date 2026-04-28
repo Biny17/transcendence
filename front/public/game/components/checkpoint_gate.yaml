@@ -1,0 +1,27 @@
+# $schema: /game/components/component.schema.json
+# -----------------------------------------------------------
+# A checkpoint arch — visual GLTF mesh with a sensor zone.
+# No physics body (players pass through freely).
+# CheckpointModule listens for the 'checkpoint' tag.
+# -----------------------------------------------------------
+id: checkpoint_gate
+
+mesh:
+  gltf: /map/modules/checkpoint_arch/scene.glb   # decorative arch model
+
+# No physics block → no rigid body created, no solid collision.
+# Only the sensor hitbox below is registered (as a software zone).
+
+hitboxes:
+  - shape: box
+    size: { x: 4, y: 3, z: 1 }       # wide enough for a running player
+    offset: { x: 0, y: 1.5, z: 0 }   # centered at arch opening height
+    isSensor: true
+    tag: checkpoint                   # CheckpointModule.addTrigger() uses this tag
+
+animations:
+  activate:
+    kind: clip
+    autoPlay: false
+    loop: false
+    # Played when a player passes through (e.g. gate glows)
