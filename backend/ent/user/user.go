@@ -28,6 +28,8 @@ const (
 	FieldHash = "hash"
 	// FieldVerifiedEmail holds the string denoting the verified_email field in the database.
 	FieldVerifiedEmail = "verified_email"
+	// FieldPpPath holds the string denoting the pp_path field in the database.
+	FieldPpPath = "pp_path"
 	// EdgeMailVerif holds the string denoting the mail_verif edge name in mutations.
 	EdgeMailVerif = "mail_verif"
 	// EdgeFriendships holds the string denoting the friendships edge name in mutations.
@@ -85,6 +87,7 @@ var Columns = []string{
 	FieldSalt,
 	FieldHash,
 	FieldVerifiedEmail,
+	FieldPpPath,
 }
 
 var (
@@ -114,6 +117,8 @@ var (
 	DefaultCreatedAt func() time.Time
 	// DefaultVerifiedEmail holds the default value on creation for the "verified_email" field.
 	DefaultVerifiedEmail bool
+	// DefaultPpPath holds the default value on creation for the "pp_path" field.
+	DefaultPpPath string
 )
 
 // OrderOption defines the ordering options for the User queries.
@@ -157,6 +162,11 @@ func ByHash(opts ...sql.OrderTermOption) OrderOption {
 // ByVerifiedEmail orders the results by the verified_email field.
 func ByVerifiedEmail(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldVerifiedEmail, opts...).ToFunc()
+}
+
+// ByPpPath orders the results by the pp_path field.
+func ByPpPath(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPpPath, opts...).ToFunc()
 }
 
 // ByMailVerifField orders the results by mail_verif field.

@@ -4,9 +4,9 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
-	"entgo.io/ent/dialect/entsql"
 )
 
 // User holds the schema definition for the User entity.
@@ -25,6 +25,7 @@ func (User) Fields() []ent.Field {
 		field.String("salt"),
 		field.String("hash"),
 		field.Bool("verified_email").Default(false),
+		field.String("pp_path").Default(""),
 	}
 }
 
@@ -34,7 +35,7 @@ func (User) Edges() []ent.Edge {
 		edge.To("mail_verif", MailVerif.Type).
 			Unique().
 			Annotations(entsql.OnDelete(entsql.Cascade)),
-		
+
 		edge.To("friendships", Friendship.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("friend_of", Friendship.Type),
 		edge.To("send_messages", Message.Type),

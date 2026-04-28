@@ -32,6 +32,8 @@ type User struct {
 	Hash string `json:"hash,omitempty"`
 	// VerifiedEmail holds the value of the "verified_email" field.
 	VerifiedEmail bool `json:"verified_email,omitempty"`
+	// PpPath holds the value of the "pp_path" field.
+	PpPath string `json:"pp_path,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges        UserEdges `json:"edges"`
@@ -111,7 +113,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case user.FieldID, user.FieldAge:
 			values[i] = new(sql.NullInt64)
-		case user.FieldUsername, user.FieldEmail, user.FieldSalt, user.FieldHash:
+		case user.FieldUsername, user.FieldEmail, user.FieldSalt, user.FieldHash, user.FieldPpPath:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
@@ -177,6 +179,12 @@ func (_m *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field verified_email", values[i])
 			} else if value.Valid {
 				_m.VerifiedEmail = value.Bool
+			}
+		case user.FieldPpPath:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field pp_path", values[i])
+			} else if value.Valid {
+				_m.PpPath = value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -259,6 +267,9 @@ func (_m *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("verified_email=")
 	builder.WriteString(fmt.Sprintf("%v", _m.VerifiedEmail))
+	builder.WriteString(", ")
+	builder.WriteString("pp_path=")
+	builder.WriteString(_m.PpPath)
 	builder.WriteByte(')')
 	return builder.String()
 }

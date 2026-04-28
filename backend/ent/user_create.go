@@ -82,6 +82,20 @@ func (_c *UserCreate) SetNillableVerifiedEmail(v *bool) *UserCreate {
 	return _c
 }
 
+// SetPpPath sets the "pp_path" field.
+func (_c *UserCreate) SetPpPath(v string) *UserCreate {
+	_c.mutation.SetPpPath(v)
+	return _c
+}
+
+// SetNillablePpPath sets the "pp_path" field if the given value is not nil.
+func (_c *UserCreate) SetNillablePpPath(v *string) *UserCreate {
+	if v != nil {
+		_c.SetPpPath(*v)
+	}
+	return _c
+}
+
 // SetMailVerifID sets the "mail_verif" edge to the MailVerif entity by ID.
 func (_c *UserCreate) SetMailVerifID(id int) *UserCreate {
 	_c.mutation.SetMailVerifID(id)
@@ -204,6 +218,10 @@ func (_c *UserCreate) defaults() {
 		v := user.DefaultVerifiedEmail
 		_c.mutation.SetVerifiedEmail(v)
 	}
+	if _, ok := _c.mutation.PpPath(); !ok {
+		v := user.DefaultPpPath
+		_c.mutation.SetPpPath(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -243,6 +261,9 @@ func (_c *UserCreate) check() error {
 	}
 	if _, ok := _c.mutation.VerifiedEmail(); !ok {
 		return &ValidationError{Name: "verified_email", err: errors.New(`ent: missing required field "User.verified_email"`)}
+	}
+	if _, ok := _c.mutation.PpPath(); !ok {
+		return &ValidationError{Name: "pp_path", err: errors.New(`ent: missing required field "User.pp_path"`)}
 	}
 	return nil
 }
@@ -297,6 +318,10 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.VerifiedEmail(); ok {
 		_spec.SetField(user.FieldVerifiedEmail, field.TypeBool, value)
 		_node.VerifiedEmail = value
+	}
+	if value, ok := _c.mutation.PpPath(); ok {
+		_spec.SetField(user.FieldPpPath, field.TypeString, value)
+		_node.PpPath = value
 	}
 	if nodes := _c.mutation.MailVerifIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
