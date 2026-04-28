@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Fragment } from "react";
+import { useEffect, useRef, useState, Fragment } from "react";
 import {
   CalendarDaysIcon,
   GiftIcon,
@@ -30,12 +30,12 @@ import { PrimaryMessage } from "@/components/examples/primary-message";
 import { AdditionalMessage } from "@/components/examples/additional-message";
 import { DateItem } from "@/components/examples/date-item";
 
-type Message = {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  timestamp: Date;
-};
+// type Message = {
+//   id: string;
+//   role: "user" | "assistant";
+//   content: string;
+//   timestamp: Date;
+// };
 
 const USER_SENDER = {
   id: "user",
@@ -55,46 +55,63 @@ export default function Chat() {
   
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const socketRef = useRef(null);
 
-  const sendMessage = async () => {
-    if (!input.trim() || isLoading) return;
+  useEffect(() => {
+    const socket = new WebSocket("ws://localhost:8080/api/chat/ws");
+    socketRef.current = socket;
 
-    const userMessage: Message = {
-      id: crypto.randomUUID(),
-      role: "user",
-      content: input,
-      timestamp: new Date(),
+    socket.addEventListener("open", () => {
+      console.log("WebSocket connected");
+    });
+
+    socket.addEventListener("message", (event) => {
+      try {
+        const receivedData = JSON.parse(event.data);
+        // const content = receivedData?.content ?? String(event.data);
+        setMessages((prev) => [
+          ...prev,
+         receivedData
+        ]);
+      } catch (error) {
+        console.error("Error parsing JSON:", error);
+        console.log("Received data was:", event.data);
+      }
+    });
+
+    socket.addEventListener("error", (event) => {
+      console.error("WebSocket error:", event);
+    });
+
+    socket.addEventListener("close", () => {
+      console.log("WebSocket closed");
+    });
+
+    return () => {
+      socket.close();
     };
+  }, []);
 
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
-    setIsLoading(true);
-
-    try {
-      const res = await fetch("/api/chat", {
-       method: "POST",
-      headers: { "Content-Type": "application/json" },
-       body: JSON.stringify({
-         messages: [...messages, userMessage].map(({ role, content }) => ({ role, content })),
-       }),
-     });
-
-     const data = await res.json();
-
-     const assistantMessage: Message = {
-       id: crypto.randomUUID(),
-       role: "assistant",
-       content: data.text ?? "",
-       timestamp: new Date(),
-     };
-      setMessages((prev) => [...prev, assistantMessage]);
-    } catch (err) {
-      console.error("Groq error:", err);
-    } finally {
-      setIsLoading(false);
+  const sendMessage = () => {
+    const socket = socketRef.current;
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
+      console.warn("WebSocket not connected");
+      return;
     }
+    if (!input.trim()) return;
+
+    // const userMessage = {
+    //   id: crypto.randomUUID(),
+    //   role: "user",
+    //   content: input,
+    //   timestamp: new Date(),
+    // };
+
+    socket.send(JSON.stringify({ conversation_id: 1, content: input }));
+    // setMessages((prev) => [...prev, userMessage]);
+    setInput("");
   };
 
   // Build enriched messages with sender info
@@ -215,4 +232,4 @@ export default function Chat() {
       )}
     </>
   );
-} 
+}
