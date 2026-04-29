@@ -39,7 +39,7 @@ var (
 				Symbol:     "friendships_users_friendships",
 				Columns:    []*schema.Column{FriendshipsColumns[3]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "friendships_users_friend_of",
@@ -122,6 +122,7 @@ var (
 		{Name: "salt", Type: field.TypeString},
 		{Name: "hash", Type: field.TypeString},
 		{Name: "verified_email", Type: field.TypeBool, Default: false},
+		{Name: "pp_path", Type: field.TypeString, Default: ""},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{

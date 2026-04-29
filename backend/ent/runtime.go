@@ -96,4 +96,8 @@ func init() {
 	userDescVerifiedEmail := userFields[6].Descriptor()
 	// user.DefaultVerifiedEmail holds the default value on creation for the verified_email field.
 	user.DefaultVerifiedEmail = userDescVerifiedEmail.Default.(bool)
+	// userDescPpPath is the schema descriptor for pp_path field.
+	userDescPpPath := userFields[7].Descriptor()
+	// user.DefaultPpPath holds the default value on creation for the pp_path field.
+	user.DefaultPpPath = userDescPpPath.Default.(string)
 }
