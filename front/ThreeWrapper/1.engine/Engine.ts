@@ -80,7 +80,7 @@ export class Engine {
 		if (me?.name) this.selfServerClient.name = me.name;
 		const engineCtx: EngineContext = {
 			renderer: this.renderer,
-shared/config			keymap: this.keymap,
+			keymap: this.keymap,
 			logger: this.logger,
 			selfServerClient: this.selfServerClient,
 			debug: this.debug,

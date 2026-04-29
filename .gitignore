@@ -8,14 +8,8 @@ front/node_modules
 front/.pnp
 front/.pnp.*
 front/bun.lock.bak
-server/node_modules
-server/.pnp
-server/.pnp.*
-server/bun.lock.bak
-
-# Root node_modules
-node_modules
-
+front/bun.lock
+front/package-lock.json
 # Front build
 front/.next/
 front/out/
@@ -23,27 +17,18 @@ front/build/
 front/dist/
 front/.env
 front/node_modules
-# Yarn workspace files
-front/.yarn/*
-front/!.yarn/patches
-front/!.yarn/plugins
-front/!.yarn/releases
-front/!.yarn/versions
-
-# Testing & coverage
-front/coverage
-
-# Logs
-front/npm-debug.log*
-front/yarn-debug.log*
-front/yarn-error.log*
-front/.pnpm-debug.log*
-*.log
-
 # OS
 front/.DS_Store
 .DS_Store
 front/*.pem
+
+#server
+server/node_modules
+server/.pnp
+server/.pnp.*
+server/bun.lock.bak
+server/bun.lock
+server/package-lock.json
 
 # IDE
 .vscode
@@ -70,4 +55,3 @@ postgres_data/
 .gitignore
 secret
 .TODO
-node_modules
