@@ -37,6 +37,8 @@ async function fetchVerified() {
     } 
   catch (error) {
       console.log(error);
+      setError("Invalid credentials");
+      setForm({ email: "", password: ""});
     }
 }
 
@@ -71,16 +73,16 @@ useEffect(function() {
       setIsSignUp(false);
       if (!response.ok) {
         const err = await response.json();
-		console.log(err)
         throw new Error(err.title);
       }
       if (isSignUpMode && (response.status === 200 || response.status === 201)) 
-	  {
-      setisSignUpMode(false);
-      setForm({ email: "", password: "", age: "", username: "" });
-	  }
-	  else if (Profile.verified && (response.status === 200 || response.status === 201))
-		router.push("/home");
+	    {
+        setisSignUpMode(false);
+        setForm({ email: "", password: "", age: "", username: "" });
+	    }
+      else if (Profile.verified && (response.status === 200 || response.status === 201))
+        router.push("/home");
+
     } 
 	catch (error) 
 	{

@@ -133,8 +133,8 @@ const StyledWrapper = styled.div`
       --button-pad-y: 0.45rem;
       --button-pad-x: 0.85rem;
       --button-nudge: 2px;
-      margin-left: 0.5rem;
-      margin-right: 0.5rem;
+      margin-left: 0.3rem;
+      margin-right: 0.3rem;
     }
   }
 

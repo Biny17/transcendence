@@ -1,3 +1,9 @@
+input::placeholder {
+  color: rgba(255,255,255,0.4);
+}
+/* input {
+  color: rgba(255,255,255,0.4) !important;
+} */
 .navbar {
   position: absolute;
   top: 0;
