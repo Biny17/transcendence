@@ -1,0 +1,15 @@
+import { NextRequest, NextResponse } from "next/server";
+
+export default function middledleware(request: NextRequest) {
+  const token = request.cookies.get("auth_token")?.value;
+
+  if (!token) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: ["/home/:path*", "/rules/:path*", "/lose/:path*", "/wining/:path*"],
+};

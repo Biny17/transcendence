@@ -1,0 +1,40 @@
+.navbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(180deg, rgba(0,0,0,0.5) 0%, transparent 100%);
+  z-index: 10;
+  animation: slideDown 0.5s ease;
+  /* font-family:'Times New Roman', Times, serif; */
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.navbar-logo-icon {
+  font-size: 2rem;
+}
+
+.navbar-logo-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 45px;
+  color: #6d83ff;
+  text-transform: uppercase;
+  font-weight: 900;
+}
+
+.navbar-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}

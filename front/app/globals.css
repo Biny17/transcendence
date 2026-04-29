@@ -1,26 +1,263 @@
 @import "tailwindcss";
+@import "flowbite-react/plugin/tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
+@source "../.flowbite-react/class-list.json";
+@source "../node_modules/@material-tailwind/react";
 
 @theme inline {
+  --color-yellow: #facc15;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+  --animate-first: moveVertical 30s ease infinite;
+  --animate-second: moveInCircle 20s reverse infinite;
+  --animate-third: moveInCircle 40s linear infinite;
+  --animate-fourth: moveHorizontal 40s ease infinite;
+  --animate-fifth: moveInCircle 20s ease infinite;
+  @keyframes moveHorizontal {
+  0% {
+    transform: translateX(-50%) translateY(-10%);
+    }
+  50% {
+    transform: translateX(50%) translateY(10%);
+    }
+  100% {
+    transform: translateX(-50%) translateY(-10%);
+    }
+  }
+  @keyframes moveInCircle {
+  0% {
+    transform: rotate(0deg);
+    }
+  50% {
+    transform: rotate(180deg);
+    }
+  100% {
+    transform: rotate(360deg);
+    }
+  }
+  @keyframes moveVertical {
+  0% {
+    transform: translateY(-50%);
+    }
+  50% {
+    transform: translateY(50%);
+    }
+  100% {
+    transform: translateY(-50%);
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.809 0.105 251.813);
+  --chart-2: oklch(0.623 0.214 259.815);
+  --chart-3: oklch(0.546 0.245 262.881);
+  --chart-4: oklch(0.488 0.243 264.376);
+  --chart-5: oklch(0.424 0.199 265.638);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.809 0.105 251.813);
+  --chart-2: oklch(0.623 0.214 259.815);
+  --chart-3: oklch(0.546 0.245 262.881);
+  --chart-4: oklch(0.488 0.243 264.376);
+  --chart-5: oklch(0.424 0.199 265.638);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+.party-title {
+  font-family: var(--font-party-title), var(--font-geist-sans), sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-shadow: 0 2px 0 rgb(255 255 255 / 0.22), 0 8px 18px rgb(0 0 0 / 0.18);
+}
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: grid;
+  height: 100vh;
+  width: 100vw;
+  place-items: center;
+  /* background:  radial-gradient(circle at 20% 20%, rgba(62, 14, 92, 0.45), transparent 35%),
+    radial-gradient(circle at 80% 0%, rgba(20, 96, 165, 0.45), transparent 30%),
+    linear-gradient(135deg, #060816 0%, #0d1b3a 55%, #120a26 100%); */
+  backdrop-filter: blur(10px);
+}
+
+.modal-overlay--leaderboard {
+  background: radial-gradient(circle at 20% 20%, rgba(62, 14, 92, 0.45), transparent 35%),
+    radial-gradient(circle at 80% 0%, rgba(20, 96, 165, 0.45), transparent 30%),
+    linear-gradient(135deg, #060816 0%, #0d1b3a 55%, #120a26 100%);
+}
+
+.tooltip:before {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: clamp(var(--b)/-2,var(--p) - 3*var(--b)/4,100% - var(--b));
+  width: var(--b);
+  aspect-ratio: 1;
+  background: inherit;
+  --g:#000 calc(100% - 1px),#0000;
+  -webkit-mask: 
+    radial-gradient(circle closest-side at 12% 88%,var(--g)),
+    radial-gradient(20% 20% at 52% 55%,var(--g)),
+    radial-gradient(25% 25% at 75% 0,var(--g));
+}
+
+/* HTML: <div class="tooltip">This is the same as #5 but with another shape for the tail </div> */
+.tooltip {
+  color: #fff;
+  font-size: 18px;
+  max-width: 28ch;
+  text-align: center;
+}
+.tooltip { 
+  --b: 3em; /* tail dimension */
+
+  --p: 47%;  /* main position (0%:left 100%:right) */
+  --r: 1.2em; /* the radius */
+
+  padding: 1em;
+  border-radius: var(--r) var(--r) min(var(--r),100% - var(--p) - var(--b)/4) min(var(--r),var(--p) - var(--b)/4)/var(--r);
+  background: #be1e2c; /* the main color */
+  position: relative;
+}
+
+@utility scrollbar-hide {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (min-width: 1024px) and (max-height: 900px) {
+  .leaderboard {
+ 	width: 400px;
+    height: 350px;
+  }
+}
+
+@media (min-width: 0px) and (max-width: 600px) {
+  .options {
+    transform: translateY(-54px);
+  }
+}
+
+@media (min-width: 600px) and (max-width: 820px) {
+  .options {
+    transform: translateY(-180px);
+  }
+}
+
+@media (min-width: 821px) and (min-height: 1000px) {
+  .options {
+    transform: translateY(-280px);
+  }
 }
