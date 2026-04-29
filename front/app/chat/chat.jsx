@@ -57,7 +57,57 @@ export default function Chat() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [Conversation, setConversation] = useState("");
   const socketRef = useRef(null);
+
+  async function findConversationId(){
+  const url = 'http://localhost:8080/api/chat/conversation';
+
+    const options = {method: 'POST', credentials: 'include', headers: {'Accept': 'application/json, application/problem+json', 'Content-Type': 'application/json'}, body: '{"target_user_id":2}'};
+    try 
+	  {
+      const response = await fetch(url, options);
+      if (!response.ok) 
+      {
+        const err = await response.json();
+        throw new Error(err.title);
+      }
+      if (response.status === 200)
+      {
+        setConversation(response.conversation_id)
+        return(response.conversation_id)
+      }
+    } 
+    catch (error) 
+    {
+      console.log(error);
+    }
+  }
+
+  async function fetchConversationHistory(){
+  const url = 'http://localhost:8080/api/chat/conversation/' + Conversation + '/messages';
+
+    const options = {method: 'GET', credentials: 'include', headers: {'Accept': 'application/json, application/problem+json', 'Content-Type': 'application/json'}, body: '{"target_user_id":0}'};
+    try 
+	  {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      if (!response.ok) 
+      {
+        const err = await response.json();
+        throw new Error(err.title);
+      }
+      if (response.status === 200)
+      {
+        console.log(data)
+        setMessages(data)
+      }
+    } 
+    catch (error) 
+    {
+      console.log(error);
+    }
+  }
 
   useEffect(() => {
     const socket = new WebSocket("ws://localhost:8080/api/chat/ws");
@@ -94,31 +144,18 @@ export default function Chat() {
     };
   }, []);
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     const socket = socketRef.current;
     if (!socket || socket.readyState !== WebSocket.OPEN) {
       console.warn("WebSocket not connected");
       return;
     }
     if (!input.trim()) return;
-
-    // const userMessage = {
-    //   id: crypto.randomUUID(),
-    //   role: "user",
-    //   content: input,
-    //   timestamp: new Date(),
-    // };
-
-    socket.send(JSON.stringify({ conversation_id: 1, content: input }));
-    // setMessages((prev) => [...prev, userMessage]);
+    const convId = await findConversationId();
+    socket.send(JSON.stringify({ conversation_id: convId , content: input }));
+    fetchConversationHistory();
     setInput("");
   };
-
-  // Build enriched messages with sender info
-  const enrichedMessages = messages.map((msg) => ({
-    ...msg,
-    sender: msg.role === "user" ? USER_SENDER : ASSISTANT_SENDER,
-  }));
 
   return (
     <>
@@ -144,55 +181,50 @@ export default function Chat() {
             </ChatHeader>
 
             <ChatMessages className="scrollbar-hidden text-white bg-indigo" >
-              {enrichedMessages.length === 0 && (
+              {messages.length === 0 && (
                 <p className="text-center text-sm text-muted-foreground mt-8">
                   Commencez la conversation !
                 </p>
               )}
+              {messages.map((msg, i) => {
+                // const nextSameSender = msg.sender.id === msg[i + 1]?.sender.id;
 
-              {enrichedMessages.map((msg, i, msgs) => {
-                const dateChanged =
-                  new Date(msg.timestamp).toDateString() !==
-                  new Date(msgs[i + 1]?.timestamp).toDateString();
+                // if (dateChanged) {
+                //   return (
+                //     <Fragment key={msg.id}>
+                //       <PrimaryMessage
+                //         avatarSrc={msg.sender.avatarUrl}
+                //         avatarAlt={msg.sender.username}
+                //         avatarFallback={msg.sender.name.slice(0, 2)}
+                //         senderName={msg.sender.name}
+                //         content={msg.content}
+                //         timestamp={msg.timestamp.getTime()}
+                //       />
+                //       <DateItem timestamp={msg.timestamp.getTime()} className="my-4" />
+                //     </Fragment>
+                //   );
+                // }
 
-                const nextSameSender = msg.sender.id === msgs[i + 1]?.sender.id;
-
-                if (dateChanged) {
-                  return (
-                    <Fragment key={msg.id}>
-                      <PrimaryMessage
-                        avatarSrc={msg.sender.avatarUrl}
-                        avatarAlt={msg.sender.username}
-                        avatarFallback={msg.sender.name.slice(0, 2)}
-                        senderName={msg.sender.name}
-                        content={msg.content}
-                        timestamp={msg.timestamp.getTime()}
-                      />
-                      <DateItem timestamp={msg.timestamp.getTime()} className="my-4" />
-                    </Fragment>
-                  );
-                }
-
-                if (nextSameSender) {
-                  return (
-                    <AdditionalMessage
-                      key={msg.id}
-                      content={msg.content}
-                      timestamp={msg.timestamp.getTime()}
-                    />
-                  );
-                }
+                // if (nextSameSender) {
+                //   return (
+                //     <AdditionalMessage
+                //       key={msg.id}
+                //       content={msg.content}
+                //       timestamp={msg.created_at}
+                //     />
+                //   );
+                // }
 
                 return (
                   <PrimaryMessage
                     className="mt-4"
                     key={msg.id}
-                    avatarSrc={msg.sender.avatarUrl}
-                    avatarAlt={msg.sender.username}
-                    avatarFallback={msg.sender.name.slice(0, 2)}
-                    senderName={msg.sender.name}
+                    // avatarSrc={msg.sender.avatarUrl}
+                    // avatarAlt={msg.sender.username}
+                    // avatarFallback={msg.sender.username.slice(0, 2)}
+                    senderName={msg.sender.username}
                     content={msg.content}
-                    timestamp={msg.timestamp.getTime()}
+                    timestamp={msg.created_at}
                   />
                 );
               })}
@@ -210,7 +242,7 @@ export default function Chat() {
               <textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-               onKeyDown={(e) => {
+                onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
                     sendMessage();
@@ -220,8 +252,7 @@ export default function Chat() {
                 className="flex-1 resize-none bg-yellow outline-none text-sm py-2"
                 rows={1}
               />
-              <ChatToolbarAddon align="inline-end">
-               
+              <ChatToolbarAddon align="inline-end">               
                 <ChatToolbarButton onClick={sendMessage} disabled={isLoading}>
                   <SquareChevronRightIcon />
                 </ChatToolbarButton>
