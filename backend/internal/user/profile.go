@@ -1,6 +1,7 @@
 package user
 
 import (
+	"backend/internal/pkg"
 	"backend/internal/pkg/picture"
 	"context"
 	"io"
@@ -22,6 +23,10 @@ func (us *UserService) UploadPP(
 	*struct{},
 	error,
 ) {
+	id, err := pkg.ContextUserId(ctx)
+	if err != nil {
+		return nil, huma.Error401Unauthorized("Please login again")
+	}
 	data := input.RawBody.Data()
 	content_type := data.File.ContentType
 	raw, err := io.ReadAll(data.File)
@@ -33,5 +38,6 @@ func (us *UserService) UploadPP(
 		return nil, err
 	}
 	log.Println("New file: ", file)
+	user, err := us.Client.User.UpdateOneID(id).Where()
 	return nil, nil
 }

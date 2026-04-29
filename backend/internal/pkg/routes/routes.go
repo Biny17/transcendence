@@ -9,6 +9,7 @@ const (
 	UpdatePwd           = "/api/update/password"
 	UpdateEmail         = "/api/update/email"
 	UpdateUsername      = "/api/update/username"
+	UpdateProfilePic    = "/api/update/profile-picture"
 	UserById            = "/api/users/{id}"
 	GetUsers            = "/api/users"
 	ResendEmail         = "/api/users/resend-email/{id}"
@@ -25,4 +26,3 @@ const (
 	GetConversations    = "/api/chat/conversations"
 	ConversationHistory = "/api/chat/conversation/{id}/messages"
 )
-

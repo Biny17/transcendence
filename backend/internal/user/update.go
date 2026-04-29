@@ -83,7 +83,7 @@ func (pi PatchUser) String() string {
 }
 
 func (us *UserService) PatchUser(ctx context.Context, input *PatchUser) (*InfoOut, error) {
-	if pkg.CheckIdMatchContextSub(ctx, input.User_id) != nil {
+	if pkg.CheckdMatchContextSub(ctx, input.User_id) != nil {
 		return nil, huma.Error401Unauthorized("")
 	}
 	user, err := us.Client.User.Get(ctx, input.User_id)

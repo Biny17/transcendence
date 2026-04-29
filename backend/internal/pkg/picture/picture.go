@@ -2,6 +2,7 @@ package picture
 
 import (
 	"crypto/rand"
+	"log"
 	"os"
 	"path"
 	"strings"
@@ -41,13 +42,19 @@ func SaveImg(content_type string, dir string, b []byte) (string, error) {
 		return "", huma.Error415UnsupportedMediaType("Supported: " + strings.Join(supported, " "))
 	}
 	filename := rand.Text() + ext
-	_path := path.Join("./", dir, filename)
-	file, err := os.OpenFile(_path, os.O_CREATE|os.O_EXCL, 0600)
+	_path := "./" + path.Join(dir, filename)
+	log.Println(_path)
+	file, err := os.OpenFile(_path, os.O_CREATE|os.O_TRUNC|os.O_WRONLY,0644)
 	if err != nil {
+		log.Println(err)
+		log.Println("Failed to create the file on the disk")
+		log.Println("path: ", _path)
 		return "", huma.Error500InternalServerError("Try again later")
 	}
 	_, err = file.Write(b)
 	if err != nil {
+		log.Println(err)
+		log.Println("Failed to write on a file:", _path)
 		return "", huma.Error500InternalServerError("Try again later")
 	}
 	return filename, nil
