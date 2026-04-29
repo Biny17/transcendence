@@ -14,7 +14,7 @@ export class ParkourWorld extends World {
 	}
 	protected override async onLoad(): Promise<void> {
 		const components = new ComponentLoader();
-		const def = await this.ctx.map.loadFile("/game/maps/fallguys_map.yaml");
+		const def = await this.ctx.map.loadFile("/game/maps/city.yaml");
 		this._disposeMap = await this.ctx.map.spawn(def, components, this.ctx.gltf, this.ctx.objects);
 		this.ctx.camera.position.set(5, 5, 15);
 	}

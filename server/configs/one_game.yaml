@@ -15,12 +15,12 @@ phases:
 
         - id: Parkour
           type: game
-          beforeStart:
-                  - id: load_parkour
-                    type: wait
-                    waitFor: WORLD_LOADED
-                    quorum: 100%
-                    timeout: 30
+          #beforeStart:
+          #        - id: load_parkour
+          #          type: wait
+          #          waitFor: WORLD_LOADED
+          #          quorum: 100%
+          #          timeout: 60
           gameModeSelect:
                   - condition: "true"
                     pick: fixed
