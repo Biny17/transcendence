@@ -1,0 +1,60 @@
+id: gta
+sky:
+        preset: day
+#        cubemap:
+#                px: /textures/skybox/front.png
+#                nx: /textures/skybox/back.png
+#                py: /textures/skybox/top.png
+#                ny: /textures/skybox/bottom.png
+#                pz: /textures/skybox/left.png
+#                nz: /textures/skybox/right.png
+fog:
+        kind: linear
+        color: 7838139
+        near: 50
+        far: 180
+lights:
+        - type: ambient
+          color: 14544639
+          intensity: 0.45
+        - type: directional
+          color: 16773324
+          intensity: 1.1
+          position:
+                  x: 40
+                  y: 80
+                  z: 30
+          castShadow: true
+          shadow:
+                  mapSize: 4096
+                  near: 1
+                  far: 400
+                  camera:
+                          left: -50
+                          right: 50
+                          top: 50
+                          bottom: -50
+                  bias: -0.0002
+                  normalBias: 0.02
+                  radius: 3
+        - type: hemisphere
+          skyColor: 11193599
+          groundColor: 6702114
+          intensity: 0.35
+objects:
+        - id: floor_start
+          component: /game/components/fallguys_map.yaml
+          type: map
+          position:
+                  x: 0
+                  y: 0
+                  z: 0
+        - id: spawn_main
+          component: /game/components/spawn_point.yaml
+          type: map
+          position:
+                  x: 0
+                  y: 1.5
+                  z: 0
+          extraData:
+                  spawnpoint: { x: 0, y: 2, z: 0 }

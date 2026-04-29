@@ -258,7 +258,10 @@ export class GeometryFactory {
 		if (options?.name)          mesh.name = options.name
 		if (options?.castShadow)    mesh.castShadow = true
 		if (options?.receiveShadow) mesh.receiveShadow = true
-		if (options?.transform)     this.applyTransform(mesh, options.transform)
+		if (options?.transform?.scale) {
+			const scl = options.transform.scale
+			mesh.scale.set(scl.x ?? 1, scl.y ?? 1, scl.z ?? 1)
+		}
 		return mesh
 	}
 	private static buildMaterial(params?: MaterialParams): THREE.Material {

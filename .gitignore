@@ -8,7 +8,13 @@ front/node_modules
 front/.pnp
 front/.pnp.*
 front/bun.lock.bak
-front/server/node_modules
+server/node_modules
+server/.pnp
+server/.pnp.*
+server/bun.lock.bak
+
+# Root node_modules
+node_modules
 
 # Front build
 front/.next/

@@ -1,0 +1,46 @@
+# $schema: /game/components/component.schema.json
+# -----------------------------------------------------------
+# A platform that shakes then drops when a player steps on it.
+# Physics starts kinematic; FallingPlatformModule switches it
+# to dynamic when triggered (via extraData.fallDelay).
+# The sensor zone reports when a player lands on it.
+# -----------------------------------------------------------
+id: falling_platform
+
+mesh:
+  primitive: box
+  size: { x: 3, y: 0.3, z: 3 }
+  textures:
+    # Per-face: distinctive top/bottom, uniform sides
+    faces:
+      py: /textures/cracked_top.png      # +Y cracked surface shown to player
+      ny: /textures/metal_bottom.png     # -Y underside
+      px: /textures/metal_side.png
+      nx: /textures/metal_side.png
+      pz: /textures/metal_side.png
+      nz: /textures/metal_side.png
+
+physics:
+  bodyType: kinematic                    # FallingPlatformModule switches to dynamic on trigger
+  gravityScale: 1
+  mass: 80
+  friction: 0.7
+
+hitboxes:
+  - shape: box
+    size: full
+    collidesWith: [player, npc]
+
+  # Sensor: fires when player steps on the platform
+  - shape: box
+    size: { x: 2.8, y: 0.5, z: 2.8 }
+    offset: { x: 0, y: 0.4, z: 0 }
+    isSensor: true
+    tag: platform_stepped               # FallingPlatformModule listens for this tag
+
+animations:
+  # Played by code just before the platform drops
+  shake:
+    kind: clip
+    autoPlay: false
+    loop: false

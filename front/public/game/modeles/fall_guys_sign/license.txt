@@ -1,0 +1,11 @@
+Model Information:
+* title:	Fall Guys Sign
+* source:	https://sketchfab.com/3d-models/fall-guys-sign-810b247d36084e62b0f57df12f49fe7a
+* author:	KDSpritzy (https://sketchfab.com/KDSpritzy)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Fall Guys Sign" (https://sketchfab.com/3d-models/fall-guys-sign-810b247d36084e62b0f57df12f49fe7a) by KDSpritzy (https://sketchfab.com/KDSpritzy) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

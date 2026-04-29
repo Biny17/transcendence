@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Game Rules Definition",
+  "type": "object",
+  "properties": {
+    "mode": {
+      "type": "string",
+      "description": "Nom du mode de jeu",
+      "enum": ["deathmatch", "capture-the-flag", "team-deathmatch", "free-for-all"]
+    },
+    "timeLimit": {
+      "type": "number",
+      "description": "Durée de la partie en secondes",
+      "minimum": 60,
+      "default": 600
+    },
+    "maxKills": {
+      "type": "number",
+      "description": "Nombre de kills requis pour gagner"
+    },
+    "winCondition": {
+      "type": "object",
+      "properties": {
+        "type": { "enum": ["firstTo", "timeUp", "lastTeamStanding"] },
+        "value": { "type": "number" }
+      },
+      "required": ["type"]
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "on": { "enum": ["playerDeath", "playerJoin", "roundStart"] },
+          "if": { "type": "string", "description": "Condition en expression simple" },
+          "then": { "type": "string", "description": "Action à exécuter" }
+        }
+      }
+    }
+  },
+  "required": ["mode"]
+}

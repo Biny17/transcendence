@@ -1,0 +1,22 @@
+# $schema: /game/components/component.schema.json
+# -----------------------------------------------------------
+# A large flat floor tile — static, no physics force on map.
+# Textures: same stone image on all 6 faces.
+# -----------------------------------------------------------
+id: stone_floor
+
+mesh:
+        primitive: box
+        size:
+                x: 20
+                y: 0.5
+                z: 20
+        color: 16777215
+
+physics:
+        bodyType: static
+
+hitboxes:
+        - shape: box
+          size: full # matches mesh bounding box
+          collidesWith: [player, npc] # map tiles never collide with each other
