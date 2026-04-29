@@ -15,8 +15,12 @@ type Conversation struct {
 func (Conversation) Fields() []ent.Field {
 	return []ent.Field{
 		field.Time("created_at").
-		Default(time.Now).
-		Immutable(),
+			Default(time.Now).
+			Immutable(),
+		field.Bool("is_group").
+			Default(false),
+		field.String("title").
+			Optional(),
 	}
 }
 

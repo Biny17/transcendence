@@ -42,6 +42,8 @@ type ConversationMutation struct {
 	typ                 string
 	id                  *int
 	created_at          *time.Time
+	is_group            *bool
+	title               *string
 	clearedFields       map[string]struct{}
 	messages            map[int]struct{}
 	removedmessages     map[int]struct{}
@@ -188,6 +190,91 @@ func (m *ConversationMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
+// SetIsGroup sets the "is_group" field.
+func (m *ConversationMutation) SetIsGroup(b bool) {
+	m.is_group = &b
+}
+
+// IsGroup returns the value of the "is_group" field in the mutation.
+func (m *ConversationMutation) IsGroup() (r bool, exists bool) {
+	v := m.is_group
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsGroup returns the old "is_group" field's value of the Conversation entity.
+// If the Conversation object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ConversationMutation) OldIsGroup(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsGroup is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsGroup requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsGroup: %w", err)
+	}
+	return oldValue.IsGroup, nil
+}
+
+// ResetIsGroup resets all changes to the "is_group" field.
+func (m *ConversationMutation) ResetIsGroup() {
+	m.is_group = nil
+}
+
+// SetTitle sets the "title" field.
+func (m *ConversationMutation) SetTitle(s string) {
+	m.title = &s
+}
+
+// Title returns the value of the "title" field in the mutation.
+func (m *ConversationMutation) Title() (r string, exists bool) {
+	v := m.title
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTitle returns the old "title" field's value of the Conversation entity.
+// If the Conversation object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ConversationMutation) OldTitle(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTitle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
+	}
+	return oldValue.Title, nil
+}
+
+// ClearTitle clears the value of the "title" field.
+func (m *ConversationMutation) ClearTitle() {
+	m.title = nil
+	m.clearedFields[conversation.FieldTitle] = struct{}{}
+}
+
+// TitleCleared returns if the "title" field was cleared in this mutation.
+func (m *ConversationMutation) TitleCleared() bool {
+	_, ok := m.clearedFields[conversation.FieldTitle]
+	return ok
+}
+
+// ResetTitle resets all changes to the "title" field.
+func (m *ConversationMutation) ResetTitle() {
+	m.title = nil
+	delete(m.clearedFields, conversation.FieldTitle)
+}
+
 // AddMessageIDs adds the "messages" edge to the Message entity by ids.
 func (m *ConversationMutation) AddMessageIDs(ids ...int) {
 	if m.messages == nil {
@@ -330,9 +417,15 @@ func (m *ConversationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ConversationMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 3)
 	if m.created_at != nil {
 		fields = append(fields, conversation.FieldCreatedAt)
+	}
+	if m.is_group != nil {
+		fields = append(fields, conversation.FieldIsGroup)
+	}
+	if m.title != nil {
+		fields = append(fields, conversation.FieldTitle)
 	}
 	return fields
 }
@@ -344,6 +437,10 @@ func (m *ConversationMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case conversation.FieldCreatedAt:
 		return m.CreatedAt()
+	case conversation.FieldIsGroup:
+		return m.IsGroup()
+	case conversation.FieldTitle:
+		return m.Title()
 	}
 	return nil, false
 }
@@ -355,6 +452,10 @@ func (m *ConversationMutation) OldField(ctx context.Context, name string) (ent.V
 	switch name {
 	case conversation.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
+	case conversation.FieldIsGroup:
+		return m.OldIsGroup(ctx)
+	case conversation.FieldTitle:
+		return m.OldTitle(ctx)
 	}
 	return nil, fmt.Errorf("unknown Conversation field %s", name)
 }
@@ -370,6 +471,20 @@ func (m *ConversationMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCreatedAt(v)
+		return nil
+	case conversation.FieldIsGroup:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsGroup(v)
+		return nil
+	case conversation.FieldTitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitle(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Conversation field %s", name)
@@ -400,7 +515,11 @@ func (m *ConversationMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *ConversationMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(conversation.FieldTitle) {
+		fields = append(fields, conversation.FieldTitle)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -413,6 +532,11 @@ func (m *ConversationMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *ConversationMutation) ClearField(name string) error {
+	switch name {
+	case conversation.FieldTitle:
+		m.ClearTitle()
+		return nil
+	}
 	return fmt.Errorf("unknown Conversation nullable field %s", name)
 }
 
@@ -422,6 +546,12 @@ func (m *ConversationMutation) ResetField(name string) error {
 	switch name {
 	case conversation.FieldCreatedAt:
 		m.ResetCreatedAt()
+		return nil
+	case conversation.FieldIsGroup:
+		m.ResetIsGroup()
+		return nil
+	case conversation.FieldTitle:
+		m.ResetTitle()
 		return nil
 	}
 	return fmt.Errorf("unknown Conversation field %s", name)

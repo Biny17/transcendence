@@ -16,6 +16,10 @@ const (
 	FieldID = "id"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
+	// FieldIsGroup holds the string denoting the is_group field in the database.
+	FieldIsGroup = "is_group"
+	// FieldTitle holds the string denoting the title field in the database.
+	FieldTitle = "title"
 	// EdgeMessages holds the string denoting the messages edge name in mutations.
 	EdgeMessages = "messages"
 	// EdgeParticipants holds the string denoting the participants edge name in mutations.
@@ -40,6 +44,8 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
+	FieldIsGroup,
+	FieldTitle,
 }
 
 var (
@@ -61,6 +67,8 @@ func ValidColumn(column string) bool {
 var (
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
+	// DefaultIsGroup holds the default value on creation for the "is_group" field.
+	DefaultIsGroup bool
 )
 
 // OrderOption defines the ordering options for the Conversation queries.
@@ -74,6 +82,16 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByCreatedAt orders the results by the created_at field.
 func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByIsGroup orders the results by the is_group field.
+func ByIsGroup(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsGroup, opts...).ToFunc()
+}
+
+// ByTitle orders the results by the title field.
+func ByTitle(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTitle, opts...).ToFunc()
 }
 
 // ByMessagesCount orders the results by messages count.
