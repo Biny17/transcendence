@@ -28,10 +28,10 @@ func (us *UserService) UploadPP(
 	if err != nil {
 		return nil, huma.Error400BadRequest("No file content")
 	}
-	file, err := picture.SaveImg(content_type, "test/", raw)
+	file, err := picture.SaveImg(content_type, "img/", raw)
 	if err != nil {
 		return nil, err
 	}
-	log.Println("new file: ", file)
+	log.Println("New file: ", file)
 	return nil, nil
 }

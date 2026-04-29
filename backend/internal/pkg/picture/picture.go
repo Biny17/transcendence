@@ -40,7 +40,8 @@ func SaveImg(content_type string, dir string, b []byte) (string, error) {
 	if valid == false {
 		return "", huma.Error415UnsupportedMediaType("Supported: " + strings.Join(supported, " "))
 	}
-	_path := "./" + dir + rand.Text() + ext
+	filename := rand.Text() + ext
+	_path := path.Join("./", dir, filename)
 	file, err := os.OpenFile(_path, os.O_CREATE|os.O_EXCL, 0600)
 	if err != nil {
 		return "", huma.Error500InternalServerError("Try again later")
@@ -49,5 +50,5 @@ func SaveImg(content_type string, dir string, b []byte) (string, error) {
 	if err != nil {
 		return "", huma.Error500InternalServerError("Try again later")
 	}
-	return path.Base(_path), nil
+	return filename, nil
 }
