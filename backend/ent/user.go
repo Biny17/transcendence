@@ -34,6 +34,10 @@ type User struct {
 	VerifiedEmail bool `json:"verified_email,omitempty"`
 	// PpPath holds the value of the "pp_path" field.
 	PpPath string `json:"pp_path,omitempty"`
+	// SkinColor holds the value of the "skin_color" field.
+	SkinColor string `json:"skin_color,omitempty"`
+	// FaceColor holds the value of the "face_color" field.
+	FaceColor string `json:"face_color,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges        UserEdges `json:"edges"`
@@ -113,7 +117,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case user.FieldID, user.FieldAge:
 			values[i] = new(sql.NullInt64)
-		case user.FieldUsername, user.FieldEmail, user.FieldSalt, user.FieldHash, user.FieldPpPath:
+		case user.FieldUsername, user.FieldEmail, user.FieldSalt, user.FieldHash, user.FieldPpPath, user.FieldSkinColor, user.FieldFaceColor:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
@@ -185,6 +189,18 @@ func (_m *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field pp_path", values[i])
 			} else if value.Valid {
 				_m.PpPath = value.String
+			}
+		case user.FieldSkinColor:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field skin_color", values[i])
+			} else if value.Valid {
+				_m.SkinColor = value.String
+			}
+		case user.FieldFaceColor:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field face_color", values[i])
+			} else if value.Valid {
+				_m.FaceColor = value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -270,6 +286,12 @@ func (_m *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("pp_path=")
 	builder.WriteString(_m.PpPath)
+	builder.WriteString(", ")
+	builder.WriteString("skin_color=")
+	builder.WriteString(_m.SkinColor)
+	builder.WriteString(", ")
+	builder.WriteString("face_color=")
+	builder.WriteString(_m.FaceColor)
 	builder.WriteByte(')')
 	return builder.String()
 }

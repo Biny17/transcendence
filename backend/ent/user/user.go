@@ -30,6 +30,10 @@ const (
 	FieldVerifiedEmail = "verified_email"
 	// FieldPpPath holds the string denoting the pp_path field in the database.
 	FieldPpPath = "pp_path"
+	// FieldSkinColor holds the string denoting the skin_color field in the database.
+	FieldSkinColor = "skin_color"
+	// FieldFaceColor holds the string denoting the face_color field in the database.
+	FieldFaceColor = "face_color"
 	// EdgeMailVerif holds the string denoting the mail_verif edge name in mutations.
 	EdgeMailVerif = "mail_verif"
 	// EdgeFriendships holds the string denoting the friendships edge name in mutations.
@@ -88,6 +92,8 @@ var Columns = []string{
 	FieldHash,
 	FieldVerifiedEmail,
 	FieldPpPath,
+	FieldSkinColor,
+	FieldFaceColor,
 }
 
 var (
@@ -119,6 +125,10 @@ var (
 	DefaultVerifiedEmail bool
 	// DefaultPpPath holds the default value on creation for the "pp_path" field.
 	DefaultPpPath string
+	// DefaultSkinColor holds the default value on creation for the "skin_color" field.
+	DefaultSkinColor string
+	// DefaultFaceColor holds the default value on creation for the "face_color" field.
+	DefaultFaceColor string
 )
 
 // OrderOption defines the ordering options for the User queries.
@@ -167,6 +177,16 @@ func ByVerifiedEmail(opts ...sql.OrderTermOption) OrderOption {
 // ByPpPath orders the results by the pp_path field.
 func ByPpPath(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPpPath, opts...).ToFunc()
+}
+
+// BySkinColor orders the results by the skin_color field.
+func BySkinColor(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSkinColor, opts...).ToFunc()
+}
+
+// ByFaceColor orders the results by the face_color field.
+func ByFaceColor(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldFaceColor, opts...).ToFunc()
 }
 
 // ByMailVerifField orders the results by mail_verif field.

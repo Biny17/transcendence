@@ -96,6 +96,34 @@ func (_c *UserCreate) SetNillablePpPath(v *string) *UserCreate {
 	return _c
 }
 
+// SetSkinColor sets the "skin_color" field.
+func (_c *UserCreate) SetSkinColor(v string) *UserCreate {
+	_c.mutation.SetSkinColor(v)
+	return _c
+}
+
+// SetNillableSkinColor sets the "skin_color" field if the given value is not nil.
+func (_c *UserCreate) SetNillableSkinColor(v *string) *UserCreate {
+	if v != nil {
+		_c.SetSkinColor(*v)
+	}
+	return _c
+}
+
+// SetFaceColor sets the "face_color" field.
+func (_c *UserCreate) SetFaceColor(v string) *UserCreate {
+	_c.mutation.SetFaceColor(v)
+	return _c
+}
+
+// SetNillableFaceColor sets the "face_color" field if the given value is not nil.
+func (_c *UserCreate) SetNillableFaceColor(v *string) *UserCreate {
+	if v != nil {
+		_c.SetFaceColor(*v)
+	}
+	return _c
+}
+
 // SetMailVerifID sets the "mail_verif" edge to the MailVerif entity by ID.
 func (_c *UserCreate) SetMailVerifID(id int) *UserCreate {
 	_c.mutation.SetMailVerifID(id)
@@ -222,6 +250,14 @@ func (_c *UserCreate) defaults() {
 		v := user.DefaultPpPath
 		_c.mutation.SetPpPath(v)
 	}
+	if _, ok := _c.mutation.SkinColor(); !ok {
+		v := user.DefaultSkinColor
+		_c.mutation.SetSkinColor(v)
+	}
+	if _, ok := _c.mutation.FaceColor(); !ok {
+		v := user.DefaultFaceColor
+		_c.mutation.SetFaceColor(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -264,6 +300,12 @@ func (_c *UserCreate) check() error {
 	}
 	if _, ok := _c.mutation.PpPath(); !ok {
 		return &ValidationError{Name: "pp_path", err: errors.New(`ent: missing required field "User.pp_path"`)}
+	}
+	if _, ok := _c.mutation.SkinColor(); !ok {
+		return &ValidationError{Name: "skin_color", err: errors.New(`ent: missing required field "User.skin_color"`)}
+	}
+	if _, ok := _c.mutation.FaceColor(); !ok {
+		return &ValidationError{Name: "face_color", err: errors.New(`ent: missing required field "User.face_color"`)}
 	}
 	return nil
 }
@@ -322,6 +364,14 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.PpPath(); ok {
 		_spec.SetField(user.FieldPpPath, field.TypeString, value)
 		_node.PpPath = value
+	}
+	if value, ok := _c.mutation.SkinColor(); ok {
+		_spec.SetField(user.FieldSkinColor, field.TypeString, value)
+		_node.SkinColor = value
+	}
+	if value, ok := _c.mutation.FaceColor(); ok {
+		_spec.SetField(user.FieldFaceColor, field.TypeString, value)
+		_node.FaceColor = value
 	}
 	if nodes := _c.mutation.MailVerifIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
