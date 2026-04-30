@@ -26,6 +26,8 @@ func (User) Fields() []ent.Field {
 		field.String("hash"),
 		field.Bool("verified_email").Default(false),
 		field.String("pp_path").Default(""),
+		field.String("skin_color").Default("#03fc6f"),
+		field.String("face_color").Default("#eeeeee"),
 	}
 }
 

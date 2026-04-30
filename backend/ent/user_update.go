@@ -151,6 +151,34 @@ func (_u *UserUpdate) SetNillablePpPath(v *string) *UserUpdate {
 	return _u
 }
 
+// SetSkinColor sets the "skin_color" field.
+func (_u *UserUpdate) SetSkinColor(v string) *UserUpdate {
+	_u.mutation.SetSkinColor(v)
+	return _u
+}
+
+// SetNillableSkinColor sets the "skin_color" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableSkinColor(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetSkinColor(*v)
+	}
+	return _u
+}
+
+// SetFaceColor sets the "face_color" field.
+func (_u *UserUpdate) SetFaceColor(v string) *UserUpdate {
+	_u.mutation.SetFaceColor(v)
+	return _u
+}
+
+// SetNillableFaceColor sets the "face_color" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableFaceColor(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetFaceColor(*v)
+	}
+	return _u
+}
+
 // SetMailVerifID sets the "mail_verif" edge to the MailVerif entity by ID.
 func (_u *UserUpdate) SetMailVerifID(id int) *UserUpdate {
 	_u.mutation.SetMailVerifID(id)
@@ -410,6 +438,12 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.PpPath(); ok {
 		_spec.SetField(user.FieldPpPath, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SkinColor(); ok {
+		_spec.SetField(user.FieldSkinColor, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.FaceColor(); ok {
+		_spec.SetField(user.FieldFaceColor, field.TypeString, value)
 	}
 	if _u.mutation.MailVerifCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -759,6 +793,34 @@ func (_u *UserUpdateOne) SetNillablePpPath(v *string) *UserUpdateOne {
 	return _u
 }
 
+// SetSkinColor sets the "skin_color" field.
+func (_u *UserUpdateOne) SetSkinColor(v string) *UserUpdateOne {
+	_u.mutation.SetSkinColor(v)
+	return _u
+}
+
+// SetNillableSkinColor sets the "skin_color" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableSkinColor(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetSkinColor(*v)
+	}
+	return _u
+}
+
+// SetFaceColor sets the "face_color" field.
+func (_u *UserUpdateOne) SetFaceColor(v string) *UserUpdateOne {
+	_u.mutation.SetFaceColor(v)
+	return _u
+}
+
+// SetNillableFaceColor sets the "face_color" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableFaceColor(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetFaceColor(*v)
+	}
+	return _u
+}
+
 // SetMailVerifID sets the "mail_verif" edge to the MailVerif entity by ID.
 func (_u *UserUpdateOne) SetMailVerifID(id int) *UserUpdateOne {
 	_u.mutation.SetMailVerifID(id)
@@ -1048,6 +1110,12 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	}
 	if value, ok := _u.mutation.PpPath(); ok {
 		_spec.SetField(user.FieldPpPath, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SkinColor(); ok {
+		_spec.SetField(user.FieldSkinColor, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.FaceColor(); ok {
+		_spec.SetField(user.FieldFaceColor, field.TypeString, value)
 	}
 	if _u.mutation.MailVerifCleared() {
 		edge := &sqlgraph.EdgeSpec{

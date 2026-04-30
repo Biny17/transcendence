@@ -58,18 +58,18 @@ func (us *UserService) Register(api huma.API, m *mid.Middleware) {
 		Summary: "USER BY ID",
 	}, us.GetUserById)
 	huma.Register(api, huma.Operation{
-		Method:  http.MethodPut,
-		Path:    routes.UserById,
-		Summary: "USER REPLACE",
+		Method:      http.MethodPut,
+		Path:        routes.UserById,
+		Summary:     "USER REPLACE",
 		Middlewares: huma.Middlewares{m.Auth},
 		Security: []map[string][]string{
 			{"cookieAuth": {}},
 		},
 	}, us.PutUser)
 	huma.Register(api, huma.Operation{
-		Method:  http.MethodPatch,
-		Path:    routes.UserById,
-		Summary: "USER UPDATE",
+		Method:      http.MethodPatch,
+		Path:        routes.UserById,
+		Summary:     "USER UPDATE",
 		Middlewares: huma.Middlewares{m.Auth},
 		Security: []map[string][]string{
 			{"cookieAuth": {}},
@@ -99,4 +99,22 @@ func (us *UserService) Register(api huma.API, m *mid.Middleware) {
 			{"cookieAuth": {}},
 		},
 	}, us.Me)
+	huma.Register(api, huma.Operation{
+		Method:      http.MethodPut,
+		Path:        routes.UpdateProfilePic,
+		Summary:     "PICTURE UPLOAD",
+		Middlewares: huma.Middlewares{m.Auth},
+		Security: []map[string][]string{
+			{"cookieAuth": {}},
+		},
+	}, us.UploadPP)
+	huma.Register(api, huma.Operation{
+		Method:			http.MethodGet,
+		Path:				routes.GetMyPicture,
+		Summary: 		"PICTURE MINE",
+		Middlewares: huma.Middlewares{m.Auth},
+		Security: []map[string][]string{
+			{"cookieAuth": {}},
+		},
+	}, us.GetMyPicture)
 }

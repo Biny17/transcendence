@@ -95,6 +95,16 @@ func PpPath(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldPpPath, v))
 }
 
+// SkinColor applies equality check predicate on the "skin_color" field. It's identical to SkinColorEQ.
+func SkinColor(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldSkinColor, v))
+}
+
+// FaceColor applies equality check predicate on the "face_color" field. It's identical to FaceColorEQ.
+func FaceColor(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldFaceColor, v))
+}
+
 // UsernameEQ applies the EQ predicate on the "username" field.
 func UsernameEQ(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldUsername, v))
@@ -508,6 +518,136 @@ func PpPathEqualFold(v string) predicate.User {
 // PpPathContainsFold applies the ContainsFold predicate on the "pp_path" field.
 func PpPathContainsFold(v string) predicate.User {
 	return predicate.User(sql.FieldContainsFold(FieldPpPath, v))
+}
+
+// SkinColorEQ applies the EQ predicate on the "skin_color" field.
+func SkinColorEQ(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldSkinColor, v))
+}
+
+// SkinColorNEQ applies the NEQ predicate on the "skin_color" field.
+func SkinColorNEQ(v string) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldSkinColor, v))
+}
+
+// SkinColorIn applies the In predicate on the "skin_color" field.
+func SkinColorIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldIn(FieldSkinColor, vs...))
+}
+
+// SkinColorNotIn applies the NotIn predicate on the "skin_color" field.
+func SkinColorNotIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldSkinColor, vs...))
+}
+
+// SkinColorGT applies the GT predicate on the "skin_color" field.
+func SkinColorGT(v string) predicate.User {
+	return predicate.User(sql.FieldGT(FieldSkinColor, v))
+}
+
+// SkinColorGTE applies the GTE predicate on the "skin_color" field.
+func SkinColorGTE(v string) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldSkinColor, v))
+}
+
+// SkinColorLT applies the LT predicate on the "skin_color" field.
+func SkinColorLT(v string) predicate.User {
+	return predicate.User(sql.FieldLT(FieldSkinColor, v))
+}
+
+// SkinColorLTE applies the LTE predicate on the "skin_color" field.
+func SkinColorLTE(v string) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldSkinColor, v))
+}
+
+// SkinColorContains applies the Contains predicate on the "skin_color" field.
+func SkinColorContains(v string) predicate.User {
+	return predicate.User(sql.FieldContains(FieldSkinColor, v))
+}
+
+// SkinColorHasPrefix applies the HasPrefix predicate on the "skin_color" field.
+func SkinColorHasPrefix(v string) predicate.User {
+	return predicate.User(sql.FieldHasPrefix(FieldSkinColor, v))
+}
+
+// SkinColorHasSuffix applies the HasSuffix predicate on the "skin_color" field.
+func SkinColorHasSuffix(v string) predicate.User {
+	return predicate.User(sql.FieldHasSuffix(FieldSkinColor, v))
+}
+
+// SkinColorEqualFold applies the EqualFold predicate on the "skin_color" field.
+func SkinColorEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldSkinColor, v))
+}
+
+// SkinColorContainsFold applies the ContainsFold predicate on the "skin_color" field.
+func SkinColorContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldSkinColor, v))
+}
+
+// FaceColorEQ applies the EQ predicate on the "face_color" field.
+func FaceColorEQ(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldFaceColor, v))
+}
+
+// FaceColorNEQ applies the NEQ predicate on the "face_color" field.
+func FaceColorNEQ(v string) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldFaceColor, v))
+}
+
+// FaceColorIn applies the In predicate on the "face_color" field.
+func FaceColorIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldIn(FieldFaceColor, vs...))
+}
+
+// FaceColorNotIn applies the NotIn predicate on the "face_color" field.
+func FaceColorNotIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldFaceColor, vs...))
+}
+
+// FaceColorGT applies the GT predicate on the "face_color" field.
+func FaceColorGT(v string) predicate.User {
+	return predicate.User(sql.FieldGT(FieldFaceColor, v))
+}
+
+// FaceColorGTE applies the GTE predicate on the "face_color" field.
+func FaceColorGTE(v string) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldFaceColor, v))
+}
+
+// FaceColorLT applies the LT predicate on the "face_color" field.
+func FaceColorLT(v string) predicate.User {
+	return predicate.User(sql.FieldLT(FieldFaceColor, v))
+}
+
+// FaceColorLTE applies the LTE predicate on the "face_color" field.
+func FaceColorLTE(v string) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldFaceColor, v))
+}
+
+// FaceColorContains applies the Contains predicate on the "face_color" field.
+func FaceColorContains(v string) predicate.User {
+	return predicate.User(sql.FieldContains(FieldFaceColor, v))
+}
+
+// FaceColorHasPrefix applies the HasPrefix predicate on the "face_color" field.
+func FaceColorHasPrefix(v string) predicate.User {
+	return predicate.User(sql.FieldHasPrefix(FieldFaceColor, v))
+}
+
+// FaceColorHasSuffix applies the HasSuffix predicate on the "face_color" field.
+func FaceColorHasSuffix(v string) predicate.User {
+	return predicate.User(sql.FieldHasSuffix(FieldFaceColor, v))
+}
+
+// FaceColorEqualFold applies the EqualFold predicate on the "face_color" field.
+func FaceColorEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldFaceColor, v))
+}
+
+// FaceColorContainsFold applies the ContainsFold predicate on the "face_color" field.
+func FaceColorContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldFaceColor, v))
 }
 
 // HasMailVerif applies the HasEdge predicate on the "mail_verif" edge.

@@ -21,6 +21,7 @@ services:
     volumes:
       - ./backend:/app
       - ./secret:/app/secret
+      - img:/app/img
     depends_on:
       db:
         condition: service_healthy
@@ -46,3 +47,4 @@ services:
 
 volumes:
   postgres_data:
+  img:
