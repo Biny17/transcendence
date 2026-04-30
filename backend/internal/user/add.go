@@ -2,6 +2,7 @@ package user
 
 import (
 	"backend/ent"
+	"backend/internal/chat"
 	"backend/internal/pkg"
 	"context"
 	"log"
@@ -57,6 +58,21 @@ func (us *UserService) AddUser(ctx context.Context, input *AddUserIn) (*AddUserO
 		}
 		return nil, huma.Error500InternalServerError("Internal Error")
 	}
+
+	// Ensure global group exists and add the new user to it
+	globalID, gerr := chat.EnsureGlobalGroup(ctx, us.Client)
+	if gerr != nil {
+		log.Print("failed to ensure global group:", gerr)
+		return nil, huma.Error500InternalServerError("Internal Error")
+	}
+	_, aerr := us.Client.Conversation.UpdateOneID(globalID).
+		AddParticipantIDs(new_user.ID).
+		Save(ctx)
+	if aerr != nil {
+		log.Print("failed to add user to global group:", aerr)
+		return nil, huma.Error500InternalServerError("Internal Error")
+	}
+
 	err = us.verifEmail(ctx, new_user)
 	if err != nil {
 		log.Print(err)

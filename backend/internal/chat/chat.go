@@ -4,7 +4,8 @@ import (
 	"backend/ent"
 	"backend/internal/auth"
 	"backend/internal/mid"
-	
+	"context"
+	"log"
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/go-chi/chi/v5"
 	"github.com/samber/do/v2"
@@ -95,6 +96,13 @@ func ProvideAndRegister(i do.Injector) *Handler {
 	m := do.MustInvoke[*mid.Middleware](i)
 
 	hub := NewHub(client)
+	
+	globalGroupID, err := EnsureGlobalGroup(context.Background(), client)
+    if err != nil {
+        log.Fatalf("failed to ensure global group: %v", err)
+    }
+	log.Printf("global group ID: %d", globalGroupID)
+
 	go hub.Run()
 
 	h := &Handler{
