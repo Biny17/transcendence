@@ -10,6 +10,7 @@ const (
 	UpdateEmail         = "/api/update/email"
 	UpdateUsername      = "/api/update/username"
 	UpdateProfilePic    = "/api/update/profile-picture"
+	GetMyPicture        = "/api/users/me/profile-picture"
 	UserById            = "/api/users/{id}"
 	GetUsers            = "/api/users"
 	ResendEmail         = "/api/users/resend-email/{id}"

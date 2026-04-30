@@ -11,8 +11,8 @@ import (
 )
 
 type PatchUser struct {
-	User_id   int        `path:"id"`
-	Body struct {
+	User_id int `path:"id"`
+	Body    struct {
 		Email     *string    `json:"email,omitempty"`
 		Username  *string    `json:"username,omitempty"`
 		Password  *string    `json:"password,omitempty"`
@@ -23,8 +23,8 @@ type PatchUser struct {
 }
 
 type PutUser struct {
-	User_id   int       `path:"id"`
-	Body struct {
+	User_id int `path:"id"`
+	Body    struct {
 		Email     string    `json:"email"`
 		Username  string    `json:"username"`
 		Password  string    `json:"password"`
@@ -83,7 +83,7 @@ func (pi PatchUser) String() string {
 }
 
 func (us *UserService) PatchUser(ctx context.Context, input *PatchUser) (*InfoOut, error) {
-	if pkg.CheckdMatchContextSub(ctx, input.User_id) != nil {
+	if pkg.CheckIdMatchContextSub(ctx, input.User_id) != nil {
 		return nil, huma.Error401Unauthorized("")
 	}
 	user, err := us.Client.User.Get(ctx, input.User_id)

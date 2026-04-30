@@ -100,8 +100,21 @@ func (us *UserService) Register(api huma.API, m *mid.Middleware) {
 		},
 	}, us.Me)
 	huma.Register(api, huma.Operation{
-		Method:  http.MethodPut,
-		Path:    routes.UpdateProfilePic,
-		Summary: "PICTURE",
+		Method:      http.MethodPut,
+		Path:        routes.UpdateProfilePic,
+		Summary:     "PICTURE UPLOAD",
+		Middlewares: huma.Middlewares{m.Auth},
+		Security: []map[string][]string{
+			{"cookieAuth": {}},
+		},
 	}, us.UploadPP)
+	huma.Register(api, huma.Operation{
+		Method:			http.MethodGet,
+		Path:				routes.GetMyPicture,
+		Summary: 		"PICTURE MINE",
+		Middlewares: huma.Middlewares{m.Auth},
+		Security: []map[string][]string{
+			{"cookieAuth": {}},
+		},
+	}, us.GetMyPicture)
 }
