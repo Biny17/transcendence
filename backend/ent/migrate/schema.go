@@ -12,6 +12,8 @@ var (
 	ConversationsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "is_group", Type: field.TypeBool, Default: false},
+		{Name: "title", Type: field.TypeString, Nullable: true},
 	}
 	// ConversationsTable holds the schema information for the "conversations" table.
 	ConversationsTable = &schema.Table{

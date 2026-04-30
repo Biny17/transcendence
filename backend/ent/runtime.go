@@ -22,6 +22,10 @@ func init() {
 	conversationDescCreatedAt := conversationFields[0].Descriptor()
 	// conversation.DefaultCreatedAt holds the default value on creation for the created_at field.
 	conversation.DefaultCreatedAt = conversationDescCreatedAt.Default.(func() time.Time)
+	// conversationDescIsGroup is the schema descriptor for is_group field.
+	conversationDescIsGroup := conversationFields[1].Descriptor()
+	// conversation.DefaultIsGroup holds the default value on creation for the is_group field.
+	conversation.DefaultIsGroup = conversationDescIsGroup.Default.(bool)
 	friendshipFields := schema.Friendship{}.Fields()
 	_ = friendshipFields
 	// friendshipDescCreatedAt is the schema descriptor for created_at field.

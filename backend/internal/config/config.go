@@ -18,8 +18,8 @@ type ConfigDB struct {
 }
 
 type ConfigNet struct {
-	Host string `mapstructure:"HOST"`
-	Port string `mapstructure:"PORT"`
+	Host string `mapstructure:"API_HOST"`
+	Port string `mapstructure:"API_PORT"`
 }
 
 type ConfigMail struct {

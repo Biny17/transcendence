@@ -93,10 +93,16 @@ func (c *Client) ReadPump() {
 			log.Printf("failed to save message: %v", err)
 			continue
 		}
+		sender, err := c.Hub.DB.User.Get(ctx, c.UserID)
+		if err != nil {
+			log.Printf("failed to fetch sender: %v", err)
+			continue
+		}
 		broadcastMsg, _ := json.Marshal(map[string]interface{}{
 			"id":              msg.ID,
 			"conversation_id": payload.ConversationID,
 			"sender_id":       c.UserID,
+			"sender_username": sender.Username,
 			"content":         msg.Content,
 			"created_at":      msg.CreatedAt,
 		})

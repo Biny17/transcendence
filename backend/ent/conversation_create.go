@@ -36,6 +36,34 @@ func (_c *ConversationCreate) SetNillableCreatedAt(v *time.Time) *ConversationCr
 	return _c
 }
 
+// SetIsGroup sets the "is_group" field.
+func (_c *ConversationCreate) SetIsGroup(v bool) *ConversationCreate {
+	_c.mutation.SetIsGroup(v)
+	return _c
+}
+
+// SetNillableIsGroup sets the "is_group" field if the given value is not nil.
+func (_c *ConversationCreate) SetNillableIsGroup(v *bool) *ConversationCreate {
+	if v != nil {
+		_c.SetIsGroup(*v)
+	}
+	return _c
+}
+
+// SetTitle sets the "title" field.
+func (_c *ConversationCreate) SetTitle(v string) *ConversationCreate {
+	_c.mutation.SetTitle(v)
+	return _c
+}
+
+// SetNillableTitle sets the "title" field if the given value is not nil.
+func (_c *ConversationCreate) SetNillableTitle(v *string) *ConversationCreate {
+	if v != nil {
+		_c.SetTitle(*v)
+	}
+	return _c
+}
+
 // AddMessageIDs adds the "messages" edge to the Message entity by IDs.
 func (_c *ConversationCreate) AddMessageIDs(ids ...int) *ConversationCreate {
 	_c.mutation.AddMessageIDs(ids...)
@@ -105,12 +133,19 @@ func (_c *ConversationCreate) defaults() {
 		v := conversation.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
+	if _, ok := _c.mutation.IsGroup(); !ok {
+		v := conversation.DefaultIsGroup
+		_c.mutation.SetIsGroup(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *ConversationCreate) check() error {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Conversation.created_at"`)}
+	}
+	if _, ok := _c.mutation.IsGroup(); !ok {
+		return &ValidationError{Name: "is_group", err: errors.New(`ent: missing required field "Conversation.is_group"`)}
 	}
 	if len(_c.mutation.ParticipantsIDs()) == 0 {
 		return &ValidationError{Name: "participants", err: errors.New(`ent: missing required edge "Conversation.participants"`)}
@@ -144,6 +179,14 @@ func (_c *ConversationCreate) createSpec() (*Conversation, *sqlgraph.CreateSpec)
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(conversation.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
+	}
+	if value, ok := _c.mutation.IsGroup(); ok {
+		_spec.SetField(conversation.FieldIsGroup, field.TypeBool, value)
+		_node.IsGroup = value
+	}
+	if value, ok := _c.mutation.Title(); ok {
+		_spec.SetField(conversation.FieldTitle, field.TypeString, value)
+		_node.Title = value
 	}
 	if nodes := _c.mutation.MessagesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
