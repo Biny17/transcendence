@@ -200,7 +200,7 @@ useEffect(() => {
 }, []);
 
 useEffect(() =>{props.FriendsDisplay ? fetchFriends():fetchUsers(); findPendingRequests(); fetchImg();}, [props.FriendsDisplay, props.FriendsRequestsOpen, deleted])
-useEffect(() => {alreadyFriends(); findSentRequests();})
+useEffect(() => {alreadyFriends(); findSentRequests();},[])
 // players.sort((a, b) => b.win - a.win);
   return (
     <div className="w-full h-full flex flex-col items-center justify-center bg-[#0b1328]">

@@ -103,6 +103,7 @@ export default function Chat() {
       if (response.status === 200)
       {
         setMessages(data)
+        console.log(data)
       }
     } 
     catch (error) 
@@ -260,15 +261,16 @@ export default function Chat() {
                 //     />
                 //   );
                 // }
-
+                const senderName = msg.sender_username ?? msg.sender?.username ?? "Unknown";
                 return (
+                  
                   <PrimaryMessage
                     className="mt-4"
                     key={msg.id}
                     // avatarSrc={msg.sender.avatarUrl}
                     // avatarAlt={msg.sender.username}
                     // avatarFallback={msg.sender.username.slice(0, 2)}
-                    senderName={msg.sender_username}
+                    senderName={senderName }
                     content={msg.content}
                     timestamp={msg.created_at}
                   />
