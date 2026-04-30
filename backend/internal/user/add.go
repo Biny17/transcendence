@@ -11,7 +11,7 @@ import (
 
 type AddUserIn struct {
 	Body struct {
-		Username string `json:"username"`
+		Username string `json:"username" minLength:"3" maxLength:"12"`
 		Age      int    `json:"age" minimum:"1" maximum:"99"`
 		Email    string `json:"email" format:"email"`
 		Password string `json:"password"`

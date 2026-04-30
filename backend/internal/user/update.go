@@ -5,6 +5,7 @@ import (
 	"backend/internal/pkg"
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -19,6 +20,8 @@ type PatchUser struct {
 		Verified  *bool      `json:"verified,omitempty"`
 		Age       *int       `json:"age,omitempty"`
 		CreatedAt *time.Time `json:"created_at,omitempty"`
+		Skin      *Color     `json:"skin_color,omitempty"`
+		Face      *Color     `json:"face_color,omitempty"`
 	}
 }
 
@@ -31,6 +34,8 @@ type PutUser struct {
 		Verified  bool      `json:"verified"`
 		Age       int       `json:"age"`
 		CreatedAt time.Time `json:"created_at"`
+		Skin      Color     `json:"skin_color,omitempty"`
+		Face      Color     `json:"face_color,omitempty"`
 	}
 }
 
@@ -55,6 +60,8 @@ func (us *UserService) PutUser(ctx context.Context, input *PutUser) (*InfoOut, e
 		SetVerifiedEmail(input.Body.Verified).
 		SetAge(input.Body.Age).
 		SetCreatedAt(input.Body.CreatedAt).
+		SetSkinColor(strings.ToLower(string(input.Body.Skin))).
+		SetFaceColor(strings.ToLower(string(input.Body.Face))).
 		Save(ctx)
 	if err != nil {
 		if ent.IsConstraintError(err) {
@@ -70,6 +77,8 @@ func (us *UserService) PutUser(ctx context.Context, input *PutUser) (*InfoOut, e
 		Verified: user.VerifiedEmail,
 		Age:      user.Age,
 		Created:  user.CreatedAt,
+		Skin:     user.SkinColor,
+		Face:     user.FaceColor,
 	})
 	return out, nil
 }
@@ -115,6 +124,12 @@ func (us *UserService) PatchUser(ctx context.Context, input *PatchUser) (*InfoOu
 	if input.Body.CreatedAt != nil && input.Body.CreatedAt.Before(time.Now()) {
 		up.SetCreatedAt(*input.Body.CreatedAt)
 	}
+	if input.Body.Skin != nil {
+		up.SetSkinColor(strings.ToLower(string(*input.Body.Skin)))
+	}
+	if input.Body.Face != nil {
+		up.SetFaceColor(strings.ToLower(string(*input.Body.Face)))
+	}
 	user, err = up.Save(ctx)
 	if err != nil {
 		if ent.IsConstraintError(err) {
@@ -130,6 +145,8 @@ func (us *UserService) PatchUser(ctx context.Context, input *PatchUser) (*InfoOu
 		Verified: user.VerifiedEmail,
 		Age:      user.Age,
 		Created:  user.CreatedAt,
+		Skin:     user.SkinColor,
+		Face:     user.FaceColor,
 	})
 	return out, nil
 }

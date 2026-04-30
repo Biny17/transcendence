@@ -29,6 +29,8 @@ type UserInfo struct {
 	Verified bool      `json:"verified"`
 	Age      int       `json:"age"`
 	Created  time.Time `json:"created_at"`
+	Skin     string    `json:"skin_color"`
+	Face     string    `json:"face_color"`
 }
 
 type InfoOut struct {
@@ -52,6 +54,8 @@ func (us *UserService) AllUsers(ctx context.Context, input *struct{}) (*InfoOut,
 			Verified: user.VerifiedEmail,
 			Age:      user.Age,
 			Created:  user.CreatedAt,
+			Skin:     user.SkinColor,
+			Face:     user.FaceColor,
 		})
 	}
 	return &InfoOut{Body: user_infos}, nil
@@ -92,6 +96,8 @@ func (us *UserService) QueryUser(ctx context.Context, input *InfoIn) (*InfoOut, 
 		Verified: res.VerifiedEmail,
 		Age:      res.Age,
 		Created:  res.CreatedAt,
+		Skin:     res.SkinColor,
+		Face:     res.FaceColor,
 	})
 	return out, nil
 }
