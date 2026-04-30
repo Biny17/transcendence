@@ -58,18 +58,18 @@ export default function Chat() {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [ConversationId, setConversationId] = useState("");
-  // let id = 0;
   const socketRef = useRef(null);
 
   async function findConversationId(){
 
-  const url = 'http://localhost:8080/api/chat/conversation';
+  const url = 'http://localhost:8080/api/chat/group-conversation';
 
-    const options = {method: 'POST', credentials: 'include', headers: {'Accept': 'application/json, application/problem+json', 'Content-Type': 'application/json'}, body: '{"target_user_id":2}'};
+    const options = {method: 'POST', credentials: 'include', headers: {'Accept': 'application/json, application/problem+json', 'Content-Type': 'application/json'}, body: '{"participant_ids":[8, 9, 10],"title":"chat"}'};
     try 
 	  {
       const response = await fetch(url, options);
       const data = await response.json();
+      console.log(data)
       if (!response.ok) 
       {
         const err = await response.json();
@@ -102,7 +102,6 @@ export default function Chat() {
       }
       if (response.status === 200)
       {
-        //console.log(data)
         setMessages(data)
       }
     } 
@@ -112,13 +111,62 @@ export default function Chat() {
     }
   }
 
-  
+  async function joinConversation(convId, pId){
+    const url = 'http://localhost:8080/api/chat/group-conversation/' + convId + '/join';
+    const options = {method: 'POST', credentials: 'include', 
+      headers: {'Accept': 'application/json, application/problem+json', 'Content-Type': 'application/json'}, 
+      body: '{"participant_ids":[' + pId + ']}'};
+    try 
+	  {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      if (!response.ok) 
+      {
+        const err = await response.json();
+        throw new Error(err.title);
+      }
+      if (response.status === 200)
+      {
+        console.log("You just join the conversation!")
+      }
+    } 
+    catch (error) 
+    {
+      console.log(error);
+    }
+  }
+
+  async function definePlayerId(){
+    const url = 'http://localhost:8080/api/users/me';
+    const options = {method: 'GET', credentials: 'include', 
+      headers: {'Accept': 'application/json, application/problem+json', 'Content-Type': 'application/json'}};
+    try 
+	  {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      if (!response.ok) 
+      {
+        const err = await response.json();
+        throw new Error(err.title);
+      }
+      if (response.status === 200)
+      {
+        return(data[0].id)
+      }
+    } 
+    catch (error) 
+    {
+      console.log(error);
+    }
+  }
+
   useEffect(() => {
   
-   async function init() {
+   async function initChat() {
     const convId = await findConversationId();
-    console.log(convId)
-    fetchConversationHistory(convId);
+    const pId = await definePlayerId();
+    // joinConversation(convId, pId);
+    fetchConversationHistory(40);
 
     const socket = new WebSocket("ws://localhost:8080/api/chat/ws");
     socketRef.current = socket;
@@ -127,9 +175,10 @@ export default function Chat() {
       console.log("WebSocket connected");
     });
 
-    socket.addEventListener("message", () => {
+    socket.addEventListener("message", (event) => {
       console.info("new message, update chat !");
-      fetchConversationHistory(convId);
+      const payload = JSON.parse(event.data)
+      setMessages((prev) => [payload, ...prev]);
     });
 
     socket.addEventListener("error", (event) => {
@@ -140,7 +189,7 @@ export default function Chat() {
       console.log("WebSocket closed");
     });
   }
-  init()
+  initChat()
   }, []);
 
   const sendMessage = async () => {
@@ -150,8 +199,7 @@ export default function Chat() {
       return;
     }
     if (!input.trim()) return;
-    socket.send(JSON.stringify({ conversation_id: ConversationId, content: input }));
-    fetchConversationHistory(ConversationId);
+    socket.send(JSON.stringify({ conversation_id: 40, content: input }));
     setInput("");
   };
 
@@ -220,7 +268,7 @@ export default function Chat() {
                     // avatarSrc={msg.sender.avatarUrl}
                     // avatarAlt={msg.sender.username}
                     // avatarFallback={msg.sender.username.slice(0, 2)}
-                    senderName={msg.sender.username}
+                    senderName={msg.sender_username}
                     content={msg.content}
                     timestamp={msg.created_at}
                   />
