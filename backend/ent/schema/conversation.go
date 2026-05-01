@@ -28,7 +28,6 @@ func (Conversation) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("messages", Message.Type),
 		edge.From("participants", User.Type).
-		Ref("conversations").
-		Required(),
+			Ref("conversations"),
 	}
 }

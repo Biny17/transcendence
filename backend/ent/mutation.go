@@ -2185,6 +2185,8 @@ type UserMutation struct {
 	hash                 *string
 	verified_email       *bool
 	pp_path              *string
+	skin_color           *string
+	face_color           *string
 	clearedFields        map[string]struct{}
 	mail_verif           *int
 	clearedmail_verif    bool
@@ -2611,6 +2613,78 @@ func (m *UserMutation) ResetPpPath() {
 	m.pp_path = nil
 }
 
+// SetSkinColor sets the "skin_color" field.
+func (m *UserMutation) SetSkinColor(s string) {
+	m.skin_color = &s
+}
+
+// SkinColor returns the value of the "skin_color" field in the mutation.
+func (m *UserMutation) SkinColor() (r string, exists bool) {
+	v := m.skin_color
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSkinColor returns the old "skin_color" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldSkinColor(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSkinColor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSkinColor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSkinColor: %w", err)
+	}
+	return oldValue.SkinColor, nil
+}
+
+// ResetSkinColor resets all changes to the "skin_color" field.
+func (m *UserMutation) ResetSkinColor() {
+	m.skin_color = nil
+}
+
+// SetFaceColor sets the "face_color" field.
+func (m *UserMutation) SetFaceColor(s string) {
+	m.face_color = &s
+}
+
+// FaceColor returns the value of the "face_color" field in the mutation.
+func (m *UserMutation) FaceColor() (r string, exists bool) {
+	v := m.face_color
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFaceColor returns the old "face_color" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldFaceColor(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFaceColor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFaceColor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFaceColor: %w", err)
+	}
+	return oldValue.FaceColor, nil
+}
+
+// ResetFaceColor resets all changes to the "face_color" field.
+func (m *UserMutation) ResetFaceColor() {
+	m.face_color = nil
+}
+
 // SetMailVerifID sets the "mail_verif" edge to the MailVerif entity by id.
 func (m *UserMutation) SetMailVerifID(id int) {
 	m.mail_verif = &id
@@ -2900,7 +2974,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 10)
 	if m.username != nil {
 		fields = append(fields, user.FieldUsername)
 	}
@@ -2924,6 +2998,12 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.pp_path != nil {
 		fields = append(fields, user.FieldPpPath)
+	}
+	if m.skin_color != nil {
+		fields = append(fields, user.FieldSkinColor)
+	}
+	if m.face_color != nil {
+		fields = append(fields, user.FieldFaceColor)
 	}
 	return fields
 }
@@ -2949,6 +3029,10 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.VerifiedEmail()
 	case user.FieldPpPath:
 		return m.PpPath()
+	case user.FieldSkinColor:
+		return m.SkinColor()
+	case user.FieldFaceColor:
+		return m.FaceColor()
 	}
 	return nil, false
 }
@@ -2974,6 +3058,10 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldVerifiedEmail(ctx)
 	case user.FieldPpPath:
 		return m.OldPpPath(ctx)
+	case user.FieldSkinColor:
+		return m.OldSkinColor(ctx)
+	case user.FieldFaceColor:
+		return m.OldFaceColor(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -3038,6 +3126,20 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPpPath(v)
+		return nil
+	case user.FieldSkinColor:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSkinColor(v)
+		return nil
+	case user.FieldFaceColor:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFaceColor(v)
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
@@ -3126,6 +3228,12 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldPpPath:
 		m.ResetPpPath()
+		return nil
+	case user.FieldSkinColor:
+		m.ResetSkinColor()
+		return nil
+	case user.FieldFaceColor:
+		m.ResetFaceColor()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)

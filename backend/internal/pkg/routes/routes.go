@@ -28,4 +28,6 @@ const (
 	JoinGroupConversation   = "/api/chat/group-conversation/{id}/join"
 	GetConversations        = "/api/chat/conversations"
 	ConversationHistory     = "/api/chat/conversation/{id}/messages"
+	UpdateProfilePic        = "/api/users/me/profile-picture"
+	GetMyPicture			= "/api/update/profile-picture"
 )

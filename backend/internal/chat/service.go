@@ -225,3 +225,28 @@ func GetUserConversations(ctx context.Context, db *ent.Client, userID int) ([]*C
 	}
 	return result, nil
 }
+
+func EnsureGlobalGroup(ctx context.Context, db *ent.Client) (int, error) {
+	// Check if global group already exists
+	conv, err := db.Conversation.Query().
+		Where(conversation.IsGroup(true)).
+		Where(conversation.TitleEQ("Global")).
+		Only(ctx)
+
+	if err == nil {
+		return conv.ID, nil
+	}
+
+	if !ent.IsNotFound(err) {
+		return 0, err
+	}
+
+	conv, err = db.Conversation.Create().
+		SetIsGroup(true).
+		SetTitle("Global").
+		Save(ctx)
+	if err != nil {
+		return 0, err
+	}
+	return conv.ID, nil
+}

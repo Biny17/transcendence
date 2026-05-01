@@ -147,9 +147,6 @@ func (_c *ConversationCreate) check() error {
 	if _, ok := _c.mutation.IsGroup(); !ok {
 		return &ValidationError{Name: "is_group", err: errors.New(`ent: missing required field "Conversation.is_group"`)}
 	}
-	if len(_c.mutation.ParticipantsIDs()) == 0 {
-		return &ValidationError{Name: "participants", err: errors.New(`ent: missing required edge "Conversation.participants"`)}
-	}
 	return nil
 }
 

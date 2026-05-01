@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -34,6 +35,10 @@ func main() {
 	log.Printf("\tSTARTINGG\n")
 	log.Printf("-------------------\n")
 
+	err := os.MkdirAll("./img/", 0755)
+	if err != nil {
+		log.Fatal(err)
+	}
 	inj := do.New()
 	addProviders(inj)
 	addServices(inj)
