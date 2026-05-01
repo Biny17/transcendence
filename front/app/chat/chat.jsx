@@ -60,32 +60,32 @@ export default function Chat() {
   const [ConversationId, setConversationId] = useState("");
   const socketRef = useRef(null);
 
-  async function findConversationId(){
+//   async function findConversationId(){
 
-  const url = 'http://localhost:8080/api/chat/group-conversation';
+//   const url = 'http://localhost:8080/api/chat/group-conversation';
 
-    const options = {method: 'POST', credentials: 'include', headers: {'Accept': 'application/json, application/problem+json', 'Content-Type': 'application/json'}, body: '{"participant_ids":[8, 9, 10],"title":"chat"}'};
-    try 
-	  {
-      const response = await fetch(url, options);
-      const data = await response.json();
-      console.log(data)
-      if (!response.ok) 
-      {
-        const err = await response.json();
-        throw new Error(err.title);
-      }
-      if (response.status === 200)
-      {
-        setConversationId(data.conversation_id)
-        return(data.conversation_id)
-      }
-    } 
-    catch (error) 
-    {
-      console.log(error);
-    }
-  }
+//     const options = {method: 'POST', credentials: 'include', headers: {'Accept': 'application/json, application/problem+json', 'Content-Type': 'application/json'}, body: '{"participant_ids":[8, 9, 10],"title":"chat"}'};
+//     try 
+// 	  {
+//       const response = await fetch(url, options);
+//       const data = await response.json();
+//       console.log(data)
+//       if (!response.ok) 
+//       {
+//         const err = await response.json();
+//         throw new Error(err.title);
+//       }
+//       if (response.status === 200)
+//       {
+//         setConversationId(data.conversation_id)
+//         return(data.conversation_id)
+//       }
+//     } 
+//     catch (error) 
+//     {
+//       console.log(error);
+//     }
+//   }
 
   async function fetchConversationHistory(convId){
     const url = 'http://localhost:8080/api/chat/conversation/' + convId + '/messages';
@@ -112,30 +112,30 @@ export default function Chat() {
     }
   }
 
-  async function joinConversation(convId, pId){
-    const url = 'http://localhost:8080/api/chat/group-conversation/' + convId + '/join';
-    const options = {method: 'POST', credentials: 'include', 
-      headers: {'Accept': 'application/json, application/problem+json', 'Content-Type': 'application/json'}, 
-      body: '{"participant_ids":[' + pId + ']}'};
-    try 
-	  {
-      const response = await fetch(url, options);
-      const data = await response.json();
-      if (!response.ok) 
-      {
-        const err = await response.json();
-        throw new Error(err.title);
-      }
-      if (response.status === 200)
-      {
-        console.log("You just join the conversation!")
-      }
-    } 
-    catch (error) 
-    {
-      console.log(error);
-    }
-  }
+//   async function joinConversation(convId, pId){
+//     const url = 'http://localhost:8080/api/chat/group-conversation/' + convId + '/join';
+//     const options = {method: 'POST', credentials: 'include', 
+//       headers: {'Accept': 'application/json, application/problem+json', 'Content-Type': 'application/json'}, 
+//       body: '{"participant_ids":[' + pId + ']}'};
+//     try 
+// 	  {
+//       const response = await fetch(url, options);
+//       const data = await response.json();
+//       if (!response.ok) 
+//       {
+//         const err = await response.json();
+//         throw new Error(err.title);
+//       }
+//       if (response.status === 200)
+//       {
+//         console.log("You just join the conversation!")
+//       }
+//     } 
+//     catch (error) 
+//     {
+//       console.log(error);
+//     }
+//   }
 
   async function definePlayerId(){
     const url = 'http://localhost:8080/api/users/me';
@@ -164,10 +164,10 @@ export default function Chat() {
   useEffect(() => {
   
    async function initChat() {
-    const convId = await findConversationId();
+    const convId = 1;
     const pId = await definePlayerId();
     // joinConversation(convId, pId);
-    fetchConversationHistory(40);
+    fetchConversationHistory(1);
 
     const socket = new WebSocket("ws://localhost:8080/api/chat/ws");
     socketRef.current = socket;
@@ -200,7 +200,7 @@ export default function Chat() {
       return;
     }
     if (!input.trim()) return;
-    socket.send(JSON.stringify({ conversation_id: 40, content: input }));
+    socket.send(JSON.stringify({ conversation_id: 1, content: input }));
     setInput("");
   };
 

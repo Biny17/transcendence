@@ -55,7 +55,7 @@ services:
     volumes:
       - ./backend:/app
       - ./secret:/app/secret
-      - img:/app/img
+      - ./backend/img:/app/img
     depends_on:
       db:
         condition: service_healthy
