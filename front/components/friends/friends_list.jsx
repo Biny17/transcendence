@@ -157,16 +157,23 @@ async function alreadyFriends() {
 }
 
 async function fetchImg() {
-  const url = 'https://picsum.photos/v2/list?page=2&limit=30'
-  const options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
+  const url = 'http://localhost:8080/api/update/profile-picture';
+  const options = {method: 'GET',  credentials: 'include', headers: {Accept: 'application/json, application/problem+json'}};
   try {
     const response = await fetch(url, options);
-    const data = await response.json();
-    setImg(data)
+    if (!response.ok) {
+      setImg("");
+      return;
+    }
+    const blob = await response.blob();
+    const imgUrl = URL.createObjectURL(blob);
+    setImg(imgUrl);
   } catch (error) {
     console.error(error);
+    setImg("");
   }
 }
+
 async function fetchData(id) {
   const url = 'http://localhost:8080/api/users/' + id;
   const options = {
@@ -200,7 +207,7 @@ useEffect(() => {
 }, []);
 
 useEffect(() =>{props.FriendsDisplay ? fetchFriends():fetchUsers(); findPendingRequests(); fetchImg();}, [props.FriendsDisplay, props.FriendsRequestsOpen, deleted])
-useEffect(() => {alreadyFriends(); findSentRequests();})
+useEffect(() => {alreadyFriends(); findSentRequests();}, [])
 // players.sort((a, b) => b.win - a.win);
   return (
     <div className="w-full h-full flex flex-col items-center justify-center bg-[#0b1328]">
@@ -225,7 +232,7 @@ useEffect(() => {alreadyFriends(); findSentRequests();})
               <span className="font-bold w-6 text-center">{idx + 1}</span>
               <img
                 alt={player.username}
-                src={Img[idx]?.download_url || Img[idx]?.url }
+                src={Img}
                 className="relative inline-block h-12 w-12 rounded-full! object-cover object-center"
               />
             </div>

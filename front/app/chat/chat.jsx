@@ -58,34 +58,27 @@ export default function Chat() {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [ConversationId, setConversationId] = useState("");
+  const [Img, setImg] = useState("");
   const socketRef = useRef(null);
 
-//   async function findConversationId(){
 
-//   const url = 'http://localhost:8080/api/chat/group-conversation';
-
-//     const options = {method: 'POST', credentials: 'include', headers: {'Accept': 'application/json, application/problem+json', 'Content-Type': 'application/json'}, body: '{"participant_ids":[8, 9, 10],"title":"chat"}'};
-//     try 
-// 	  {
-//       const response = await fetch(url, options);
-//       const data = await response.json();
-//       console.log(data)
-//       if (!response.ok) 
-//       {
-//         const err = await response.json();
-//         throw new Error(err.title);
-//       }
-//       if (response.status === 200)
-//       {
-//         setConversationId(data.conversation_id)
-//         return(data.conversation_id)
-//       }
-//     } 
-//     catch (error) 
-//     {
-//       console.log(error);
-//     }
-//   }
+async function fetchImg() {
+  const url = 'http://localhost:8080/api/update/profile-picture';
+  const options = {method: 'GET',  credentials: 'include', headers: {Accept: 'application/json, application/problem+json'}};
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      setImg("");
+      return;
+    }
+    const blob = await response.blob();
+    const imgUrl = URL.createObjectURL(blob);
+    setImg(imgUrl);
+  } catch (error) {
+    console.error(error);
+    setImg("");
+  }
+}
 
   async function fetchConversationHistory(convId){
     const url = 'http://localhost:8080/api/chat/conversation/' + convId + '/messages';
@@ -111,31 +104,6 @@ export default function Chat() {
       console.log(error);
     }
   }
-
-//   async function joinConversation(convId, pId){
-//     const url = 'http://localhost:8080/api/chat/group-conversation/' + convId + '/join';
-//     const options = {method: 'POST', credentials: 'include', 
-//       headers: {'Accept': 'application/json, application/problem+json', 'Content-Type': 'application/json'}, 
-//       body: '{"participant_ids":[' + pId + ']}'};
-//     try 
-// 	  {
-//       const response = await fetch(url, options);
-//       const data = await response.json();
-//       if (!response.ok) 
-//       {
-//         const err = await response.json();
-//         throw new Error(err.title);
-//       }
-//       if (response.status === 200)
-//       {
-//         console.log("You just join the conversation!")
-//       }
-//     } 
-//     catch (error) 
-//     {
-//       console.log(error);
-//     }
-//   }
 
   async function definePlayerId(){
     const url = 'http://localhost:8080/api/users/me';
@@ -191,6 +159,7 @@ export default function Chat() {
     });
   }
   initChat()
+  fetchImg()
   }, []);
 
   const sendMessage = async () => {
@@ -267,8 +236,8 @@ export default function Chat() {
                   <PrimaryMessage
                     className="mt-4"
                     key={msg.id}
-                    // avatarSrc={msg.sender.avatarUrl}
-                    // avatarAlt={msg.sender.username}
+                    avatarSrc={Img}
+                    avatarAlt={senderName}
                     // avatarFallback={msg.sender.username.slice(0, 2)}
                     senderName={senderName }
                     content={msg.content}

@@ -21,11 +21,35 @@ export function Profile({ SetProfileOpen }) {
       const response = await fetch(url, options);
       const data = await response.json();
       setProfile({age: data[0].age, email: data[0].email, password: ".........", username: data[0].username })
-	    setinitialProfile({age: data[0].age, email: data[0].email, password: ".........", username: data[0].username })
+	  setinitialProfile({age: data[0].age, email: data[0].email, password: ".........", username: data[0].username })
     } catch (error) {
       console.error(error);
     }
   }
+    async function uploadPicture(e){
+    const url = 'http://localhost:8080/api/users/me/profile-picture';
+    const file = event.target.files[0];
+    if (file)
+    {
+        const form = new FormData();
+        form.append('file', file);
+        const options = {method: 'PUT', credentials: 'include', headers: {'Accept': 'application/json, application/problem+json'}}
+        options.body = form;
+        try {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.title);
+            }
+        if (response.status === 200)
+        {
+        console.log("avatar changed!")
+        }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+}
 
   function getCookie(name) {
     return document.cookie
@@ -74,6 +98,10 @@ export function Profile({ SetProfileOpen }) {
 	  	setEmailError("Invalid credentials");
     }
   }
+
+function handleFileSelect(e){
+
+}
 
 async function handleDelete() {
   const url = 'http://localhost:8080/api/users/delete?user_id='+ decoded;
@@ -169,7 +197,7 @@ async function handleDelete() {
               type="file"
               accept="image/*"
               style={{ display: 'none' }}
-              // onChange={handleFileSelect}
+              onChange={(event) => uploadPicture(event)}
             />
             <Button statement="Delete Profile" onClick={() => {handleDelete()}} />
             <Button statement="Save Changes" onClick={() => {handleSave()}} />

@@ -36,7 +36,6 @@ async function fetchImg() {
     }
     const blob = await response.blob();
     const imgUrl = URL.createObjectURL(blob);
-    console.log(imgUrl)
     setImg(imgUrl);
   } catch (error) {
     console.error(error);
