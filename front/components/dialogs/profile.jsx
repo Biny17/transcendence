@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useRef } from "react";
 import { useRouter } from 'next/navigation';
 
-export function Profile({ SetProfileOpen }) {
+export function Profile({ SetProfileOpen}) {
   const [Profile, setProfile] = useState({ age: "", email: "", password: ".........", username: "" })
   const [initialProfile, setinitialProfile] = useState({ age: "", email: "", password: ".........", username: "" })
   const [userError, setUserError] = useState("")
@@ -43,10 +43,10 @@ export function Profile({ SetProfileOpen }) {
             }
         if (response.status === 200)
         {
-        console.log("avatar changed!")
+            console.log("avatar changed!")
         }
         } catch (error) {
-            console.error(error);
+        console.error(error);
         }
     }
 }

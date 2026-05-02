@@ -31,26 +31,22 @@ import { AdditionalMessage } from "@/components/examples/additional-message";
 import { DateItem } from "@/components/examples/date-item";
 import MenuOptions from "@/components/cards/menu_options";
 
-export default function Options({setOptionsOpen}) {
+export default function Options(props) {
   
 
   return (
-  <>
-    {(
     <div
       className="w-70 h-110 lg:w-90 lg:h-100 xl:w-90 xl:h-130 z-50 shadow-xl rounded-3xl border-yellow border-20 table-fixed border-double overflow-hidden"
       style={{ fontFamily: "var(--font-party-title), var(--font-geist-sans), sans-serif" }}
     >
       <ChatContainer className="h-full">
-      <ChatHeader className="border-b bg-yellow">
-        <ChatHeaderMain >
-        <span className="font-medium">Options</span>
-        </ChatHeaderMain>
-      </ChatHeader>
-        <MenuOptions setOptionsOpen={setOptionsOpen} />
-		  </ChatContainer>
-		</div>
-	  )}
-	</>
+        <ChatHeader className="border-b bg-yellow">
+          <ChatHeaderMain>
+            <span className="font-medium">Options</span>
+          </ChatHeaderMain>
+        </ChatHeader>
+        <MenuOptions  setOptionsOpen={props.setOptionsOpen} />
+      </ChatContainer>
+    </div>
   );
 }

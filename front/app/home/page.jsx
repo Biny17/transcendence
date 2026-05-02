@@ -60,12 +60,12 @@ useEffect(function () {
       </motion.div>
     </div>
     <div className="chat xl:fixed xl:right-2 xl:top-1/2 xl:-translate-y-1/2">
-      <Online />
+      <Online OptionsOpen={OptionsOpen}/>
     </div>
   </div>
 </div>
       <div className= "chat">
-        <Chat />
+        <Chat OptionsOpen={OptionsOpen}/>
       </div>
     <div className="absolute inset-x-4 bottom-5 h-17 ...">
         <SimpleFooter setPrivacyOpen={setPrivacyOpen}/>

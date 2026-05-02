@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Badge } from "@material-tailwind/react";
 
-export default function ListCard() {
+export default function ListCard({OptionsOpen}) {
   // const players = [
   //   {  name: "Tania Andrew", img: "https://docs.material-tailwind.com/img/face-1.jpg", win: 20 },
   //   {  name: "Alexander", img: "https://docs.material-tailwind.com/img/face-2.jpg", win: 18 },
@@ -15,7 +15,7 @@ export default function ListCard() {
   //   { name: "Sophie", img: "https://randomuser.me/api/portraits/women/4.jpg", win: 6 },
   // ];
   const [players, setPlayers] = useState([]);
-  const [img, setImg] = useState("");
+  const [img, setImg] = useState(null);
   const [UserName, setUserName] = useState("");
 
   async function fetchData() {
@@ -39,7 +39,7 @@ async function fetchImg() {
   try {
     const response = await fetch(url, options);
     if (!response.ok) {
-      setImg("");
+      setImg(null);
       return;
     }
     const blob = await response.blob();
@@ -48,7 +48,7 @@ async function fetchImg() {
     setImg(imgUrl);
   } catch (error) {
     console.error(error);
-    setImg("");
+    setImg(null);
   }
 }
 
@@ -80,7 +80,7 @@ useEffect(() => {
   fetchUserById(decoded.sub);
   fetchData();
   fetchImg();
-}, []);
+}, [OptionsOpen]);
 
 players.sort((a, b) => b.win - a.win);
   return (

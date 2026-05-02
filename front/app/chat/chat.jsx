@@ -51,7 +51,7 @@ const ASSISTANT_SENDER = {
   avatarUrl: "https://cdn.jsdelivr.net/gh/alohe/avatars/png/upstream_20.png",
 };
 
-export default function Chat() {
+export default function Chat(OptionsOpen) {
   
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
@@ -160,7 +160,7 @@ async function fetchImg() {
   }
   initChat()
   fetchImg()
-  }, []);
+  }, [OptionsOpen]);
 
   const sendMessage = async () => {
     const socket = socketRef.current;
