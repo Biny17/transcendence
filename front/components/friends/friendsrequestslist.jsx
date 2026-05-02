@@ -111,7 +111,16 @@ async function fetchDecline(id) {
 //   fetchData(decoded.sub);
 // }, []);
 
-useEffect(() =>{ fetchFriends(); fetchImg()}, [FriendsClick])
+useEffect(() => {
+  fetchFriends();
+  const pendingRequestsIntervalId = setInterval(fetchFriends, 5000);
+
+  return () => clearInterval(pendingRequestsIntervalId);
+}, [FriendsClick]);
+
+useEffect(() => {
+  fetchImg();
+}, []);
   return (
     <div className="w-full h-full flex flex-col items-center justify-center bg-[#0b1328]">
       <nav

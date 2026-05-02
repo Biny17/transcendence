@@ -22,6 +22,7 @@ export default function FriendList(props) {
   const [Requests,setRequests] = useState([])
   const [SentRequests,setSentRequests] = useState([])
   const [deleted, setDeleted] = useState(false)
+  const [Requested, setRequested] = useState(false)
 
   function handleAdd(idx) {
 
@@ -87,6 +88,7 @@ async function fetchDelete(id) {
         throw new Error(err.title || 'Failed to delete friend');
       }
       setDeleted(!deleted)
+      setAdded([])
   } catch (error) {
     console.error(error);
   }
@@ -206,8 +208,39 @@ useEffect(() => {
   fetchData(decoded.sub);
 }, []);
 
-useEffect(() =>{props.FriendsDisplay ? fetchFriends():fetchUsers(); findPendingRequests(); fetchImg();}, [props.FriendsDisplay, props.FriendsRequestsOpen, deleted])
-useEffect(() => {alreadyFriends(); findSentRequests();}, [])
+useEffect(() => {
+  fetchImg();
+}, []);
+
+useEffect(() => {
+  setAdded([]);
+}, [deleted]);
+
+useEffect(() => {
+  if (props.FriendsDisplay) {
+    const refreshFriendsView = () => {
+      fetchFriends();
+      findPendingRequests();
+    };
+
+    refreshFriendsView();
+    const friendsIntervalId = setInterval(refreshFriendsView, 5000);
+
+    return () => clearInterval(friendsIntervalId);
+  }
+
+  const refreshAddablePlayers = () => {
+    fetchUsers();
+    alreadyFriends();
+    findPendingRequests();
+    findSentRequests();
+  };
+
+  refreshAddablePlayers();
+  const addablePlayersIntervalId = setInterval(refreshAddablePlayers, 5000);
+
+  return () => clearInterval(addablePlayersIntervalId);
+}, [props.FriendsDisplay, deleted]);
 // players.sort((a, b) => b.win - a.win);
   return (
     <div className="w-full h-full flex flex-col items-center justify-center bg-[#0b1328]">
