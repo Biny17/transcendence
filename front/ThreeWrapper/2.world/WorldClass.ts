@@ -106,7 +106,13 @@ export abstract class World {
 	async init(): Promise<void> {
 		const log = this.ctx.logger.for("World");
 		const worldPhase = this.ctx.logger.pushPhase(`World [${this.config.id}] init`);
+		const isLoadingWorld = this.config.id === "minimal";
 		const physicsPhase = this.ctx.logger.pushPhase("Physics init");
+		if (!isLoadingWorld) {
+			localStorage.setItem("loading_progress", "1");
+			localStorage.setItem("loading_phase", "Loading physics");
+		}
+
 		try {
 			const { PhysicsWorld } = await import("@/ThreeWrapper/2.world/tools/PhysicsWorld");
 			const physics = new PhysicsWorld(this._scene, { debug: false });
@@ -129,20 +135,46 @@ export abstract class World {
 				}
 			}
 		}
-		const onLoadPhase = this.ctx.logger.pushPhase("onLoad");
-		await this.onLoad();
-		onLoadPhase.close();
-		for (const module of this.modules.values()) {
-			const phase = this.ctx.logger.pushPhase(`Module [${module.type}] init`);
-			try {
-				await module.init(this.ctx);
-			} catch (e) {
-				log.error(`Module [${module.type}] init failed`, { error: String(e) });
-				throw e;
-			} finally {
-				phase.close();
+		if (!isLoadingWorld) {
+			localStorage.setItem("loading_progress", "10");
+			localStorage.setItem("loading_phase", "Loading map");
+			await new Promise((r) => setTimeout(r, 100));
+
+			const onLoadPhase = this.ctx.logger.pushPhase("onLoad");
+			localStorage.setItem("loading_progress", "50");
+			localStorage.setItem("loading_phase", "Loading assets");
+
+			await this.onLoad();
+			onLoadPhase.close();
+			const totalModules = [...this.modules.values()].length;
+			let moduleIndex = 0;
+			for (const module of this.modules.values()) {
+				await new Promise((r) => setTimeout(r, 100));
+				localStorage.setItem("loading_progress", String(Math.round(50 + (moduleIndex / totalModules) * 50)));
+				localStorage.setItem("loading_phase", `Loading modules (${moduleIndex + 1}/${totalModules})`);
+				const phase = this.ctx.logger.pushPhase(`Module [${module.type}] init`);
+				try {
+					await module.init(this.ctx);
+					moduleIndex++;
+				} catch (e) {
+					log.error(`Module [${module.type}] init failed`, { error: String(e) });
+					throw e;
+				} finally {
+					phase.close();
+				}
 			}
+			await new Promise((r) => setTimeout(r, 100));
+
+			localStorage.setItem("loading_progress", "100");
+			localStorage.setItem("loading_phase", "Sending client info");
+			await new Promise((r) => setTimeout(r, 200));
+			localStorage.setItem("loading_phase", "Wait for others clients");
+			
+		} else {
+			localStorage.setItem("loading_phase", "");
+			await this.onLoad();
 		}
+
 		worldPhase.close();
 	}
 	start(initialState?: unknown): void {

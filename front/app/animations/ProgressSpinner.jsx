@@ -2,10 +2,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 
 const STORAGE_KEY = 'loading_progress';
+const PHASE_KEY = 'loading_phase';
 const POLL_INTERVAL = 100;
 
 export const ProgressSpinner = ({ onFinish }) => {
   const [progress, setProgress] = useState(null);
+  const [phase, setPhase] = useState('');
 
   const checkProgress = useCallback(() => {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -16,11 +18,12 @@ export const ProgressSpinner = ({ onFinish }) => {
         if (val >= 100) {
           onFinish?.();
         }
-        return;
       }
+    } else {
+      setProgress(0);
     }
-    localStorage.setItem(STORAGE_KEY, '0');
-    setProgress(0);
+    const phaseRaw = localStorage.getItem(PHASE_KEY);
+    setPhase(phaseRaw || '');
   }, [onFinish]);
 
   useEffect(() => {
@@ -31,9 +34,9 @@ export const ProgressSpinner = ({ onFinish }) => {
 
   return (
     <StyledWrapper>
-      <div className="liquid-loader">
+        <div className="liquid-loader">
         <div className="loading-text">
-          Loading<span className="dot">.</span><span className="dot">.</span><span className="dot">.</span>
+          {phase || 'Loading'}<span className="dot">.</span><span className="dot">.</span><span className="dot">.</span>
         </div>
         <div className="loader-track">
           <div

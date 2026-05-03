@@ -13,7 +13,7 @@ export class LoadingWorld extends World {
 	protected setupEnvironment(): void {}
 
 	protected override async onLoad(): Promise<void> {
-		localStorage.setItem(STORAGE_KEY, '0');
+		localStorage.setItem(STORAGE_KEY, '1');
 		const uiModule = this.ctx.getModule<UIModule>("ui");
 		if (uiModule) {
 			uiModule.show("loading", <LoadingUI />);
