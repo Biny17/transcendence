@@ -1,3 +1,4 @@
+# Schema: ../../shared/schemas/lobby-sequence.schema.json
 # ─────────────────────────────────────────────────────────────────────────────
 # LobbySequenceConfig — no_life_one_game
 # Single game, one winner. Everyone else loses their life and spectates.
@@ -7,25 +8,24 @@ id: one_game
 globalLives: 1
 
 phases:
-        - id: lobby_wait
-          type: wait
+        - type: wait
+          worldId: Lobby
           waitFor: PLAYER_READY
           quorum: 100%
           timeout: 30
+          
 
-        - id: Parkour
-          type: game
-          #beforeStart:
-          #        - id: load_parkour
-          #          type: wait
-          #          waitFor: WORLD_LOADED
-          #          quorum: 100%
-          #          timeout: 60
+        - type: game
+          sendGameResult: true # when game condition is filled end game and broadcast result to all clients
+          endCondition:
+                  type: last_with_lives
           gameModeSelect:
                   - condition: "true"
                     pick: fixed
                     candidates:
-                            - modeId: Parkour
+                            - worldId: Parkour
+                              cinematic: false
+                              loadTimeout: 60
                               winCondition:
                                       type: quorum_win
                                       trigger: player_won
@@ -33,8 +33,6 @@ phases:
                               elimination:
                                       livesLost: 1
 
-        - id: lobby_end
-          type: end
-
-lobbyWinCondition:
-        type: last_with_lives
+        - type: end
+          worldId: End
+          timeout: 30

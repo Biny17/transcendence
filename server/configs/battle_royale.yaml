@@ -1,89 +1,79 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # LobbySequenceConfig — battle_royale
-# Each player has 1 global life. Rounds repeat until one player remains.
+# Each player has 2 global life. Rounds repeat until one player remains.
+# Schema: ../../shared/schemas/lobby-sequence.schema.json
 # ─────────────────────────────────────────────────────────────────────────────
 
 id: battle_royale
-globalLives: 1
+globalLives: 2
 
 phases:
         # ── Load lobby world; clients ack with WORLD_LOADED when assets are ready ──
-        - id: lobby_wait
-          type: wait
+        - type: wait
           worldId: Lobby
-          waitFor: READY
+          waitFor: PLAYER_READY
           quorum: 100%
           timeout: 60 # seconds; 0 = wait forever
 
         # ── Main round loop — repeats until lobby win condition is met ─────────────
-        - id: round_loop
-          type: loop
-          repeat: until_lobby_end
-          phases:
-                  # Run the game; gamemode selected based on active player count
-                  - id: round_game
-                    type: game
-                    gameModeSelect:
-                            # Many players: pick one of three modes randomly (race or survival)
-                            - condition: activePlayers > 30
-                              pick: random
-                              candidates:
-                                      - modeId: parkour
-                                        cinematic: true
-                                        winCondition:
-                                                type: quorum_win
-                                                trigger: player_won
-                                                quorum: 80% # top 80% safe, bottom 20% lose a life
-                                      - modeId: deathmatch
-                                        winCondition:
-                                                type: timer_survival
-                                                duration: 120
-                                                loseTrigger: player_eliminated
-                                      - modeId: arena_ffa
-                                        winCondition:
-                                                type: timer_survival
-                                                duration: 90
-                                                loseTrigger: player_eliminated
+        - type: game
+          sendGameResult: true # when game condition is filled end game and broadcast result to all clients
+          endCondition:
+                  type: last_with_lives
+          gameModeSelect:
+                # Many players: pick one of three modes randomly (race or survival)
+                - condition: activePlayers > 30
+                  pick: random
+                  candidates:
+                        - worldId: parkour  
+                          cinematic: true
+                          loadTimeout: 60
+                          winCondition:
+                             type: quorum_win
+                             trigger: player_won
+                             quorum: 80% # top 80% safe, bottom 20% lose a life
+                        - worldId: deathmatch
+                          cinematic: true
+                          loadTimeout: 60
+                          winCondition:
+                              type: timer_survival
+                              duration: 120
+                              loseTrigger: player_eliminated
+                        - worldId: arena_ffa
+                          cinematic: true
+                          loadTimeout: 60
+                          winCondition:
+                              type: timer_survival
+                              duration: 90
+                              loseTrigger: player_eliminated
+                - condition: activePlayers <= 3
+                  pick: fixed
+                  candidates:
+                      - worldId: duel_1v1
+                        cinematic: true
+                        loadTimeout: 60
+                        winCondition:
+                            type: quorum_win
+                            trigger: player_won
+                            quorum: 1 # absolute: first player wins
+                - condition: "true"
+                  pick: random
+                  candidates:
+                      - worldId: parkour
+                        cinematic: true
+                        loadTimeout: 60
+                        winCondition:
+                            type: quorum_win
+                            trigger: player_won
+                            quorum: 80%
+                      - worldId: deathmatch
+                        cinematic: true
+                        loadTimeout: 60
+                        winCondition:
+                            type: timer_survival
+                            duration: 120
+                            loseTrigger: player_eliminated
 
-                            # Few players left: 1v1 duel, first to finish wins
-                            - condition: activePlayers <= 3
-                              pick: fixed
-                              candidates:
-                                      - modeId: duel_1v1
-                                        winCondition:
-                                                type: quorum_win
-                                                trigger: player_won
-                                                quorum: 1 # absolute: first player wins
-
-                            # Fallback
-                            - condition: "true"
-                              pick: random
-                              candidates:
-                                      - modeId: parkour
-                                        winCondition:
-                                                type: quorum_win
-                                                trigger: player_won
-                                                quorum: 80%
-                                      - modeId: deathmatch
-                                        winCondition:
-                                                type: timer_survival
-                                                duration: 120
-                                                loseTrigger: player_eliminated
-
-                    elimination:
-                            livesLost: 1
-
-                  # Brief results screen; clients ack before next round starts
-                  - id: round_results
-                    type: wait
-                    waitFor: results_ack
-                    quorum: 100%
-                    timeout: 15
-                    onTimeout: proceed
-
-        - id: lobby_end
-          type: end
-
-# ─── Global lobby win condition ───────────────────────────────────────────────
-lobbyWinCondition:
-        type: last_with_lives
+        - type: end
+          worldId: End
+          timeout: 30

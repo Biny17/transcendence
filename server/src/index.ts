@@ -143,10 +143,23 @@ const server = Bun.serve<{ playerId: string }>({
 				case CLIENT_MSG.WORLD_LOADED: {
 					const username = usernames.get(playerId) ?? playerId;
 					console.log(`[Server] ${username} loaded world`);
-					if (sequencer.isInGamePhase() || sequencer.isInLobbyWait()) {
-						sendTo(playerId, JSON.stringify(createMessage(SERVER_MSG.START_WORLD, {})));
-					} else {
-						sequencer.onWaitEvent(playerId, CLIENT_MSG.WORLD_LOADED);
+					if (sequencer.isInLobbyWait()) {
+						sendTo(
+							playerId,
+							JSON.stringify(createMessage(SERVER_MSG.START_WORLD, { worldId: "Lobby" }))
+						);
+					} else if (sequencer.isInGamePhase()) {
+						const result = sequencer.onGameWorldLoaded(playerId);
+						if (result.processed) {
+							const data = result.data as { loaded?: number; total?: number; allLoaded?: boolean };
+							console.log(`[Server] ${username} → game_world_loaded (loaded=${data?.loaded}/${data?.total})`);
+						}
+					}
+					break;
+				}
+				case CLIENT_MSG.PLAYER_READY: {
+					if (sequencer.isInLobbyWait()) {
+						sequencer.onWaitEvent(playerId, CLIENT_MSG.PLAYER_READY);
 					}
 					break;
 				}

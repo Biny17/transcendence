@@ -1,168 +1,163 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "LobbySequenceConfig",
-  "type": "object",
-  "required": ["id", "globalLives", "phases", "lobbyWinCondition"],
-  "properties": {
-    "id": { "type": "string" },
-    "globalLives": { "type": "integer", "minimum": 1 },
-    "phases": {
-      "type": "array",
-      "items": { "$ref": "#/definitions/SequencePhase" }
-    },
-    "lobbyWinCondition": { "$ref": "#/definitions/LobbyWinCondition" }
-  },
-
+  "description": "Phase-based lobby orchestration configuration",
   "definitions": {
-    "SequencePhase": {
-      "oneOf": [
-        { "$ref": "#/definitions/WaitPhase" },
-        { "$ref": "#/definitions/GamePhase" },
-        { "$ref": "#/definitions/LoopPhase" },
-        { "$ref": "#/definitions/EndPhase" }
-      ]
-    },
-
-    "WaitPhase": {
+    "WinConditionQuorumWin": {
       "type": "object",
-      "required": ["type", "id", "waitFor", "quorum"],
       "properties": {
-        "type":      { "type": "string", "const": "wait" },
-        "id":        { "type": "string" },
-        "waitFor":   { "type": "string", "description": "Client message type to collect" },
-        "quorum":    {
-          "oneOf": [
-            { "type": "integer", "minimum": 1, "description": "Absolute player count" },
-            { "type": "string",  "pattern": "^[0-9]+%$", "description": "Percentage e.g. 80%" }
-          ]
-        },
-        "timeout":   { "type": "integer", "minimum": 0, "description": "Seconds; 0 = no timeout" },
-        "onTimeout": { "type": "string", "enum": ["proceed", "random"] }
-      }
+        "type": { "const": "quorum_win" },
+        "trigger": { "type": "string" },
+        "quorum": { "oneOf": [{ "type": "number" }, { "type": "string", "pattern": "^[0-9]+%$" }] }
+      },
+      "required": ["type", "trigger", "quorum"],
+      "additionalProperties": false
     },
-
-    "GamePhase": {
+    "WinConditionTimerSurvival": {
       "type": "object",
-      "required": ["type", "id", "gameModeSelect", "elimination"],
       "properties": {
-        "type":           { "type": "string", "const": "game" },
-        "id":             { "type": "string" },
-        "gameModeSelect": {
-          "type": "array",
-          "minItems": 1,
-          "items": { "$ref": "#/definitions/GameModeSelectEntry" }
-        },
-        "elimination": { "$ref": "#/definitions/EliminationRule" }
-      }
+        "type": { "const": "timer_survival" },
+        "duration": { "type": "number", "minimum": 1 },
+        "loseTrigger": { "type": "string" }
+      },
+      "required": ["type", "duration", "loseTrigger"],
+      "additionalProperties": false
     },
-
-    "LoopPhase": {
-      "type": "object",
-      "required": ["type", "id", "repeat", "phases"],
-      "properties": {
-        "type":   { "type": "string", "const": "loop" },
-        "id":     { "type": "string" },
-        "repeat": { "type": "string", "enum": ["until_lobby_end"] },
-        "phases": {
-          "type": "array",
-          "items": { "$ref": "#/definitions/SequencePhase" }
-        }
-      }
-    },
-
-    "EndPhase": {
-      "type": "object",
-      "required": ["type", "id"],
-      "properties": {
-        "type": { "type": "string", "const": "end" },
-        "id":   { "type": "string" }
-      }
-    },
-
-    "GameModeSelectEntry": {
-      "type": "object",
-      "required": ["condition", "pick", "candidates"],
-      "properties": {
-        "condition":  { "type": "string", "description": "Expression: 'activePlayers > 30' or 'true'" },
-        "pick":       { "type": "string", "enum": ["random", "fixed"] },
-        "candidates": {
-          "type": "array",
-          "minItems": 1,
-          "items": { "$ref": "#/definitions/GameModeCandidate" }
-        }
-      }
-    },
-
-    "GameModeCandidate": {
-      "type": "object",
-      "required": ["modeId", "winCondition"],
-      "properties": {
-        "modeId":       { "type": "string" },
-        "winCondition": { "$ref": "#/definitions/WinCondition" }
-      }
-    },
-
     "WinCondition": {
       "oneOf": [
         { "$ref": "#/definitions/WinConditionQuorumWin" },
         { "$ref": "#/definitions/WinConditionTimerSurvival" }
       ]
     },
-
-    "WinConditionQuorumWin": {
-      "type": "object",
-      "required": ["type", "trigger", "quorum"],
-      "properties": {
-        "type":    { "type": "string", "const": "quorum_win" },
-        "trigger": { "type": "string", "description": "Client PHASE_EVENT.event value" },
-        "quorum":  {
-          "oneOf": [
-            { "type": "integer", "minimum": 1 },
-            { "type": "string",  "pattern": "^[0-9]+%$" }
-          ]
-        }
-      }
-    },
-
-    "WinConditionTimerSurvival": {
-      "type": "object",
-      "required": ["type", "duration", "loseTrigger"],
-      "properties": {
-        "type":         { "type": "string", "const": "timer_survival" },
-        "duration":     { "type": "integer", "minimum": 1, "description": "Seconds" },
-        "loseTrigger":  { "type": "string", "description": "Client PHASE_EVENT.event value for elimination" }
-      }
-    },
-
     "EliminationRule": {
       "type": "object",
-      "required": ["livesLost"],
       "properties": {
-        "livesLost": { "type": "integer", "minimum": 1 }
-      }
+        "livesLost": { "type": "number", "minimum": 0 }
+      },
+      "required": ["livesLost"],
+      "additionalProperties": false
     },
-
+    "GameModeCandidate": {
+      "type": "object",
+      "properties": {
+        "worldId": { "type": "string" },
+        "cinematic": { "type": "boolean" },
+        "loadTimeout": { "type": "number", "minimum": 1 },
+        "winCondition": { "$ref": "#/definitions/WinCondition" },
+        "elimination": { "$ref": "#/definitions/EliminationRule" }
+      },
+      "required": ["worldId", "winCondition", "elimination"],
+      "additionalProperties": false
+    },
+    "GameModeSelectEntry": {
+      "type": "object",
+      "properties": {
+        "condition": { "type": "string" },
+        "pick": { "enum": ["random", "fixed"] },
+        "candidates": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/GameModeCandidate" },
+          "minItems": 1
+        }
+      },
+      "required": ["condition", "pick", "candidates"],
+      "additionalProperties": false
+    },
+    "CinematicPhase": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "cinematic" },
+        "id": { "type": "string" },
+        "timeout": { "type": "number", "minimum": 0 }
+      },
+      "required": ["type", "id", "timeout"],
+      "additionalProperties": false
+    },
+    "WaitPhase": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "wait" },
+        "worldId": { "type": "string" },
+        "waitFor": { "type": "string", "enum": ["PLAYER_READY", "WORLD_LOADED"] },
+        "quorum": { "oneOf": [{ "type": "number" }, { "type": "string", "pattern": "^[0-9]+%$" }] },
+        "timeout": { "type": "number", "minimum": 0 },
+        "onTimeout": { "enum": ["proceed", "random"] }
+      },
+      "required": ["type", "worldId", "waitFor", "quorum", "timeout"],
+      "additionalProperties": false
+    },
+    "GamePhase": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "game" },
+        "sendGameResult": { "type": "boolean" },
+        "endCondition": { "$ref": "#/definitions/LobbyWinCondition" },
+        "gameModeSelect": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/GameModeSelectEntry" },
+          "minItems": 1
+        },
+        "elimination": { "$ref": "#/definitions/EliminationRule" }
+      },
+      "required": ["type", "sendGameResult", "gameModeSelect", "elimination"],
+      "additionalProperties": false
+    },
+    "LoopPhase": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "loop" },
+        "id": { "type": "string" },
+        "repeat": { "const": "until_lobby_end" },
+        "phases": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/SequencePhase" },
+          "minItems": 1
+        }
+      },
+      "required": ["type", "id", "repeat", "phases"],
+      "additionalProperties": false
+    },
+    "EndPhase": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "end" },
+        "worldId": { "type": "string" },
+        "timeout": { "type": "number", "minimum": 0 }
+      },
+      "required": ["type", "worldId", "timeout"],
+      "additionalProperties": false
+    },
+    "SequencePhase": {
+      "oneOf": [
+        { "$ref": "#/definitions/WaitPhase" },
+        { "$ref": "#/definitions/GamePhase" },
+        { "$ref": "#/definitions/LoopPhase" },
+        { "$ref": "#/definitions/EndPhase" },
+        { "$ref": "#/definitions/CinematicPhase" }
+      ]
+    },
     "LobbyWinCondition": {
       "oneOf": [
-        {
-          "type": "object",
-          "required": ["type"],
-          "properties": { "type": { "type": "string", "const": "last_with_lives" } }
-        },
-        {
-          "type": "object",
-          "required": ["type"],
-          "properties": { "type": { "type": "string", "const": "best_cumulative_score" } }
-        },
-        {
-          "type": "object",
-          "required": ["type", "value"],
-          "properties": {
-            "type":  { "type": "string", "const": "fixed_rounds" },
-            "value": { "type": "integer", "minimum": 1 }
-          }
-        }
+        { "type": "object", "properties": { "type": { "const": "last_with_lives" } }, "required": ["type"], "additionalProperties": false },
+        { "type": "object", "properties": { "type": { "const": "best_cumulative_score" } }, "required": ["type"], "additionalProperties": false },
+        { "type": "object", "properties": { "type": { "const": "fixed_rounds" }, "value": { "type": "number", "minimum": 1 } }, "required": ["type", "value"], "additionalProperties": false }
       ]
+    },
+    "LobbySequenceConfig": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "globalLives": { "type": "number", "minimum": 0 },
+        "phases": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/SequencePhase" },
+          "minItems": 1
+        },
+        "lobbyWinCondition": { "$ref": "#/definitions/LobbyWinCondition" }
+      },
+      "required": ["id", "globalLives", "phases", "lobbyWinCondition"],
+      "additionalProperties": false
     }
-  }
+  },
+  "$ref": "#/definitions/LobbySequenceConfig"
 }

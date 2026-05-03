@@ -10,8 +10,11 @@ export type WinConditionTimerSurvival = {
 }
 export type WinCondition = WinConditionQuorumWin | WinConditionTimerSurvival
 export type GameModeCandidate = {
-  modeId: string
+  worldId: string
+  cinematic?: boolean
+  loadTimeout?: number
   winCondition: WinCondition
+  elimination: EliminationRule
 }
 export type GameModeSelectEntry = {
   condition: string                 
@@ -22,35 +25,35 @@ export type EliminationRule = {
   livesLost: number
 }
 export type CinematicPhase = {
-	type: "cinematic";
-	id: string;
-	timeout: number;
+  type: "cinematic";
+  id: string;
+  timeout: number;
 };
 export type WaitPhase = {
-	type: "wait";
-	id: string;
-	worldId?: string;
-	waitFor: string;
-	quorum: number | string;
-	timeout: number;
-	onTimeout?: "proceed" | "random";
+  type: "wait";
+  worldId: string;
+  waitFor: string;
+  quorum: number | string;
+  timeout: number;
+  onTimeout?: "proceed" | "random";
 };
 export type GamePhase = {
 	type: "game";
-	id: string;
-	beforeStart?: SequencePhase[];
+	sendGameResult: boolean;
+	endCondition?: LobbyWinCondition;
 	gameModeSelect: GameModeSelectEntry[];
 	elimination: EliminationRule;
 };
 export type LoopPhase = {
-	type: "loop";
-	id: string;
-	repeat: "until_lobby_end";
-	phases: SequencePhase[];
+  type: "loop";
+  id: string;
+  repeat: "until_lobby_end";
+  phases: SequencePhase[];
 };
 export type EndPhase = {
-	type: "end";
-	id: string;
+  type: "end";
+  worldId: string;
+  timeout: number;
 };
 export type SequencePhase = WaitPhase | GamePhase | LoopPhase | EndPhase | CinematicPhase;
 export type LobbyWinCondition =

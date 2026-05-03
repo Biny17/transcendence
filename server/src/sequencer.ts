@@ -1,5 +1,5 @@
 import { createMessage, SERVER_MSG, PHASE_EVENTS } from "shared/index";
-import type { LobbySequenceConfig, SequencePhase, WaitPhase, GamePhase, LoopPhase, GameModeSelectEntry, GameModeCandidate, WinCondition, WinConditionQuorumWin, WinConditionTimerSurvival, CinematicPhase } from "shared/config";
+import type { LobbySequenceConfig, SequencePhase, WaitPhase, GamePhase, LoopPhase, GameModeSelectEntry, GameModeCandidate, WinCondition, WinConditionQuorumWin, WinConditionTimerSurvival, CinematicPhase, EndPhase } from "shared/config";
 import type { Ranking } from "shared/state";
 import { broadcast, sockets, usernames } from "./state";
 export type ActiveGame = {
@@ -40,6 +40,8 @@ export class Sequencer {
 	private frame: { phases: SequencePhase[]; index: number } | null = null;
 	private phase: SequencePhase | null = null;
 	private gameRunning = false;
+	private gameLoaded = new Set<string>();
+	private gameLoadTimer: ReturnType<typeof setTimeout> | null = null;
 	constructor(config: LobbySequenceConfig) {
 		this.config = config;
 	}
@@ -55,6 +57,9 @@ export class Sequencer {
 		this.frame = null;
 		this.phase = null;
 		this.gameRunning = false;
+		if (this.gameLoadTimer) clearTimeout(this.gameLoadTimer);
+		this.gameLoadTimer = null;
+		this.gameLoaded.clear();
 	}
 	addPlayer(playerId: string): void {
 		console.log(`[Sequencer] addPlayer(${playerId}) globalLives=${this.config.globalLives}`);
@@ -84,15 +89,18 @@ export class Sequencer {
 	}
 	isInLobbyWait(): boolean {
 		if (!this.frame) return true;
-		const phase = this.frame.phases[this.frame.index];
-		return phase?.type === "wait" && phase.id === this.config.phases[0]?.id;
+		const phase = this.frame.phases[this.frame.index] as any;
+		return phase?.type === "wait" && phase.worldId === "Lobby";
 	}
 	getCurrentPhaseId(): string | null {
 		if (!this.frame) return null;
-		return this.frame.phases[this.frame.index]?.id ?? null;
+		const phase = this.frame.phases[this.frame.index] as any;
+		return phase?.worldId ?? null;
 	}
 	getLoadWorldId(): string {
-		return this.isInLobbyWait() ? "Lobby" : (this.getCurrentPhaseId() ?? "Lobby");
+		if (this.isInLobbyWait()) return "Lobby";
+		const phase = this.frame?.phases[this.frame.index] as any;
+		return phase?.worldId ?? "Lobby";
 	}
 	start(): void {
 		this.stack = [{ phases: this.config.phases, index: -1 }];
@@ -196,6 +204,24 @@ export class Sequencer {
 		}
 		return { processed: true, data: { currentCount: this.waitCollected.size, needed, quorumMet } };
 	}
+	onGameWorldLoaded(playerId: string): EventResult {
+		if (!this.isPhaseType("game")) return { processed: false, reason: FAIL_REASON.WRONG_PHASE_TYPE };
+		if (this.isSpectator(playerId)) return { processed: false, reason: FAIL_REASON.PLAYER_IS_SPECTATOR };
+		if (this.gameLoaded.has(playerId)) return { processed: true, data: {} };
+		this.gameLoaded.add(playerId);
+		const total = this.getActivePlayers().length;
+		const allLoaded = this.gameLoaded.size >= total;
+		if (allLoaded) {
+			console.log(`[Sequencer] All clients loaded game world - ending load timeout early`);
+			if (this.gameLoadTimer) {
+				clearTimeout(this.gameLoadTimer);
+				this.gameLoadTimer = null;
+			}
+			const phase = this.phase as GamePhase;
+			this.broadcastStartWorld(phase);
+		}
+		return { processed: true, data: { loaded: this.gameLoaded.size, total, allLoaded } };
+	}
 	private advance(): void {
 		if (this.gameRunning) {
 			console.log(`[Sequencer] advance() blocked – gameRunning=true`);
@@ -236,11 +262,12 @@ export class Sequencer {
 		}
 	}
 	private executePhase(phase: SequencePhase): void {
-		console.log(`[Sequencer] Phase: ${phase.id} (${phase.type})`);
+		const phaseId = (phase as any).worldId ?? (phase as any).id ?? "unknown";
+		console.log(`[Sequencer] Phase: ${phaseId} (${phase.type})`);
 		broadcast(
 			JSON.stringify(
 				createMessage(SERVER_MSG.PHASE_CHANGED, {
-					phaseId: phase.id,
+					phaseId,
 					phaseType: phase.type
 				})
 			)
@@ -260,40 +287,32 @@ export class Sequencer {
 				this.startCinematicPhase(phase);
 				break;
 			case "end":
-				this.endLobby();
+				this.startEndPhase(phase as EndPhase);
 				break;
 		}
 	}
 	private startWaitPhase(phase: WaitPhase): void {
 		this.waitCollected.clear();
 		if (this.waitTimer) clearTimeout(this.waitTimer);
-		if (phase.timeout > 0) {
-			this.waitTimer = setTimeout(() => {
-				console.log(`[Sequencer] Wait phase "${phase.id}" timed out`);
-				this.finishWaitPhase();
-			}, phase.timeout * 1000);
-		}
+		this.waitTimer = setTimeout(() => {
+			console.log(`[Sequencer] Wait phase for "${phase.worldId}" timed out - starting game`);
+			this.finishWaitPhase();
+		}, phase.timeout * 1000);
 		const players = [...this.lives.entries()].map(([id, lives]) => ({
 			id,
 			name: usernames.get(id) ?? id,
 			lives,
 			isSpectator: lives <= 0
 		}));
-		if (phase.id === "lobby_wait") {
-			broadcast(JSON.stringify(createMessage(SERVER_MSG.LOAD_WORLD, { worldId: "Lobby", players })));
-			console.log(`[Sequencer] Broadcasting LOAD_WORLD for Lobby (lobby_wait phase)`);
-		} else if (phase.worldId) {
-			broadcast(JSON.stringify(createMessage(SERVER_MSG.LOAD_WORLD, { worldId: phase.worldId, players })));
-		} else if (phase.waitFor === "WORLD_LOADED" && this.currentGame?.modeId) {
-			broadcast(JSON.stringify(createMessage(SERVER_MSG.LOAD_WORLD, { worldId: this.currentGame.modeId, players })));
-			console.log(`[Sequencer] Broadcasting LOAD_WORLD for game: ${this.currentGame.modeId}`);
-		} else {
-			broadcast(JSON.stringify(createMessage(SERVER_MSG.LOAD_WORLD, { worldId: "Lobby", players })));
-			console.log(`[Sequencer] Broadcasting LOAD_WORLD for Lobby`);
-		}
+		broadcast(JSON.stringify(createMessage(SERVER_MSG.LOAD_WORLD, { worldId: phase.worldId, players })));
+		console.log(`[Sequencer] Broadcasting LOAD_WORLD for ${phase.worldId}`);
 	}
 	private finishWaitPhase(): void {
 		this.waitCollected.clear();
+		if (this.waitTimer) {
+			clearTimeout(this.waitTimer);
+			this.waitTimer = null;
+		}
 		this.advance();
 	}
 	private startGamePhase(phase: GamePhase): void {
@@ -306,7 +325,7 @@ export class Sequencer {
 		}
 		const { candidate } = selected;
 		this.currentGame = {
-			modeId: candidate.modeId,
+			modeId: candidate.worldId,
 			winCondition: candidate.winCondition,
 			activePlayers: new Set(activePlayers),
 			winPlayers: new Set(),
@@ -314,22 +333,35 @@ export class Sequencer {
 			timer: null,
 			candidate
 		};
-		console.log(`[Sequencer] startGamePhase created game | modeId=${candidate.modeId} | winCondition=${candidate.winCondition.type}`);
-		if (phase.beforeStart && phase.beforeStart.length > 0) {
-			this.stack.push({ phases: phase.beforeStart, index: -1, gamePhase: phase });
-			this.advance();
-			return;
-		}
-		this.broadcastStartWorld(phase);
+		console.log(`[Sequencer] startGamePhase created game | worldId=${candidate.worldId} | winCondition=${candidate.winCondition.type}`);
+		this.gameLoaded.clear();
+		if (this.gameLoadTimer) clearTimeout(this.gameLoadTimer);
+		const timeout = candidate.loadTimeout ?? 60;
+		this.gameLoadTimer = setTimeout(() => {
+			console.log(`[Sequencer] Game load timeout fired for ${candidate.worldId}`);
+			this.broadcastStartWorld(phase);
+		}, timeout * 1000);
+		const players = [...this.lives.entries()].map(([id, lives]) => ({
+			id,
+			name: usernames.get(id) ?? id,
+			lives,
+			isSpectator: lives <= 0
+		}));
+		broadcast(JSON.stringify(createMessage(SERVER_MSG.LOAD_WORLD, { worldId: candidate.worldId, players })));
+		console.log(`[Sequencer] Broadcasting LOAD_WORLD for game: ${candidate.worldId} (loadTimeout=${timeout}s)`);
 	}
 	private broadcastStartWorld(phase: GamePhase): void {
+		if (this.gameLoadTimer) {
+			clearTimeout(this.gameLoadTimer);
+			this.gameLoadTimer = null;
+		}
 		if (!this.currentGame?.winCondition) return;
 		if (this.isInLobbyWait()) {
 			console.log(`[Sequencer] broadcastStartWorld skipped - in lobby_wait phase`);
 			return;
 		}
-		console.log(`[Sequencer] broadcastStartWorld | modeId: ${this.currentGame?.modeId} | winCondition: ${this.currentGame?.winCondition.type}`);
-		broadcast(JSON.stringify(createMessage(SERVER_MSG.START_WORLD, {})));
+		console.log(`[Sequencer] broadcastStartWorld | worldId: ${this.currentGame?.modeId} | winCondition: ${this.currentGame?.winCondition.type}`);
+		broadcast(JSON.stringify(createMessage(SERVER_MSG.START_WORLD, { worldId: this.currentGame.modeId })));
 		if (this.currentGame.winCondition.type === "timer_survival") {
 			this.currentGame.timer = setTimeout(
 				() => {
@@ -349,9 +381,25 @@ export class Sequencer {
 			this.advance();
 		}, phase.timeout * 1000);
 	}
+	private startEndPhase(phase: EndPhase): void {
+		if (phase.timeout > 0) {
+			setTimeout(() => {
+				this.endLobby();
+			}, phase.timeout * 1000);
+		}
+		broadcast(JSON.stringify(createMessage(SERVER_MSG.LOAD_WORLD, {
+			worldId: phase.worldId,
+			players: [...this.lives.entries()].map(([id, lives]) => ({
+				id, name: usernames.get(id) ?? id, lives, isSpectator: lives <= 0
+			}))
+		})));
+	}
 	private finishGamePhase(phase: GamePhase): void {
 		console.log(`[Sequencer] finishGamePhase called | gameMode: ${this.currentGame?.modeId} | winPlayers: ${[...(this.currentGame?.winPlayers ?? [])]} | lostPlayers: ${[...(this.currentGame?.lostPlayers ?? [])]}`);
 		this.gameRunning = false;
+		if (this.gameLoadTimer) clearTimeout(this.gameLoadTimer);
+		this.gameLoadTimer = null;
+		this.gameLoaded.clear();
 		const game = this.currentGame!;
 		if (game.timer) clearTimeout(game.timer);
 		this.currentGame = null;
@@ -381,10 +429,11 @@ export class Sequencer {
 		for (const [id, lives] of this.lives) {
 			livesRemaining[id] = lives;
 		}
+		const phaseId = (phase as any).worldId ?? this.getCurrentPhaseId() ?? "game";
 		broadcast(
 			JSON.stringify(
 				createMessage(SERVER_MSG.PHASE_CHANGED, {
-					phaseId: phase.id,
+					phaseId,
 					phaseType: "end",
 					data: { rankings, livesRemaining }
 				})
@@ -395,7 +444,12 @@ export class Sequencer {
 			this.endLobby();
 			return;
 		}
-		this.advance();
+		const nextPhase = this.frame!.phases[this.frame!.index + 1];
+		if (nextPhase && nextPhase.type === "wait") {
+			this.advance();
+			return;
+		}
+		this.startGamePhase(phase);
 	}
 	private computeLosers(game: ActiveGame): Set<string> {
 		if (game.winCondition.type === "quorum_win") {
@@ -416,6 +470,14 @@ export class Sequencer {
 		}
 	}
 	private isLobbyOver(): boolean {
+		const gamePhase = this.phase as GamePhase;
+		if (gamePhase?.endCondition) {
+			const wc = gamePhase.endCondition;
+			const active = this.getActivePlayers();
+			if (wc.type === "last_with_lives") return active.length <= 1;
+			if (wc.type === "fixed_rounds") return this.roundsPlayed >= wc.value;
+			if (wc.type === "best_cumulative_score") return active.length <= 1;
+		}
 		const wc = this.config.lobbyWinCondition;
 		const active = this.getActivePlayers();
 		if (wc.type === "last_with_lives") return active.length <= 1;
@@ -428,7 +490,7 @@ export class Sequencer {
 	}
 	private endLobby(): void {
 		this.gameRunning = false;
-		console.log(`[Sequencer] endLobby called | activePlayers: ${this.getActivePlayers()} | frame: ${this.frame?.index}/${this.frame?.phases.length} | phase: ${this.phase?.id}`);
+		console.log(`[Sequencer] endLobby called | activePlayers: ${this.getActivePlayers()}`);
 		const active = this.getActivePlayers();
 		const winner = active[0] ?? null;
 		console.log(`[Sequencer] Lobby ended. Winner: ${winner}`);
