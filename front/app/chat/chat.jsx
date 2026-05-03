@@ -235,7 +235,7 @@ async function fetchImg() {
                   
                   <PrimaryMessage
                     className="mt-4"
-                    key={msg.id}
+                    key={i}
                     avatarSrc={Img}
                     avatarAlt={senderName}
                     // avatarFallback={msg.sender.username.slice(0, 2)}
