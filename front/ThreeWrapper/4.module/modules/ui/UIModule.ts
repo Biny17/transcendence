@@ -47,6 +47,7 @@ export class UIModule implements Module {
     this.hide(id)
     const container = document.createElement('div')
     container.dataset.uiPanel = id
+    container.style.cssText = 'position:fixed;inset:0;z-index:9999;overflow:auto;'
     document.body.appendChild(container)
     const root = createRoot(container)
     root.render(node)

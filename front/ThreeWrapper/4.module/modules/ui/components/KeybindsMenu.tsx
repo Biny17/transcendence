@@ -1,129 +1,125 @@
 'use client'
-import { useState, useCallback } from 'react'
-import { KeyActionLabels } from 'shared/config'
+
+import { useState, useEffect, useCallback } from 'react'
+import { Button } from '../../../../../app/animations/Button.jsx'
+import Key from '../../../../../components/keyboard/key.jsx'
+import Space from '../../../../../components/keyboard/space.jsx'
 import type { KeyBinding } from 'shared/config'
+
 type KeybindsMenuProps = {
   getBindings: () => KeyBinding[]
   onRebind: (action: string, key: string) => void
   onClose: () => void
 }
+
+const ACTION_LABELS: Record<string, string> = {
+  forward: 'Forward',
+  backward: 'Backward',
+  left: 'Left',
+  right: 'Right',
+  space: 'Space',
+  shift: 'Shift',
+  pause: 'Pause',
+  detach: 'Detach',
+}
+
+function codeToLabel(code: string | undefined): string {
+  if (!code) return '—'
+  if (code.startsWith('Key')) return code.slice(3).toUpperCase()
+  if (code.startsWith('Digit')) return code.slice(5)
+  if (code === 'Space') return 'Space'
+  if (code === 'ShiftLeft' || code === 'ShiftRight') return 'Shift'
+  return code
+}
+
 export function KeybindsMenu({ getBindings, onRebind, onClose }: KeybindsMenuProps) {
   const [listening, setListening] = useState<string | null>(null)
+  const [bindings, setBindings] = useState<KeyBinding[]>(getBindings())
+
+  useEffect(() => {
+    setBindings(getBindings())
+  }, [getBindings])
+
   function startListening(action: string) {
     setListening(action)
   }
-  function handleKeyDown(e: React.KeyboardEvent, action: string) {
-    if (listening !== action) return
-    e.preventDefault()
-    setListening(null)
-    onRebind(action, e.code)
-  }
-  const saveToLocalStorage = useCallback(() => {
+
+  useEffect(() => {
+    if (!listening) return
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      event.preventDefault()
+      const newBindings = bindings.map(b =>
+        b.action === listening ? { ...b, key: event.code } : b
+      )
+      setBindings(newBindings)
+      setListening(null)
+      onRebind(listening, event.code)
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [listening, bindings, onRebind])
+
+  const handleClose = useCallback(() => {
     try {
-      localStorage.setItem('game_keybindings', JSON.stringify(getBindings()))
+      localStorage.setItem('game_keybindings', JSON.stringify(bindings))
     } catch (error) {
       console.error('[KeybindsMenu] Failed to save to localStorage:', error)
     }
-  }, [getBindings])
-  const handleClose = useCallback(() => {
-    saveToLocalStorage()
     onClose()
-  }, [saveToLocalStorage, onClose])
-  const getActionLabel = useCallback((action: string): string => {
-    return KeyActionLabels[action as keyof typeof KeyActionLabels] || action
-  }, [])
+  }, [bindings, onClose])
+
   return (
-    <div style={{
-      position: 'absolute',
-      inset: 0,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: 'rgba(0, 0, 0, 0.65)',
-      pointerEvents: 'auto',
-    }}>
-      {}
-      <div style={{
-        width: 420,
-        maxHeight: 500,
-        background: 'rgba(15, 15, 20, 0.95)',
-        border: '1px solid rgba(255,255,255,0.12)',
-        borderRadius: 12,
-        display: 'flex',
-        flexDirection: 'column',
-        padding: 28,
-        boxSizing: 'border-box',
-        gap: 12,
-      }}>
-        {}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <p style={{ color: '#fff', fontSize: 20, fontWeight: 700, margin: 0 }}>Keybinds</p>
-          <button onClick={handleClose} style={{ ...btnStyle, width: 'auto', padding: '4px 14px', fontSize: 13 }}>
-            ✕
-          </button>
+    <div
+      className="w-full h-full flex flex-col items-center justify-center bg-[#05113a]/80"
+    >
+      <div className="relative m-2 h-[88vh] w-[94vw] max-h-208 max-w-4xl overflow-hidden rounded-3xl border-20 border-double border-yellow bg-[#0b1328] shadow-xl sm:h-[86vh] sm:w-[88vw] md:m-4 md:h-[84vh] md:w-[80vw] lg:h-[82vh] lg:w-[70vw] xl:h-[80vh] xl:w-[60vw]">
+        <div className="flex items-center justify-between border-b bg-yellow px-4 py-3">
+          <h5 className="text-lg font-medium text-[#292524]">Keyboard Settings</h5>
+          <button onClick={handleClose} className="text-[#292524] hover:text-[#1a1a1a] text-xl font-bold">✕</button>
         </div>
-        <div style={{ width: '100%', height: 1, background: 'rgba(255,255,255,0.1)' }} />
-        {}
-        <div style={{ overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {getBindings().map((b) => {
-            const isListening = listening === b.action
-            return (
-              <div
-                key={b.action}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '8px 10px',
-                  borderRadius: 8,
-                  background: isListening ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.04)',
-                }}
-              >
-                {}
-                <span style={{ color: '#ccc', fontSize: 14 }}>{getActionLabel(b.action)}</span>
-                {}
-                <button
-                  onClick={() => startListening(b.action)}
-                  onKeyDown={(e) => handleKeyDown(e, b.action)}
-                  style={{
-                    ...keyBtnStyle,
-                    outline: isListening ? '2px solid #6af' : 'none',
-                    color: isListening ? '#6af' : '#fff',
-                  }}
-                >
-                  {isListening ? '…' : (b.key ?? '—')}
-                </button>
-              </div>
-            )
-          })}
-          {getBindings().length === 0 && (
-            <p style={{ color: '#666', fontSize: 13, textAlign: 'center', margin: '16px 0' }}>
-              Aucun binding enregistré.
-            </p>
-          )}
+        <div className="flex h-[calc(100%-58px)] min-h-0 flex-col bg-[#05113a] px-4 py-5">
+          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto scrollbar-hide pr-1">
+            <div className="mb-8">
+              <p className="text-sm font-light text-slate-300">
+                Click on a key, then press a keyboard key to rebind it.
+              </p>
+            </div>
+            {bindings.map((b) => {
+              const isListening = listening === b.action
+              const label = ACTION_LABELS[b.action] || b.action
+              const keyName = isListening ? '…' : codeToLabel(b.key)
+
+              if (b.action === 'space' || b.action === 'shift') {
+                return (
+                  <fieldset key={b.action} className="flex items-center gap-4">
+                    <label className="w-24 text-right text-[15px] text-slate-200">{label}</label>
+                    <Space
+                      name={keyName}
+                      onClick={() => !isListening && startListening(b.action)}
+                    />
+                  </fieldset>
+                )
+              }
+
+              return (
+                <fieldset key={b.action} className="flex items-center gap-4">
+                  <label className="w-24 text-right text-[15px] text-slate-200">{label}</label>
+                  <Key
+                    name={keyName}
+                    onClick={() => !isListening && startListening(b.action)}
+                  />
+                </fieldset>
+              )
+            })}
+          </div>
+          <div className="mt-6 flex shrink-0 gap-3 justify-end pr-1">
+            <Button statement="Go back" onClick={handleClose} />
+            <Button statement="Save Changes" onClick={handleClose} />
+          </div>
         </div>
       </div>
     </div>
   )
-}
-const btnStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '10px 0',
-  background: 'rgba(255,255,255,0.07)',
-  border: '1px solid rgba(255,255,255,0.15)',
-  borderRadius: 8,
-  color: '#fff',
-  fontSize: 15,
-  cursor: 'pointer',
-}
-const keyBtnStyle: React.CSSProperties = {
-  minWidth: 90,
-  padding: '5px 10px',
-  background: 'rgba(255,255,255,0.08)',
-  border: '1px solid rgba(255,255,255,0.2)',
-  borderRadius: 6,
-  color: '#fff',
-  fontSize: 13,
-  cursor: 'pointer',
-  textAlign: 'center',
 }
