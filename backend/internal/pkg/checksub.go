@@ -16,7 +16,7 @@ func ContextUserId(ctx context.Context) (int, error) {
 
 func CheckIdMatchContextSub(ctx context.Context, id int) (error) {
 	sub, err := ContextUserId(ctx)
-	if err != nil {
+	if err != nil {		
 		return err
 	}
 	if sub != id {

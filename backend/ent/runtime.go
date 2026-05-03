@@ -22,6 +22,10 @@ func init() {
 	conversationDescCreatedAt := conversationFields[0].Descriptor()
 	// conversation.DefaultCreatedAt holds the default value on creation for the created_at field.
 	conversation.DefaultCreatedAt = conversationDescCreatedAt.Default.(func() time.Time)
+	// conversationDescIsGroup is the schema descriptor for is_group field.
+	conversationDescIsGroup := conversationFields[1].Descriptor()
+	// conversation.DefaultIsGroup holds the default value on creation for the is_group field.
+	conversation.DefaultIsGroup = conversationDescIsGroup.Default.(bool)
 	friendshipFields := schema.Friendship{}.Fields()
 	_ = friendshipFields
 	// friendshipDescCreatedAt is the schema descriptor for created_at field.
@@ -96,4 +100,12 @@ func init() {
 	userDescPpPath := userFields[7].Descriptor()
 	// user.DefaultPpPath holds the default value on creation for the pp_path field.
 	user.DefaultPpPath = userDescPpPath.Default.(string)
+	// userDescSkinColor is the schema descriptor for skin_color field.
+	userDescSkinColor := userFields[8].Descriptor()
+	// user.DefaultSkinColor holds the default value on creation for the skin_color field.
+	user.DefaultSkinColor = userDescSkinColor.Default.(string)
+	// userDescFaceColor is the schema descriptor for face_color field.
+	userDescFaceColor := userFields[9].Descriptor()
+	// user.DefaultFaceColor holds the default value on creation for the face_color field.
+	user.DefaultFaceColor = userDescFaceColor.Default.(string)
 }

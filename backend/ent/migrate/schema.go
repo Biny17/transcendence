@@ -12,6 +12,8 @@ var (
 	ConversationsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "is_group", Type: field.TypeBool, Default: false},
+		{Name: "title", Type: field.TypeString, Nullable: true},
 	}
 	// ConversationsTable holds the schema information for the "conversations" table.
 	ConversationsTable = &schema.Table{
@@ -121,6 +123,8 @@ var (
 		{Name: "hash", Type: field.TypeString},
 		{Name: "verified_email", Type: field.TypeBool, Default: false},
 		{Name: "pp_path", Type: field.TypeString, Default: ""},
+		{Name: "skin_color", Type: field.TypeString, Default: "#03fc6f"},
+		{Name: "face_color", Type: field.TypeString, Default: "#eeeeee"},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{

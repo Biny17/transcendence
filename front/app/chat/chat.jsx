@@ -51,15 +51,92 @@ const ASSISTANT_SENDER = {
   avatarUrl: "https://cdn.jsdelivr.net/gh/alohe/avatars/png/upstream_20.png",
 };
 
-export default function Chat() {
+export default function Chat(OptionsOpen) {
   
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [ConversationId, setConversationId] = useState("");
+  const [Img, setImg] = useState("");
   const socketRef = useRef(null);
 
+
+async function fetchImg() {
+  const url = 'http://localhost:8080/api/update/profile-picture';
+  const options = {method: 'GET',  credentials: 'include', headers: {Accept: 'application/json, application/problem+json'}};
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      setImg("");
+      return;
+    }
+    const blob = await response.blob();
+    const imgUrl = URL.createObjectURL(blob);
+    setImg(imgUrl);
+  } catch (error) {
+    console.error(error);
+    setImg("");
+  }
+}
+
+  async function fetchConversationHistory(convId){
+    const url = 'http://localhost:8080/api/chat/conversation/' + convId + '/messages';
+    //const options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
+    const options = {method: 'GET', credentials: 'include', headers: {'Accept': 'application/json, application/problem+json', 'Content-Type': 'application/json'}};
+    try 
+	  {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      if (!response.ok) 
+      {
+        const err = await response.json();
+        throw new Error(err.title);
+      }
+      if (response.status === 200)
+      {
+        setMessages(data)
+        console.log(data)
+      }
+    } 
+    catch (error) 
+    {
+      console.log(error);
+    }
+  }
+
+  async function definePlayerId(){
+    const url = 'http://localhost:8080/api/users/me';
+    const options = {method: 'GET', credentials: 'include', 
+      headers: {'Accept': 'application/json, application/problem+json', 'Content-Type': 'application/json'}};
+    try 
+	  {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      if (!response.ok) 
+      {
+        const err = await response.json();
+        throw new Error(err.title);
+      }
+      if (response.status === 200)
+      {
+        return(data[0].id)
+      }
+    } 
+    catch (error) 
+    {
+      console.log(error);
+    }
+  }
+
   useEffect(() => {
+  
+   async function initChat() {
+    const convId = 1;
+    const pId = await definePlayerId();
+    // joinConversation(convId, pId);
+    fetchConversationHistory(1);
+
     const socket = new WebSocket("ws://localhost:8080/api/chat/ws");
     socketRef.current = socket;
 
@@ -68,17 +145,9 @@ export default function Chat() {
     });
 
     socket.addEventListener("message", (event) => {
-      try {
-        const receivedData = JSON.parse(event.data);
-        // const content = receivedData?.content ?? String(event.data);
-        setMessages((prev) => [
-          ...prev,
-         receivedData
-        ]);
-      } catch (error) {
-        console.error("Error parsing JSON:", error);
-        console.log("Received data was:", event.data);
-      }
+      console.info("new message, update chat !");
+      const payload = JSON.parse(event.data)
+      setMessages((prev) => [payload, ...prev]);
     });
 
     socket.addEventListener("error", (event) => {
@@ -88,37 +157,21 @@ export default function Chat() {
     socket.addEventListener("close", () => {
       console.log("WebSocket closed");
     });
+  }
+  initChat()
+  fetchImg()
+  }, [OptionsOpen]);
 
-    return () => {
-      socket.close();
-    };
-  }, []);
-
-  const sendMessage = () => {
+  const sendMessage = async () => {
     const socket = socketRef.current;
     if (!socket || socket.readyState !== WebSocket.OPEN) {
       console.warn("WebSocket not connected");
       return;
     }
     if (!input.trim()) return;
-
-    // const userMessage = {
-    //   id: crypto.randomUUID(),
-    //   role: "user",
-    //   content: input,
-    //   timestamp: new Date(),
-    // };
-
     socket.send(JSON.stringify({ conversation_id: 1, content: input }));
-    // setMessages((prev) => [...prev, userMessage]);
     setInput("");
   };
-
-  // Build enriched messages with sender info
-  const enrichedMessages = messages.map((msg) => ({
-    ...msg,
-    sender: msg.role === "user" ? USER_SENDER : ASSISTANT_SENDER,
-  }));
 
   return (
     <>
@@ -144,55 +197,51 @@ export default function Chat() {
             </ChatHeader>
 
             <ChatMessages className="scrollbar-hidden text-white bg-indigo" >
-              {enrichedMessages.length === 0 && (
+              {messages.length === 0 && (
                 <p className="text-center text-sm text-muted-foreground mt-8">
                   Commencez la conversation !
                 </p>
               )}
+              {messages.map((msg, i) => {
+                // const nextSameSender = msg.sender.id === msg[i + 1]?.sender.id;
 
-              {enrichedMessages.map((msg, i, msgs) => {
-                const dateChanged =
-                  new Date(msg.timestamp).toDateString() !==
-                  new Date(msgs[i + 1]?.timestamp).toDateString();
+                // if (dateChanged) {
+                //   return (
+                //     <Fragment key={msg.id}>
+                //       <PrimaryMessage
+                //         avatarSrc={msg.sender.avatarUrl}
+                //         avatarAlt={msg.sender.username}
+                //         avatarFallback={msg.sender.name.slice(0, 2)}
+                //         senderName={msg.sender.name}
+                //         content={msg.content}
+                //         timestamp={msg.timestamp.getTime()}
+                //       />
+                //       <DateItem timestamp={msg.timestamp.getTime()} className="my-4" />
+                //     </Fragment>
+                //   );
+                // }
 
-                const nextSameSender = msg.sender.id === msgs[i + 1]?.sender.id;
-
-                if (dateChanged) {
-                  return (
-                    <Fragment key={msg.id}>
-                      <PrimaryMessage
-                        avatarSrc={msg.sender.avatarUrl}
-                        avatarAlt={msg.sender.username}
-                        avatarFallback={msg.sender.name.slice(0, 2)}
-                        senderName={msg.sender.name}
-                        content={msg.content}
-                        timestamp={msg.timestamp.getTime()}
-                      />
-                      <DateItem timestamp={msg.timestamp.getTime()} className="my-4" />
-                    </Fragment>
-                  );
-                }
-
-                if (nextSameSender) {
-                  return (
-                    <AdditionalMessage
-                      key={msg.id}
-                      content={msg.content}
-                      timestamp={msg.timestamp.getTime()}
-                    />
-                  );
-                }
-
+                // if (nextSameSender) {
+                //   return (
+                //     <AdditionalMessage
+                //       key={msg.id}
+                //       content={msg.content}
+                //       timestamp={msg.created_at}
+                //     />
+                //   );
+                // }
+                const senderName = msg.sender_username ?? msg.sender?.username ?? "Unknown";
                 return (
+                  
                   <PrimaryMessage
                     className="mt-4"
-                    key={msg.id}
-                    avatarSrc={msg.sender.avatarUrl}
-                    avatarAlt={msg.sender.username}
-                    avatarFallback={msg.sender.name.slice(0, 2)}
-                    senderName={msg.sender.name}
+                    key={i}
+                    avatarSrc={Img}
+                    avatarAlt={senderName}
+                    // avatarFallback={msg.sender.username.slice(0, 2)}
+                    senderName={senderName }
                     content={msg.content}
-                    timestamp={msg.timestamp.getTime()}
+                    timestamp={msg.created_at}
                   />
                 );
               })}
@@ -210,7 +259,7 @@ export default function Chat() {
               <textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-               onKeyDown={(e) => {
+                onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
                     sendMessage();
@@ -220,8 +269,7 @@ export default function Chat() {
                 className="flex-1 resize-none bg-yellow outline-none text-sm py-2"
                 rows={1}
               />
-              <ChatToolbarAddon align="inline-end">
-               
+              <ChatToolbarAddon align="inline-end">               
                 <ChatToolbarButton onClick={sendMessage} disabled={isLoading}>
                   <SquareChevronRightIcon />
                 </ChatToolbarButton>

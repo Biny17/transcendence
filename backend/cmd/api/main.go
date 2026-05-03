@@ -6,11 +6,13 @@ import (
 	"backend/internal/config"
 	"backend/internal/friend"
 	"backend/internal/mid"
+	"backend/internal/pkg"
 	"backend/internal/server"
 	"backend/internal/user"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -33,6 +35,10 @@ func main() {
 	log.Printf("\tSTARTINGG\n")
 	log.Printf("-------------------\n")
 
+	err := os.MkdirAll("./img/", 0755)
+	if err != nil {
+		log.Fatal(err)
+	}
 	inj := do.New()
 	addProviders(inj)
 	addServices(inj)
@@ -61,12 +67,12 @@ func ProvideRouter(i do.Injector) (*chi.Mux, error) {
 func ProvideApi(i do.Injector) (huma.API, error) {
 	config := huma.DefaultConfig("transcendence", "0.6.9")
 	config.Components.SecuritySchemes = map[string]*huma.SecurityScheme{
-    "cookieAuth": {
-        Type: "apiKey",
-        In:   "cookie",
-        Name: "auth_token",
-    },
-}
+		"cookieAuth": {
+			Type: "apiKey",
+			In:   "cookie",
+			Name: "auth_token",
+		},
+	}
 
 	return humachi.New(
 		do.MustInvoke[*chi.Mux](i),
@@ -83,4 +89,6 @@ func addProviders(i do.Injector) {
 	do.Provide(i, server.ProvideDB)
 	do.Provide(i, ProvideRouter)
 	do.Provide(i, ProvideApi)
+	do.ProvideNamed(i, pkg.DoPrivateKey, pkg.PrivateKeyFromFile)
+	do.ProvideNamed(i, pkg.DoPublicKey, pkg.ProvidePublicKey)
 }

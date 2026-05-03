@@ -24,6 +24,6 @@
 			"shared/*": ["../shared/*", "./shared/*"]
 		}
 	},
-	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", ".next/dev/types/**/*.ts", "**/*.mts"],
+	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", ".next/dev/types/**/*.ts", "**/*.mts", "components/cards/Onlineplayers.jsx"],
 	"exclude": ["node_modules"]
 }

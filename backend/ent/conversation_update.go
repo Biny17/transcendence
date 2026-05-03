@@ -29,6 +29,40 @@ func (_u *ConversationUpdate) Where(ps ...predicate.Conversation) *ConversationU
 	return _u
 }
 
+// SetIsGroup sets the "is_group" field.
+func (_u *ConversationUpdate) SetIsGroup(v bool) *ConversationUpdate {
+	_u.mutation.SetIsGroup(v)
+	return _u
+}
+
+// SetNillableIsGroup sets the "is_group" field if the given value is not nil.
+func (_u *ConversationUpdate) SetNillableIsGroup(v *bool) *ConversationUpdate {
+	if v != nil {
+		_u.SetIsGroup(*v)
+	}
+	return _u
+}
+
+// SetTitle sets the "title" field.
+func (_u *ConversationUpdate) SetTitle(v string) *ConversationUpdate {
+	_u.mutation.SetTitle(v)
+	return _u
+}
+
+// SetNillableTitle sets the "title" field if the given value is not nil.
+func (_u *ConversationUpdate) SetNillableTitle(v *string) *ConversationUpdate {
+	if v != nil {
+		_u.SetTitle(*v)
+	}
+	return _u
+}
+
+// ClearTitle clears the value of the "title" field.
+func (_u *ConversationUpdate) ClearTitle() *ConversationUpdate {
+	_u.mutation.ClearTitle()
+	return _u
+}
+
 // AddMessageIDs adds the "messages" edge to the Message entity by IDs.
 func (_u *ConversationUpdate) AddMessageIDs(ids ...int) *ConversationUpdate {
 	_u.mutation.AddMessageIDs(ids...)
@@ -142,6 +176,15 @@ func (_u *ConversationUpdate) sqlSave(ctx context.Context) (_node int, err error
 			}
 		}
 	}
+	if value, ok := _u.mutation.IsGroup(); ok {
+		_spec.SetField(conversation.FieldIsGroup, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.Title(); ok {
+		_spec.SetField(conversation.FieldTitle, field.TypeString, value)
+	}
+	if _u.mutation.TitleCleared() {
+		_spec.ClearField(conversation.FieldTitle, field.TypeString)
+	}
 	if _u.mutation.MessagesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -250,6 +293,40 @@ type ConversationUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *ConversationMutation
+}
+
+// SetIsGroup sets the "is_group" field.
+func (_u *ConversationUpdateOne) SetIsGroup(v bool) *ConversationUpdateOne {
+	_u.mutation.SetIsGroup(v)
+	return _u
+}
+
+// SetNillableIsGroup sets the "is_group" field if the given value is not nil.
+func (_u *ConversationUpdateOne) SetNillableIsGroup(v *bool) *ConversationUpdateOne {
+	if v != nil {
+		_u.SetIsGroup(*v)
+	}
+	return _u
+}
+
+// SetTitle sets the "title" field.
+func (_u *ConversationUpdateOne) SetTitle(v string) *ConversationUpdateOne {
+	_u.mutation.SetTitle(v)
+	return _u
+}
+
+// SetNillableTitle sets the "title" field if the given value is not nil.
+func (_u *ConversationUpdateOne) SetNillableTitle(v *string) *ConversationUpdateOne {
+	if v != nil {
+		_u.SetTitle(*v)
+	}
+	return _u
+}
+
+// ClearTitle clears the value of the "title" field.
+func (_u *ConversationUpdateOne) ClearTitle() *ConversationUpdateOne {
+	_u.mutation.ClearTitle()
+	return _u
 }
 
 // AddMessageIDs adds the "messages" edge to the Message entity by IDs.
@@ -394,6 +471,15 @@ func (_u *ConversationUpdateOne) sqlSave(ctx context.Context) (_node *Conversati
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.IsGroup(); ok {
+		_spec.SetField(conversation.FieldIsGroup, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.Title(); ok {
+		_spec.SetField(conversation.FieldTitle, field.TypeString, value)
+	}
+	if _u.mutation.TitleCleared() {
+		_spec.ClearField(conversation.FieldTitle, field.TypeString)
 	}
 	if _u.mutation.MessagesCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Badge } from "@material-tailwind/react";
 
-export default function ListCard() {
+export default function ListCard({OptionsOpen}) {
   // const players = [
   //   {  name: "Tania Andrew", img: "https://docs.material-tailwind.com/img/face-1.jpg", win: 20 },
   //   {  name: "Alexander", img: "https://docs.material-tailwind.com/img/face-2.jpg", win: 18 },
@@ -15,7 +15,7 @@ export default function ListCard() {
   //   { name: "Sophie", img: "https://randomuser.me/api/portraits/women/4.jpg", win: 6 },
   // ];
   const [players, setPlayers] = useState([]);
-  const [img, setImg] = useState([]);
+  const [img, setImg] = useState(null);
   const [UserName, setUserName] = useState("");
 
   async function fetchData() {
@@ -34,19 +34,24 @@ export default function ListCard() {
   }
 
 async function fetchImg() {
-  const url = "https://picsum.photos/v2/list?page=2&limit=30";
-  const options = {
-    method: "GET",
-    headers: { Accept: "application/json, application/problem+json" },
-  };
+  const url = 'http://localhost:8080/api/update/profile-picture';
+  const options = {method: 'GET', credentials: 'include'};
   try {
     const response = await fetch(url, options);
-    const data = await response.json();
-    setImg(data);
+    if (!response.ok) {
+      setImg(null);
+      return;
+    }
+    const blob = await response.blob();
+    const imgUrl = URL.createObjectURL(blob);
+    console.log(img)
+    setImg(imgUrl);
   } catch (error) {
     console.error(error);
+    setImg(null);
   }
 }
+
 async function fetchUserById(id) {
   const url = 'http://localhost:8080/api/users/' + id;
   const options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
@@ -75,7 +80,7 @@ useEffect(() => {
   fetchUserById(decoded.sub);
   fetchData();
   fetchImg();
-}, []);
+}, [OptionsOpen]);
 
 players.sort((a, b) => b.win - a.win);
   return (
@@ -100,7 +105,7 @@ players.sort((a, b) => b.win - a.win);
               >
                 <img
                   alt={player.username}
-                  src={img[idx]?.download_url || img[idx]?.url}
+                  src={img}
                   className="relative inline-block h-12 w-12 rounded-full object-cover object-center"
                 />
               </Badge>

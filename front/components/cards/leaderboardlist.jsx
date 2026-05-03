@@ -34,17 +34,20 @@ export default function LeaderBoardList() {
   }
 
 async function fetchImg() {
-  const url = "https://picsum.photos/v2/list?page=2&limit=30";
-  const options = {
-    method: "GET",
-    headers: { Accept: "application/json, application/problem+json" },
-  };
+  const url = 'http://localhost:8080/api/update/profile-picture';
+  const options = {method: 'GET',  credentials: 'include', headers: {Accept: 'application/json, application/problem+json'}};
   try {
     const response = await fetch(url, options);
-    const data = await response.json();
-    setImg(data);
+    if (!response.ok) {
+      setImg("");
+      return;
+    }
+    const blob = await response.blob();
+    const imgUrl = URL.createObjectURL(blob);
+    setImg(imgUrl);
   } catch (error) {
     console.error(error);
+    setImg("");
   }
 }
 
@@ -75,7 +78,7 @@ players.sort((a, b) => b.win - a.win);
               >
                 <img
                   alt={player.username}
-                  src={img[idx]?.download_url || img[idx]?.url}
+                  src={img}
                   className="relative inline-block h-12 w-12 rounded-full object-cover object-center"
                 />
               </Badge>

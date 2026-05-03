@@ -15,7 +15,7 @@ export const Navbar = ({OptionsOpen, setOptionsOpen}) => {
 const [dropdownOpen, setDropdownOpen] = useState(false);
 const [error, setError] = useState("");
 const [username, setUserName] = useState('');
-const [Img, setImg] = useState([])
+const [Img, setImg] = useState("")
 const router = useRouter();
 const slothRef = useRef(null);
 
@@ -26,14 +26,20 @@ const slothRef = useRef(null);
 // }
 
 async function fetchImg() {
-  const url = 'https://picsum.photos/v2/list?page=2&limit=30'
-  const options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
+  const url = 'http://localhost:8080/api/update/profile-picture';
+  const options = {method: 'GET',  credentials: 'include', headers: {Accept: 'application/json, application/problem+json'}};
   try {
     const response = await fetch(url, options);
-    const data = await response.json();
-    setImg(data)
+    if (!response.ok) {
+      setImg("");
+      return;
+    }
+    const blob = await response.blob();
+    const imgUrl = URL.createObjectURL(blob);
+    setImg(imgUrl);
   } catch (error) {
     console.error(error);
+    setImg("");
   }
 }
 
@@ -100,7 +106,7 @@ useEffect(function(){
                 className="cursor-pointer text-slate-800 flex w-full text-sm items-center rounded-md p-3 transition-all hover:bg-slate-100 focus:bg-slate-100 active:bg-slate-100"
               >
 					<div className="flex items-center gap-4">
-				<Avatar src={Img[2]?.download_url || Img[2]?.url} alt="avatar" />
+               <Avatar src={Img} alt="avatar" />
 				<div>
 				<Typography variant="h6"> {username}</Typography>
 
@@ -151,7 +157,7 @@ useEffect(function(){
         onClick={() => setOptionsOpen(false)}
       >
         <div onClick={e => e.stopPropagation()}>
-          <Options setOptionsOpen={setOptionsOpen}/>
+          <Options OptionsOpen={OptionsOpen} setOptionsOpen={setOptionsOpen}/>
         </div>
       </div>
     )}

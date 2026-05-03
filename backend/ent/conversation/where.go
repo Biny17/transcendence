@@ -60,6 +60,16 @@ func CreatedAt(v time.Time) predicate.Conversation {
 	return predicate.Conversation(sql.FieldEQ(FieldCreatedAt, v))
 }
 
+// IsGroup applies equality check predicate on the "is_group" field. It's identical to IsGroupEQ.
+func IsGroup(v bool) predicate.Conversation {
+	return predicate.Conversation(sql.FieldEQ(FieldIsGroup, v))
+}
+
+// Title applies equality check predicate on the "title" field. It's identical to TitleEQ.
+func Title(v string) predicate.Conversation {
+	return predicate.Conversation(sql.FieldEQ(FieldTitle, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Conversation {
 	return predicate.Conversation(sql.FieldEQ(FieldCreatedAt, v))
@@ -98,6 +108,91 @@ func CreatedAtLT(v time.Time) predicate.Conversation {
 // CreatedAtLTE applies the LTE predicate on the "created_at" field.
 func CreatedAtLTE(v time.Time) predicate.Conversation {
 	return predicate.Conversation(sql.FieldLTE(FieldCreatedAt, v))
+}
+
+// IsGroupEQ applies the EQ predicate on the "is_group" field.
+func IsGroupEQ(v bool) predicate.Conversation {
+	return predicate.Conversation(sql.FieldEQ(FieldIsGroup, v))
+}
+
+// IsGroupNEQ applies the NEQ predicate on the "is_group" field.
+func IsGroupNEQ(v bool) predicate.Conversation {
+	return predicate.Conversation(sql.FieldNEQ(FieldIsGroup, v))
+}
+
+// TitleEQ applies the EQ predicate on the "title" field.
+func TitleEQ(v string) predicate.Conversation {
+	return predicate.Conversation(sql.FieldEQ(FieldTitle, v))
+}
+
+// TitleNEQ applies the NEQ predicate on the "title" field.
+func TitleNEQ(v string) predicate.Conversation {
+	return predicate.Conversation(sql.FieldNEQ(FieldTitle, v))
+}
+
+// TitleIn applies the In predicate on the "title" field.
+func TitleIn(vs ...string) predicate.Conversation {
+	return predicate.Conversation(sql.FieldIn(FieldTitle, vs...))
+}
+
+// TitleNotIn applies the NotIn predicate on the "title" field.
+func TitleNotIn(vs ...string) predicate.Conversation {
+	return predicate.Conversation(sql.FieldNotIn(FieldTitle, vs...))
+}
+
+// TitleGT applies the GT predicate on the "title" field.
+func TitleGT(v string) predicate.Conversation {
+	return predicate.Conversation(sql.FieldGT(FieldTitle, v))
+}
+
+// TitleGTE applies the GTE predicate on the "title" field.
+func TitleGTE(v string) predicate.Conversation {
+	return predicate.Conversation(sql.FieldGTE(FieldTitle, v))
+}
+
+// TitleLT applies the LT predicate on the "title" field.
+func TitleLT(v string) predicate.Conversation {
+	return predicate.Conversation(sql.FieldLT(FieldTitle, v))
+}
+
+// TitleLTE applies the LTE predicate on the "title" field.
+func TitleLTE(v string) predicate.Conversation {
+	return predicate.Conversation(sql.FieldLTE(FieldTitle, v))
+}
+
+// TitleContains applies the Contains predicate on the "title" field.
+func TitleContains(v string) predicate.Conversation {
+	return predicate.Conversation(sql.FieldContains(FieldTitle, v))
+}
+
+// TitleHasPrefix applies the HasPrefix predicate on the "title" field.
+func TitleHasPrefix(v string) predicate.Conversation {
+	return predicate.Conversation(sql.FieldHasPrefix(FieldTitle, v))
+}
+
+// TitleHasSuffix applies the HasSuffix predicate on the "title" field.
+func TitleHasSuffix(v string) predicate.Conversation {
+	return predicate.Conversation(sql.FieldHasSuffix(FieldTitle, v))
+}
+
+// TitleIsNil applies the IsNil predicate on the "title" field.
+func TitleIsNil() predicate.Conversation {
+	return predicate.Conversation(sql.FieldIsNull(FieldTitle))
+}
+
+// TitleNotNil applies the NotNil predicate on the "title" field.
+func TitleNotNil() predicate.Conversation {
+	return predicate.Conversation(sql.FieldNotNull(FieldTitle))
+}
+
+// TitleEqualFold applies the EqualFold predicate on the "title" field.
+func TitleEqualFold(v string) predicate.Conversation {
+	return predicate.Conversation(sql.FieldEqualFold(FieldTitle, v))
+}
+
+// TitleContainsFold applies the ContainsFold predicate on the "title" field.
+func TitleContainsFold(v string) predicate.Conversation {
+	return predicate.Conversation(sql.FieldContainsFold(FieldTitle, v))
 }
 
 // HasMessages applies the HasEdge predicate on the "messages" edge.
