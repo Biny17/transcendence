@@ -37,6 +37,7 @@ export class ServerHandler {
 	private reconnectCount = 0;
 	private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 	private intentionalDisconnect = false;
+	private handlersRegistered = false;
 	private readonly logger = Logger.getInstance().for("ServerHandler");
 	playerId: string | null = null;
 	public readonly networkManager: NetworkManager;
@@ -64,7 +65,6 @@ export class ServerHandler {
 			playerChoose: (payload) => this.sendRaw(CLIENT_MSG.PLAYER_CHOOSE, payload),
 			reset: () => this.sendRaw(CLIENT_MSG.RESET, {})
 		};
-		this.registerInternalHandlers();
 	}
 	setWorldResolver(resolver: (worldId: string) => Promise<World>): void {
 		this.worldResolver = resolver;
@@ -83,6 +83,10 @@ export class ServerHandler {
 	}
 	connect(): void {
 		this.ws = new WebSocket(this.serverUrl);
+		if (!this.handlersRegistered) {
+			this.registerInternalHandlers();
+			this.handlersRegistered = true;
+		}
 		this.ws.onopen = () => {
 			this.logger.info("Connected to server");
 			this.reconnectCount = 0;
@@ -146,6 +150,7 @@ export class ServerHandler {
 	dispose(): void {
 		this.disconnect();
 		this.handlers.clear();
+		this.handlersRegistered = false;
 	}
 	forceDisconnectAndReconnect(): void {
 		console.log("[ServerHandler] forceDisconnectAndReconnect called, ws state:", this.ws?.readyState);

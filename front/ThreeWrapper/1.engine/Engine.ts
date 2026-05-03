@@ -132,7 +132,6 @@ export class Engine {
 				this.timeScale = eng.timeScale;
 				this.gravity = eng.gravity;
 				this.renderer.shadowMap.enabled = eng.shadows;
-				this.renderer.forceContextRestore?.();
 				if (this.active) {
 					this.active.scene.fog = eng.fog ? this.active.scene.fog : null;
 					const ambient = this.active.scene.children.find((c) => c instanceof THREE.AmbientLight) as THREE.AmbientLight | undefined;
