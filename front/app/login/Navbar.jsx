@@ -82,6 +82,11 @@ useEffect(function() {
 	    }
       else if (Profile.verified && (response.status === 200 || response.status === 201))
         router.push("/home");
+      else
+     {
+        setError("Mail not verified");
+        setForm({ email: "", password: "", age: "", username: "" });
+     }
 
     } 
 	catch (error) 

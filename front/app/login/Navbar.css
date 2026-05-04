@@ -1,9 +1,17 @@
 input::placeholder {
   color: rgba(255,255,255,0.4);
 }
-/* input {
-  color: rgba(255,255,255,0.4) !important;
-} */
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: #ffffff;
+  caret-color: #ffffff;
+  box-shadow: 0 0 0 1000px #05113a inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
 .navbar {
   position: absolute;
   top: 0;
