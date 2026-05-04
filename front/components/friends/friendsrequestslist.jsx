@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "../../app/animations/Button.jsx";
 import { useState, useEffect} from "react";
+import { api } from "@/lib/api";
 export default function FriendsRequestsList(props) {
   // const players = [
   //   {  name: "Tania Andrew", img: "https://docs.material-tailwind.com/img/face-1.jpg", win: 20 },
@@ -27,16 +28,9 @@ export default function FriendsRequestsList(props) {
     });
   }
   
- async function fetchFriends() {
-  const url = 'http://localhost:8080/api/friends/pending'
-  const options = {
-    method: 'GET',
-    credentials: 'include',
-    headers: {Accept: 'application/json, application/problem+json'}
-  };
+  async function fetchFriends() {
   try {
-    const response = await fetch(url, options);
-    const data = await response.json();
+    const data = await api.get('/api/friends/pending');
     setRequests(data)
   } catch (error) {
     console.error(error);
@@ -56,19 +50,8 @@ async function fetchImg() {
 }
 
 async function fetchAccept(id) {
-  const url = 'http://localhost:8080/api/friends/accept';
-  const options = {
-    method: 'PATCH',
-    credentials: 'include',
-    headers: {'Content-Type': 'application/json', Accept: 'application/json, application/problem+json'},
-    body: JSON.stringify({ friend_id: id })
-  };
   try {
-    const response = await fetch(url, options);
-  if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.title);
-      }
+    await api.patch('/api/friends/accept', { friend_id: id });
     setFriendsClick(!FriendsClick)
   } catch (error) {
     console.error(error);
@@ -76,19 +59,8 @@ async function fetchAccept(id) {
 }
 
 async function fetchDecline(id) {
-  const url = 'http://localhost:8080/api/friends/reject';
-  const options = {
-    method: 'DELETE',
-    credentials: 'include',
-    headers: {'Content-Type': 'application/json', Accept: 'application/json, application/problem+json'},
-    body: JSON.stringify({ friend_id: id })
-  };
   try {
-    const response = await fetch(url, options);
-  if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.title);
-      }
+    await api.delete('/api/friends/reject', { friend_id: id });
     setFriendsClick(!FriendsClick)
   } catch (error) {
     console.error(error);

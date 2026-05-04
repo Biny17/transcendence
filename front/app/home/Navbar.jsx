@@ -10,6 +10,7 @@ import Options from "@/components/cards/Options";
 import { Avatar, Typography } from "@material-tailwind/react";
 import Sloth from "@/public/sloth-meditate.json";
 import lottie from "lottie-web";
+import { api, API_BASE } from "@/lib/api";
 
 export const Navbar = ({OptionsOpen, setOptionsOpen}) => {
 const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -26,7 +27,7 @@ const slothRef = useRef(null);
 // }
 
 async function fetchImg() {
-  const url = 'http://localhost:8080/api/update/profile-picture';
+  const url = `${API_BASE}/api/update/profile-picture`;
   const options = {method: 'GET',  credentials: 'include', headers: {Accept: 'application/json, application/problem+json'}};
   try {
     const response = await fetch(url, options);
@@ -44,11 +45,8 @@ async function fetchImg() {
 }
 
 async function fetchData(id) {
-  const url = 'http://localhost:8080/api/users/' + id;
-  const options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
   try {
-    const response = await fetch(url, options);
-    const data = await response.json();
+    const data = await api.get('/api/users/' + id);
     setUserName(data[0].username);
   } catch (error) {
     console.error(error);

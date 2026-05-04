@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from "../animations/Button.jsx"
 import lottie from "lottie-web";
 import Sloth from "@/public/sloth-meditate.json";
+import { api } from "@/lib/api";
 
 export const Navbar = ({ signInOpen, setSignInOpen }) => {
 const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -21,19 +22,11 @@ const slothRef = useRef(null)
 
 
 async function fetchVerified() {
-	const url =  'http://localhost:8080/api/users/find?email=' + form.email;
-	const options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
     try {
-      const response = await fetch(url, options);
-	  const data = await response.json();
+      const data = await api.get('/api/users/find?email=' + form.email);
 	  console.log(data)
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.title);
-      }
-    if (response.status === 200 ) 
       setProfile(data[0]);
-	setIsSignIn(true);
+	  setIsSignIn(true);
     } 
   catch (error) {
       console.log(error);
@@ -55,32 +48,22 @@ useEffect(function() {
     return;
   }
   async function fetchData() {
-    const url = isSignUp ? 'http://localhost:8080/api/users/add' : 'http://localhost:8080/api/auth/login';
-  let payload;
-  if (isSignUp)
-    payload = { ...form, age: Number(form.age), verified: false };
-  else
-    payload = {email: form.email,password: form.password};
-    const options = {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/problem+json' },
-      body: JSON.stringify(payload)
-    };
+    const path = isSignUp ? '/api/users/add' : '/api/auth/login';
+    let payload;
+    if (isSignUp)
+      payload = { ...form, age: Number(form.age), verified: false };
+    else
+      payload = {email: form.email,password: form.password};
     try {
-      const response = await fetch(url, options);
+      await api.post(path, payload);
       setIsSignIn(false);
       setIsSignUp(false);
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.title);
-      }
-      if (isSignUpMode && (response.status === 200 || response.status === 201)) 
+      if (isSignUpMode) 
 	    {
         setisSignUpMode(false);
         setForm({ email: "", password: "", age: "", username: "" });
 	    }
-      else if (Profile.verified && (response.status === 200 || response.status === 201))
+      else if (Profile.verified)
         router.push("/home");
       else
      {

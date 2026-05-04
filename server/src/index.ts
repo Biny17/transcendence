@@ -5,7 +5,7 @@ import type { WSMessage, JoinPayload, PlayerInputPayload, PhaseEventPayload } fr
 import type { LobbySequenceConfig } from "shared/config";
 import type { PlayerState } from "shared/state";
 import yaml from "js-yaml";
-const PORT = parseInt(Bun.env.PORT ?? "3002");
+const PORT = parseInt(Bun.env.PORT ?? "3000");
 const TICK_MS = 50;
 const configName = Bun.env.LOBBY_CONFIG ?? "one_game";
 const configPath = `${import.meta.dir}/../configs/${configName}.yaml`;
@@ -26,7 +26,7 @@ const server = Bun.serve<{ playerId: string }>({
 	port: PORT,
 	fetch(req, server) {
 		const url = new URL(req.url);
-		if (url.pathname === "/ws") {
+		if (url.pathname === "/") {
 			const upgraded = server.upgrade(req, { data: { playerId: "" } });
 			if (upgraded) return;
 			return new Response("WebSocket upgrade failed", { status: 400 });
@@ -58,7 +58,7 @@ const server = Bun.serve<{ playerId: string }>({
 					const knownBySequencer = existingId && sequencer.hasPlayer(existingId);
 					console.log(`[Server] knownBySequencer=${knownBySequencer}`);
 					const hasLives = existingId ? sequencer.getLives(existingId) > 0 : false;
-					console.log(`[Server] hasLives=${hasLives} existingId=${existingId} existingLives=${existingId ? sequencer.getLives(existingId) : 'N/A'}`);
+					console.log(`[Server] hasLives=${hasLives} existingId=${existingId} existingLives=${existingId ? sequencer.getLives(existingId) : "N/A"}`);
 					if (sequencer.isInLobbyWait()) {
 						console.log(`[Server] BRANCH: lobby_wait - adding new player`);
 						usernames.set(playerId, username);
@@ -90,10 +90,7 @@ const server = Bun.serve<{ playerId: string }>({
 						sequencer.addActivePlayer(playerId);
 						const activePlayers = sequencer.getActivePlayers();
 						const worldId = sequencer.isInGamePhase() && sequencer.getCurrentGameMode() ? sequencer.getCurrentGameMode() : sequencer.getLoadWorldId();
-						broadcastExcept(
-							playerId,
-							JSON.stringify(createMessage(SERVER_MSG.PLAYER_JOIN, { id: playerId, name: username }))
-						);
+						broadcastExcept(playerId, JSON.stringify(createMessage(SERVER_MSG.PLAYER_JOIN, { id: playerId, name: username })));
 						sendTo(
 							playerId,
 							JSON.stringify(
@@ -144,10 +141,7 @@ const server = Bun.serve<{ playerId: string }>({
 					const username = usernames.get(playerId) ?? playerId;
 					console.log(`[Server] ${username} loaded world`);
 					if (sequencer.isInLobbyWait()) {
-						sendTo(
-							playerId,
-							JSON.stringify(createMessage(SERVER_MSG.START_WORLD, { worldId: "Lobby" }))
-						);
+						sendTo(playerId, JSON.stringify(createMessage(SERVER_MSG.START_WORLD, { worldId: "Lobby" })));
 					} else if (sequencer.isInGamePhase()) {
 						const result = sequencer.onGameWorldLoaded(playerId);
 						if (result.processed) {
@@ -234,4 +228,4 @@ const server = Bun.serve<{ playerId: string }>({
 		}
 	}
 });
-console.log(`[Server] Running on ws://localhost:${PORT}/ws`);
+console.log(`[Server] Running on ws://localhost:${PORT}`);

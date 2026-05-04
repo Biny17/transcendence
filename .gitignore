@@ -1,58 +1,68 @@
-# Environment files
+# ========================
+# Environment Files
+# ========================
 .env
 .env.local
 .env.*.local
 
-# Front dependencies
+# ========================
+# Frontend (Next.js)
+# ========================
 front/node_modules
 front/.pnp
 front/.pnp.*
 front/bun.lock.bak
 front/bun.lock
 front/package-lock.json
-# Front build
 front/.next/
 front/out/
 front/build/
 front/dist/
 front/.env
-front/node_modules
-# OS
-front/.DS_Store
-.DS_Store
+front/.vercel
 front/*.pem
+front/*.tsbuildinfo
+front/next-env.d.ts
+front/tsconfig.tsbuildinfo
 
-#server
+# ========================
+# Backend / Game Server
+# ========================
 server/node_modules
 server/.pnp
 server/.pnp.*
 server/bun.lock.bak
 server/bun.lock
 server/package-lock.json
+server/dist/
 
+# ========================
+# Database
+# ========================
+postgres_data/
+
+# ========================
+# Shared
+# ========================
+secret
+.TODO
+
+# ========================
+# Build Tools
+# ========================
+.turbo
+.turborepo
+
+# ========================
 # IDE
+# ========================
 .vscode
 .idea
 *.swp
 *.swo
 
-# Vercel
-front/.vercel
-
-# TypeScript
-front/*.tsbuildinfo
-front/next-env.d.ts
-front/tsconfig.tsbuildinfo
-
-
-# Docker volumes
-postgres_data/
-
-# Turbo
-.turbo
-.turborepo
-.env
-.gitignore
-secret
-.TODO
-node_modules
+# ========================
+# OS
+# ========================
+.DS_Store
+front/.DS_Store

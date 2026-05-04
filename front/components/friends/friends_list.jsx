@@ -1,7 +1,7 @@
 "use client";
-import { request } from "http";
 import { Button } from "../../app/animations/Button.jsx";
 import { useState, useEffect} from "react";
+import { api, API_BASE } from "@/lib/api";
 export default function FriendList(props) {
   // const players = [
   //   {  name: "Tania Andrew", img: "https://docs.material-tailwind.com/img/face-1.jpg", win: 20 },
@@ -34,59 +34,24 @@ export default function FriendList(props) {
   }
 
     async function fetchUsers() {
-  const url = 'http://localhost:8080/api/users'
-  const options = {
-    method: 'GET',
-    credentials: 'include',
-    headers: {Accept: 'application/json, application/problem+json'}
-  };
   try {
-    const response = await fetch(url, options);
-    const data = await response.json();
+    const data = await api.get('/api/users');
     setPlayers(data)
   } catch (error) {
     console.error(error);
   }
 }
   async function fetchSendRequest(id) {
-  const url = 'http://localhost:8080/api/friends/request';
-  const options = {
-    method: 'POST',
-    credentials: 'include',
-    headers: {
-      Accept: 'application/json, application/problem+json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ friend_id: id }),
-  };
   try {
-    const response = await fetch(url, options);
-    if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.title || 'Failed to delete friend');
-      }
+    await api.post('/api/friends/request', { friend_id: id });
   } catch (error) {
     console.error(error);
   }
 }
 
-async function fetchDelete(id) {
-  const url = 'http://localhost:8080/api/friends/delete';
-  const options = {
-    method: 'DELETE',
-    credentials: 'include',
-    headers: {
-      Accept: 'application/json, application/problem+json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ friend_id: id }),
-  };
+  async function fetchDelete(id) {
   try {
-    const response = await fetch(url, options);
-  if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.title || 'Failed to delete friend');
-      }
+    await api.delete('/api/friends/delete', { body: JSON.stringify({ friend_id: id }) });
       setDeleted(!deleted)
       setAdded([])
   } catch (error) {
@@ -94,75 +59,49 @@ async function fetchDelete(id) {
   }
 }
 
- async function fetchFriends() {
-  const url = 'http://localhost:8080/api/friends/friendlist';
-  const options = {
-    method: 'GET',
-    credentials: 'include',
-    headers: {Accept: 'application/json, application/problem+json'}
-  };
+  async function fetchFriends() {
   try {
-    const response = await fetch(url, options);
-    const data = await response.json();
+    const data = await api.get('/api/friends/friendlist');
     setPlayers(data)
   } catch (error) {
     console.error(error);
   }
 }
 
-async function findPendingRequests(){
-  const url = 'http://localhost:8080/api/friends/pending'
-  const options = {
-    method: 'GET',
-    credentials: 'include',
-    headers: {Accept: 'application/json, application/problem+json'}
-  };
+  async function findPendingRequests(){
   try {
-    const response = await fetch(url, options);
-    const data = await response.json();
+    const data = await api.get('/api/friends/pending');
     setRequests(data)
   } catch (error) {
     console.error(error);
   }
 }
 
-async function findSentRequests(){
-  const url = 'http://localhost:8080/api/friends/sent'
-  const options = {
-    method: 'GET',
-    credentials: 'include',
-    headers: {Accept: 'application/json, application/problem+json'}
-  };
+  async function findSentRequests(){
   try {
-    const response = await fetch(url, options);
-    const data = await response.json();
+    const data = await api.get('/api/friends/sent');
     setSentRequests(data)
   } catch (error) {
     console.error(error);
   }
 }
 
-async function alreadyFriends() {
-  const url = 'http://localhost:8080/api/friends/friendlist';
-  const options = {
-    method: 'GET',
-    credentials: 'include',
-    headers: {Accept: 'application/json, application/problem+json'}
-  };
+  async function alreadyFriends() {
   try {
-    const response = await fetch(url, options);
-    const data = await response.json();
+    const data = await api.get('/api/friends/friendlist');
     setFriends(data)
   } catch (error) {
     console.error(error);
   }
 }
 
-async function fetchImg() {
-  const url = 'http://localhost:8080/api/update/profile-picture';
-  const options = {method: 'GET',  credentials: 'include', headers: {Accept: 'application/json, application/problem+json'}};
+  async function fetchImg() {
   try {
-    const response = await fetch(url, options);
+    const response = await fetch(`${API_BASE}/api/update/profile-picture`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {Accept: 'application/json, application/problem+json'}
+    });
     if (!response.ok) {
       setImg("");
       return;
@@ -176,16 +115,9 @@ async function fetchImg() {
   }
 }
 
-async function fetchData(id) {
-  const url = 'http://localhost:8080/api/users/' + id;
-  const options = {
-    method: 'GET',
-    credentials: 'include',
-    headers: {Accept: 'application/json, application/problem+json'}
-  };
+  async function fetchData(id) {
   try {
-    const response = await fetch(url, options);
-    const data = await response.json();
+    const data = await api.get('/api/users/' + id);
     setUserName(data[0].username);
   } catch (error) {
     console.error(error);

@@ -7,7 +7,7 @@ export default function OnlineDemo() {
 		<EngineCanvas
 			config={{
 				mode: "online",
-				serverUrl: "wss://ws.spacecowboy.fr/ws",
+				serverUrl: process.env.GAME_SERVER_URL ?? "ws://localhost:3002",
 				debug: { enabled: true }
 			}}
 			world={() => new DemoWorld()}

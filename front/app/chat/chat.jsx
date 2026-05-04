@@ -29,6 +29,7 @@ import { ChatMessages } from "@/components/chat/chat-messages";
 import { PrimaryMessage } from "@/components/examples/primary-message";
 import { AdditionalMessage } from "@/components/examples/additional-message";
 import { DateItem } from "@/components/examples/date-item";
+import { api, API_BASE } from "@/lib/api";
 
 // type Message = {
 //   id: string;
@@ -63,7 +64,7 @@ export default function Chat(OptionsOpen) {
 
 
 async function fetchImg() {
-  const url = 'http://localhost:8080/api/update/profile-picture';
+  const url = `${API_BASE}/api/update/profile-picture`;
   const options = {method: 'GET',  credentials: 'include', headers: {Accept: 'application/json, application/problem+json'}};
   try {
     const response = await fetch(url, options);
@@ -81,23 +82,11 @@ async function fetchImg() {
 }
 
   async function fetchConversationHistory(convId){
-    const url = 'http://localhost:8080/api/chat/conversation/' + convId + '/messages';
-    //const options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
-    const options = {method: 'GET', credentials: 'include', headers: {'Accept': 'application/json, application/problem+json', 'Content-Type': 'application/json'}};
     try 
 	  {
-      const response = await fetch(url, options);
-      const data = await response.json();
-      if (!response.ok) 
-      {
-        const err = await response.json();
-        throw new Error(err.title);
-      }
-      if (response.status === 200)
-      {
-        setMessages(data)
-        console.log(data)
-      }
+      const data = await api.get('/api/chat/conversation/' + convId + '/messages');
+      setMessages(data)
+      console.log(data)
     } 
     catch (error) 
     {
@@ -106,22 +95,10 @@ async function fetchImg() {
   }
 
   async function definePlayerId(){
-    const url = 'http://localhost:8080/api/users/me';
-    const options = {method: 'GET', credentials: 'include', 
-      headers: {'Accept': 'application/json, application/problem+json', 'Content-Type': 'application/json'}};
     try 
 	  {
-      const response = await fetch(url, options);
-      const data = await response.json();
-      if (!response.ok) 
-      {
-        const err = await response.json();
-        throw new Error(err.title);
-      }
-      if (response.status === 200)
-      {
-        return(data[0].id)
-      }
+      const data = await api.get('/api/users/me');
+      return(data[0].id)
     } 
     catch (error) 
     {
@@ -129,14 +106,14 @@ async function fetchImg() {
     }
   }
 
-  useEffect(() => {
+   useEffect(() => {
   
    async function initChat() {
     const convId = 1;
     const pId = await definePlayerId();
     fetchConversationHistory(1);
 
-    const socket = new WebSocket("ws://localhost:8080/api/chat/ws");
+    const socket = new WebSocket(api.getChatWebSocketUrl("/api/chat/ws"));
     socketRef.current = socket;
 
     socket.addEventListener("open", () => {

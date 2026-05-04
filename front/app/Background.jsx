@@ -1,23 +1,26 @@
 "use client";
 import "./Background.css";
 import { Loader } from './animations/Loader';
-import { NextRequest, NextResponse } from "next/server";
 import { Spinner } from './animations/Spinner';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { motion } from "motion/react"
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 export function Background() {
   const router = useRouter();
+  const [token, setToken] = useState(null);
 
-  function getCookie(name) {
-    if (typeof window === 'undefined') return undefined;
-	 return document.cookie
-	   .split('; ')
-	   .find(row => row.startsWith(name + '='))
-	   ?.split('=')[1];
-   }
-   const token = getCookie('auth_token');
-  return (
+  useEffect(() => {
+    function getCookie(name) {
+      return document.cookie
+        .split('; ')
+        .find(row => row.startsWith(name + '='))
+        ?.split('=')[1];
+    }
+    setToken(getCookie('auth_token'));
+  }, []);
+
+return (
 	<>
     <div className="background">
 	      <div className="blob blob-1"></div>

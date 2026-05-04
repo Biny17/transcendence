@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Badge } from "@material-tailwind/react";
+import { api, API_BASE } from "@/lib/api";
 
 export default function LeaderBoardList() {
   const play = [
@@ -19,14 +20,8 @@ export default function LeaderBoardList() {
   const [UserName, setUserName] = useState("");
 
   async function fetchData() {
-    const url = "http://localhost:8080/api/users";
-    const options = {
-      method: "GET",
-      headers: { Accept: "application/json, application/problem+json" },
-    };
     try {
-      const response = await fetch(url, options);
-      const data = await response.json();
+      const data = await api.get("/api/users");
       setPlayers([...data, ...play]);
     } catch (error) {
       console.error(error);
@@ -34,7 +29,7 @@ export default function LeaderBoardList() {
   }
 
 async function fetchImg() {
-  const url = 'http://localhost:8080/api/update/profile-picture';
+  const url = `${API_BASE}/api/update/profile-picture`;
   const options = {method: 'GET',  credentials: 'include', headers: {Accept: 'application/json, application/problem+json'}};
   try {
     const response = await fetch(url, options);

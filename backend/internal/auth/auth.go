@@ -2,6 +2,7 @@ package auth
 
 import (
 	"backend/ent"
+	"backend/internal/config"
 	"backend/internal/pkg/routes"
 	"backend/internal/pkg"
 	"log"
@@ -12,9 +13,17 @@ import (
 )
 
 type AuthService struct {
-	Client  *ent.Client
-	PrivKey jwk.Key
-	PubKey  jwk.Key
+	Client       *ent.Client
+	PrivKey      jwk.Key
+	PubKey       jwk.Key
+	CookieDomain string
+}
+
+func (auth *AuthService) getCookieSettings() (domain string, secure bool) {
+	if auth.CookieDomain == "" || auth.CookieDomain == "localhost" {
+		return "", false
+	}
+	return auth.CookieDomain, true
 }
 
 func ProvideAndRegister(i do.Injector) *AuthService {
@@ -33,6 +42,7 @@ func ProvideAuthService(i do.Injector) (*AuthService, error) {
 	auth.PubKey = do.MustInvokeNamed[jwk.Key](i, pkg.DoPublicKey)
 	auth.PrivKey = do.MustInvokeNamed[jwk.Key](i, pkg.DoPrivateKey)
 	auth.Client = do.MustInvoke[*ent.Client](i)
+	auth.CookieDomain = do.MustInvoke[config.Config](i).CookieDomain
 	return &auth, nil
 }
 

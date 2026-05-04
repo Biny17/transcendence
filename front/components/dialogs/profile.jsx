@@ -4,6 +4,7 @@ import { Button } from "@/app/animations/Button.jsx";
 import { useEffect, useState } from "react";
 import { useRef } from "react";
 import { useRouter } from 'next/navigation';
+import { api, API_BASE } from "@/lib/api";
 
 export function Profile({ SetProfileOpen}) {
   const [Profile, setProfile] = useState({ age: "", email: "", password: ".........", username: "" })
@@ -15,11 +16,8 @@ export function Profile({ SetProfileOpen}) {
   const router = useRouter();
 
   async function fetchData(id) {
-    const url = 'http://localhost:8080/api/users/' + id;
-    let options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
     try {
-      const response = await fetch(url, options);
-      const data = await response.json();
+      const data = await api.get('/api/users/' + id);
       setProfile({age: data[0].age, email: data[0].email, password: ".........", username: data[0].username })
 	  setinitialProfile({age: data[0].age, email: data[0].email, password: ".........", username: data[0].username })
     } catch (error) {
@@ -27,12 +25,12 @@ export function Profile({ SetProfileOpen}) {
     }
   }
     async function uploadPicture(e){
-    const url = 'http://localhost:8080/api/users/me/profile-picture';
     const file = event.target.files[0];
     if (file)
     {
         const form = new FormData();
         form.append('file', file);
+        const url = `${API_BASE}/api/users/me/profile-picture`;
         const options = {method: 'PUT', credentials: 'include', headers: {'Accept': 'application/json, application/problem+json'}}
         options.body = form;
         try {
@@ -69,8 +67,6 @@ export function Profile({ SetProfileOpen}) {
   }, []);
 
   async function handleSave(){
-    const url = 'http://localhost:8080/api/users/' + decoded;
-
     let payload;
     if (Profile.password === initialProfile.password) {
       const { password: _password, ...profileWithoutPassword } = Profile;
@@ -78,16 +74,10 @@ export function Profile({ SetProfileOpen}) {
     }
     else
       payload = Profile
-    const options = {method: 'PATCH', credentials: 'include', headers: {'Accept': 'application/json, application/problem+json', 'Content-Type': 'application/json'}, body: JSON.stringify(payload)};
     try 
 	{
-		const response = await fetch(url, options);
-		if (!response.ok) {
-			const err = await response.json();
-			throw new Error(err.title);
-		}
-		if (response.status === 200)
-			SetProfileOpen(false)
+		await api.patch('/api/users/' + decoded, payload);
+		SetProfileOpen(false)
   } 
     catch (error) 
     {
@@ -104,26 +94,10 @@ function handleFileSelect(e){
 }
 
 async function handleDelete() {
-  const url = 'http://localhost:8080/api/users/delete?user_id='+ decoded;
-  const options = {
-    method: 'DELETE',
-    credentials: 'include',
-    headers: {
-      'Accept': 'application/problem+json',
-      'Content-Type': 'application/json'
-    },
-  };
   try {
-    const response = await fetch(url, options);
-    if (!response.ok) {
-			const err = await response.json();
-			throw new Error(err.title);
-		}
-    if (response.status === 200)
-    {
-      SetProfileOpen(false)
-      router.push("/login")
-    }
+    await api.delete('/api/users/delete?user_id='+ decoded);
+    SetProfileOpen(false)
+    router.push("/login")
   } catch (error) {
     console.error(error);
   }
