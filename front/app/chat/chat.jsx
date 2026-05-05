@@ -123,7 +123,12 @@ async function fetchImg() {
     socket.addEventListener("message", (event) => {
       console.info("new message, update chat !");
       const payload = JSON.parse(event.data)
-      setMessages((prev) => [payload, ...prev]);
+        setMessages((prev) => {
+          if (prev.some((msg) => msg.id === payload.id)) {
+            return prev;
+          }
+          return [payload, ...prev];
+        });
     });
 
     socket.addEventListener("error", (event) => {
