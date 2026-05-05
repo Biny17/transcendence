@@ -10,6 +10,7 @@ registry.set("Editor", async () => new (await import("./worlds/EditorWorld")).Ed
 registry.set("ComponentCreator", async () => new (await import("./worlds/ComponentCreatorWorld")).ComponentCreatorWorld());
 registry.set("Parkour", async () => new (await import("./worlds/ParkourWorld")).ParkourWorld());
 registry.set("CharacterCustomizer", async () => new (await import("./worlds/CharacterCustomizerWorld")).CharacterCustomizerWorld());
+registry.set("CharacterVisualizer", async () => new (await import("./worlds/CharacterVisualizerWorld")).CharacterVisualizerWorld());
 export { registry as WorldRegistry };
 export function resolveWorld(worldId: string): Promise<World> {
 	const factory = registry.get(worldId);

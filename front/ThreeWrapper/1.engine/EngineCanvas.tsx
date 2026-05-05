@@ -10,12 +10,17 @@ type EngineCanvasProps = {
 	keymap?: KeyBinding[];
 	style?: React.CSSProperties;
 	className?: string;
+	onReady?: (world: World) => void;
 };
-export function EngineCanvas({ config, world, keymap, style, className }: EngineCanvasProps) {
+export function EngineCanvas({ config, world, keymap, style, className, onReady }: EngineCanvasProps) {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const configRef = useRef(config);
 	const worldRef = useRef(world);
 	const keymapRef = useRef(keymap);
+	const onReadyRef = useRef(onReady);
+	useEffect(() => {
+		onReadyRef.current = onReady;
+	}, [onReady]);
 	useEffect(() => {
 		const container = containerRef.current;
 		if (!container) return;
@@ -32,9 +37,13 @@ export function EngineCanvas({ config, world, keymap, style, className }: Engine
 				engine.startActive();
 				engine.start();
 				engine.connect();
+				onReadyRef.current?.(worldInstance);
 			});
 		} else {
-			engine.loadAndStart(worldInstance).then(() => engine.start());
+			engine.loadAndStart(worldInstance).then(() => {
+				engine.start();
+				onReadyRef.current?.(worldInstance);
+			});
 		}
 		return () => {
 			ro.disconnect();
@@ -42,7 +51,5 @@ export function EngineCanvas({ config, world, keymap, style, className }: Engine
 			if (container.contains(engine.canvas)) container.removeChild(engine.canvas);
 		};
 	}, []);
-	return (
-		<div ref={containerRef} className={className} style={{ width: "100%", height: "100%", overflow: "hidden", ...style }} />
-	);
+	return <div ref={containerRef} className={className} style={{ width: "100%", height: "100%", overflow: "hidden", ...style }} />;
 }

@@ -6,11 +6,23 @@ export type LoadedModel = {
 	animations: THREE.AnimationClip[];
 	mixer?: THREE.AnimationMixer;
 };
+export type ColorSwapConfig = {
+	bodyColor?: string;
+	faceColor?: string;
+	eyeColor?: string;
+};
 const BODY_ORIGINAL = { r: 0xff, g: 0x00, b: 0x00 };
 const FACE_ORIGINAL = { r: 0x00, g: 0x80, b: 0xff };
-const BODY_NEW = { r: 0xc0, g: 0x00, b: 0xc0 };
-const FACE_NEW = { r: 0xff, g: 0xff, b: 0xff };
-function applyTextureWithColorSwap(group: THREE.Group, textureUrl: string): Promise<void> {
+const EYE_ORIGINAL = { r: 0x00, g: 0x00, b: 0x00 };
+function hexToRgb(hex: string): { r: number; g: number; b: number } {
+	const clean = hex.replace("#", "");
+	const num = parseInt(clean, 16);
+	return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+}
+function applyTextureWithColorSwap(group: THREE.Group, textureUrl: string, config?: ColorSwapConfig): Promise<void> {
+	const bodyNew = config?.bodyColor ? hexToRgb(config.bodyColor) : { r: 0xc0, g: 0x00, b: 0xc0 };
+	const faceNew = config?.faceColor ? hexToRgb(config.faceColor) : { r: 0xff, g: 0xff, b: 0xff };
+	const eyeNew = config?.eyeColor ? hexToRgb(config.eyeColor) : { r: 0xff, g: 0xff, b: 0xff };
 	return new Promise((resolve) => {
 		const loader = new THREE.TextureLoader();
 		loader.load(textureUrl, (texture) => {
@@ -30,13 +42,17 @@ function applyTextureWithColorSwap(group: THREE.Group, textureUrl: string): Prom
 				const g = data[i + 1];
 				const b = data[i + 2];
 				if (r === BODY_ORIGINAL.r && g === BODY_ORIGINAL.g && b === BODY_ORIGINAL.b) {
-					data[i] = BODY_NEW.r;
-					data[i + 1] = BODY_NEW.g;
-					data[i + 2] = BODY_NEW.b;
+					data[i] = bodyNew.r;
+					data[i + 1] = bodyNew.g;
+					data[i + 2] = bodyNew.b;
 				} else if (r === FACE_ORIGINAL.r && g === FACE_ORIGINAL.g && b === FACE_ORIGINAL.b) {
-					data[i] = FACE_NEW.r;
-					data[i + 1] = FACE_NEW.g;
-					data[i + 2] = FACE_NEW.b;
+					data[i] = faceNew.r;
+					data[i + 1] = faceNew.g;
+					data[i + 2] = faceNew.b;
+				} else if (r === EYE_ORIGINAL.r && g === EYE_ORIGINAL.g && b === EYE_ORIGINAL.b) {
+					data[i] = eyeNew.r;
+					data[i + 1] = eyeNew.g;
+					data[i + 2] = eyeNew.b;
 				}
 			}
 			ctx.putImageData(imageData, 0, 0);
@@ -65,8 +81,9 @@ function applyTextureWithColorSwap(group: THREE.Group, textureUrl: string): Prom
 export class GLTFLoader {
 	private readonly loader = new ThreeGLTFLoader();
 	private readonly cache = new Map<string, LoadedModel>();
-	async load(id: string, url: string, textureUrl?: string): Promise<LoadedModel> {
-		if (this.cache.has(id)) return this.cache.get(id)!;
+	async load(id: string, url: string, textureUrl?: string, colorSwap?: ColorSwapConfig): Promise<LoadedModel> {
+		const cacheKey = colorSwap ? `${id}_${colorSwap.bodyColor ?? ""}_${colorSwap.faceColor ?? ""}_${colorSwap.eyeColor ?? ""}` : id;
+		if (this.cache.has(cacheKey)) return this.cache.get(cacheKey)!;
 		const gltf: GLTF = await new Promise((resolve, reject) => {
 			this.loader.load(url, resolve, undefined, reject);
 		});
@@ -75,12 +92,12 @@ export class GLTFLoader {
 			animations: gltf.animations
 		};
 		if (textureUrl) {
-			await applyTextureWithColorSwap(model.scene, textureUrl);
+			await applyTextureWithColorSwap(model.scene, textureUrl, colorSwap);
 		}
 		if (gltf.animations.length > 0) {
 			model.mixer = new THREE.AnimationMixer(model.scene);
 		}
-		this.cache.set(id, model);
+		this.cache.set(cacheKey, model);
 		return model;
 	}
 	get(id: string): LoadedModel | undefined {

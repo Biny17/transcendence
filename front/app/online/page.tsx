@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { DemoWorld } from "@/ThreeWrapper/2.world/worlds/DemoWorld";
 import { EngineCanvas } from "../../ThreeWrapper/1.engine/EngineCanvas";
 import { ConnectingWorld } from "@/ThreeWrapper/2.world/worlds/ConnectingWorld";
 
