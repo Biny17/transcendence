@@ -31,8 +31,6 @@ type Result struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ResultQuery when eager-loading is set.
 	Edges        ResultEdges `json:"edges"`
-	game_results *int
-	user_results *int
 	selectValues sql.SelectValues
 }
 
@@ -75,10 +73,6 @@ func (*Result) scanValues(columns []string) ([]any, error) {
 	for i := range columns {
 		switch columns[i] {
 		case result.FieldID, result.FieldRank, result.FieldKills, result.FieldDeath, result.FieldGameID, result.FieldUserID:
-			values[i] = new(sql.NullInt64)
-		case result.ForeignKeys[0]: // game_results
-			values[i] = new(sql.NullInt64)
-		case result.ForeignKeys[1]: // user_results
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -130,20 +124,6 @@ func (_m *Result) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
 				_m.UserID = int(value.Int64)
-			}
-		case result.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field game_results", value)
-			} else if value.Valid {
-				_m.game_results = new(int)
-				*_m.game_results = int(value.Int64)
-			}
-		case result.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field user_results", value)
-			} else if value.Valid {
-				_m.user_results = new(int)
-				*_m.user_results = int(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])

@@ -18,6 +18,7 @@ services:
       - GMAIL_PASSWORD=${GMAIL_PASSWORD}
       - ORIGINS=${ORIGINS}
       - KEYPATH=${KEYPATH}
+      - CREDENTIAL=${CREDENTIAL}
     volumes:
       - ./backend:/app
       - ./secret:/app/secret

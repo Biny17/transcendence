@@ -133,8 +133,6 @@ var (
 		{Name: "death", Type: field.TypeInt},
 		{Name: "game_id", Type: field.TypeInt},
 		{Name: "user_id", Type: field.TypeInt},
-		{Name: "game_results", Type: field.TypeInt},
-		{Name: "user_results", Type: field.TypeInt},
 	}
 	// ResultsTable holds the schema information for the "results" table.
 	ResultsTable = &schema.Table{
@@ -144,13 +142,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "results_games_results",
-				Columns:    []*schema.Column{ResultsColumns[6]},
+				Columns:    []*schema.Column{ResultsColumns[4]},
 				RefColumns: []*schema.Column{GamesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "results_users_results",
-				Columns:    []*schema.Column{ResultsColumns[7]},
+				Columns:    []*schema.Column{ResultsColumns[5]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
