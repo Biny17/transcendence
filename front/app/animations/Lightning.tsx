@@ -6,9 +6,10 @@ interface LightningProps {
   speed?: number;
   intensity?: number;
   size?: number;
+  transparent?: boolean;
 }
 
-const Lightning: React.FC<LightningProps> = ({ hue = 230, xOffset = 0, speed = 1, intensity = 1, size = 1 }) => {
+const Lightning: React.FC<LightningProps> = ({ hue = 230, xOffset = 0, speed = 1, intensity = 1, size = 1, transparent = false }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -44,6 +45,7 @@ const Lightning: React.FC<LightningProps> = ({ hue = 230, xOffset = 0, speed = 1
       uniform float uSpeed;
       uniform float uIntensity;
       uniform float uSize;
+      uniform bool uTransparent;
       
       #define OCTAVE_COUNT 10
 
@@ -105,9 +107,13 @@ const Lightning: React.FC<LightningProps> = ({ hue = 230, xOffset = 0, speed = 1
           
           float dist = abs(uv.x);
           vec3 baseColor = hsv2rgb(vec3(uHue / 360.0, 0.7, 0.8));
-          vec3 col = baseColor * pow(mix(0.0, 0.07, hash11(iTime * uSpeed)) / dist, 1.0) * uIntensity;
+          float lightningIntensity = pow(mix(0.0, 0.07, hash11(iTime * uSpeed)) / dist, 1.0) * uIntensity;
+          vec3 col = baseColor * lightningIntensity;
           col = pow(col, vec3(1.0));
-          fragColor = vec4(col, 1.0);
+          
+          float alpha = uTransparent ? lightningIntensity : 1.0;
+          
+          fragColor = vec4(col, alpha);
       }
 
       void main() {
@@ -159,6 +165,7 @@ const Lightning: React.FC<LightningProps> = ({ hue = 230, xOffset = 0, speed = 1
     const uSpeedLocation = gl.getUniformLocation(program, 'uSpeed');
     const uIntensityLocation = gl.getUniformLocation(program, 'uIntensity');
     const uSizeLocation = gl.getUniformLocation(program, 'uSize');
+    const uTransparentLocation = gl.getUniformLocation(program, 'uTransparent');
 
     const startTime = performance.now();
     const render = () => {
@@ -172,6 +179,7 @@ const Lightning: React.FC<LightningProps> = ({ hue = 230, xOffset = 0, speed = 1
       gl.uniform1f(uSpeedLocation, speed);
       gl.uniform1f(uIntensityLocation, intensity);
       gl.uniform1f(uSizeLocation, size);
+      gl.uniform1i(uTransparentLocation, transparent ? 1 : 0);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
       requestAnimationFrame(render);
     };
@@ -180,7 +188,7 @@ const Lightning: React.FC<LightningProps> = ({ hue = 230, xOffset = 0, speed = 1
     return () => {
       window.removeEventListener('resize', resizeCanvas);
     };
-  }, [hue, xOffset, speed, intensity, size]);
+  }, [hue, xOffset, speed, intensity, size, transparent]);
 
   return <canvas ref={canvasRef} className="w-full h-full relative" />;
 };

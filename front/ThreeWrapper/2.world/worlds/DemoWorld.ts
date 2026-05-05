@@ -20,11 +20,11 @@ export class DemoWorld extends World {
 		sun.position.set(10, 20, 10)
 		sun.castShadow = true
 		this.ctx.objects.add({ type: 'map', name: "sun", pieces: [{ asset: sun, relativePosition: { x: 0, y: 0, z: 0 }, hitboxes: [] }] })
-		this.ctx.scene.background = new THREE.Color(0x87ceeb)
+		/*this.ctx.scene.background = new THREE.Color(0x87ceeb)
 		this.cube = new THREE.Mesh(
 			new THREE.BoxGeometry(1, 1, 1),
 			new THREE.MeshPhongMaterial({ color: 0xff4444 }),
-		)
+			)*/
 		this.cube.position.set(0, 8, 0)
 		this.cube.castShadow = true
 		const cubeObj = this.ctx.objects.add({ type: 'map', name: "cube", pieces: [{ asset: this.cube, relativePosition: { x: 0, y: 0, z: 0 }, hitboxes: [{ shape: { kind: 'auto' }, relativeOffset: { x: 0, y: 0, z: 0 } }] }], physics: { bodyType: 'static' } });

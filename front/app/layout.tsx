@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Baloo_2, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "./home/Background.css";
+import "./online/online-background.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,13 +32,25 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-		<head>
+      <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${baloo2.variable} antialiased`}
+        style={{ background: "#060816", margin: 0, padding: 0 }}
       >
-        {children}
+        <div
+          className="background"
+          style={{ position: "fixed", inset: 0, zIndex: 0 }}
+        >
+          <div className="blob blob-1" />
+          <div className="blob blob-2" />
+          <div className="blob blob-3" />
+          <div className="blob blob-4" />
+        </div>
+        <div style={{ position: "relative", zIndex: 1 }}>
+          {children}
+        </div>
       </body>
     </html>
   );

@@ -2,6 +2,7 @@ import type { World } from "./WorldClass";
 const registry = new Map<string, () => Promise<World>>();
 registry.set("Demo", async () => new (await import("./worlds/DemoWorld")).DemoWorld());
 registry.set("Loading", async () => new (await import("./worlds/LoadingWorld")).LoadingWorld());
+registry.set("Connecting", async () => new (await import("./worlds/ConnectingWorld")).ConnectingWorld());
 registry.set("Lobby", async () => new (await import("./worlds/LobbyWorld")).LobbyWorld());
 registry.set("UI", async () => new (await import("./worlds/UIWorld")).UIWorld());
 registry.set("Visualizer", async () => new (await import("./worlds/VisualizerWorld")).VisualizerWorld());
