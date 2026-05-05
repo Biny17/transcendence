@@ -1,6 +1,7 @@
 package user
 
 import (
+	"backend/ent"
 	"backend/internal/pkg"
 	"backend/internal/pkg/picture"
 	"context"
@@ -52,25 +53,29 @@ func (us *UserService) UploadPP(
 	return nil, nil
 }
 
+type GetPPIn struct {
+	UserId int `path:"user_id"`
+}
+
 type GetPPOut struct {
 	ContentType string `header:"Content-Type"`
 	Body        []byte
 }
 
-func (us *UserService) GetMyPicture(
+func (us *UserService) GetPicture(
 	ctx context.Context,
-	input *struct{},
+	input *GetPPIn,
 ) (
 	*GetPPOut,
 	error,
 ) {
 	out := &GetPPOut{}
-	id, err := pkg.ContextUserId(ctx)
-	if err != nil {
-		return nil, huma.Error401Unauthorized("login")
-	}
+	id := input.UserId
 	user, err := us.Client.User.Get(ctx, id)
 	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, huma.Error404NotFound("User not found")
+		}
 		return nil, huma.Error500InternalServerError("Try again later")
 	}
 	if user.PpPath == "" {
@@ -84,4 +89,18 @@ func (us *UserService) GetMyPicture(
 	}
 	out.ContentType = cont_type
 	return out, nil
+}
+
+func (us *UserService) GetMyPicture(
+	ctx context.Context,
+	input *struct{},
+) (
+	*GetPPOut,
+	error,
+) {
+	id, err := pkg.ContextUserId(ctx)
+	if err != nil {
+		return nil, huma.Error401Unauthorized("login")
+	}
+	return us.GetPicture(ctx, &GetPPIn{UserId: id})
 }

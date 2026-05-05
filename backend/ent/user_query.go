@@ -8,6 +8,7 @@ import (
 	"backend/ent/mailverif"
 	"backend/ent/message"
 	"backend/ent/predicate"
+	"backend/ent/result"
 	"backend/ent/user"
 	"context"
 	"database/sql/driver"
@@ -32,6 +33,7 @@ type UserQuery struct {
 	withFriendOf      *FriendshipQuery
 	withSendMessages  *MessageQuery
 	withConversations *ConversationQuery
+	withResults       *ResultQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -171,6 +173,28 @@ func (_q *UserQuery) QueryConversations() *ConversationQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(conversation.Table, conversation.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, user.ConversationsTable, user.ConversationsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryResults chains the current query on the "results" edge.
+func (_q *UserQuery) QueryResults() *ResultQuery {
+	query := (&ResultClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(result.Table, result.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.ResultsTable, user.ResultsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -375,6 +399,7 @@ func (_q *UserQuery) Clone() *UserQuery {
 		withFriendOf:      _q.withFriendOf.Clone(),
 		withSendMessages:  _q.withSendMessages.Clone(),
 		withConversations: _q.withConversations.Clone(),
+		withResults:       _q.withResults.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -433,6 +458,17 @@ func (_q *UserQuery) WithConversations(opts ...func(*ConversationQuery)) *UserQu
 		opt(query)
 	}
 	_q.withConversations = query
+	return _q
+}
+
+// WithResults tells the query-builder to eager-load the nodes that are connected to
+// the "results" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithResults(opts ...func(*ResultQuery)) *UserQuery {
+	query := (&ResultClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withResults = query
 	return _q
 }
 
@@ -514,12 +550,13 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = _q.querySpec()
-		loadedTypes = [5]bool{
+		loadedTypes = [6]bool{
 			_q.withMailVerif != nil,
 			_q.withFriendships != nil,
 			_q.withFriendOf != nil,
 			_q.withSendMessages != nil,
 			_q.withConversations != nil,
+			_q.withResults != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -571,6 +608,13 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := _q.loadConversations(ctx, query, nodes,
 			func(n *User) { n.Edges.Conversations = []*Conversation{} },
 			func(n *User, e *Conversation) { n.Edges.Conversations = append(n.Edges.Conversations, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withResults; query != nil {
+		if err := _q.loadResults(ctx, query, nodes,
+			func(n *User) { n.Edges.Results = []*Result{} },
+			func(n *User, e *Result) { n.Edges.Results = append(n.Edges.Results, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -755,6 +799,37 @@ func (_q *UserQuery) loadConversations(ctx context.Context, query *ConversationQ
 		for kn := range nodes {
 			assign(kn, n)
 		}
+	}
+	return nil
+}
+func (_q *UserQuery) loadResults(ctx context.Context, query *ResultQuery, nodes []*User, init func(*User), assign func(*User, *Result)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Result(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.ResultsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.user_results
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "user_results" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_results" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
 	}
 	return nil
 }
