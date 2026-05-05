@@ -2749,10 +2749,6 @@ type ResultMutation struct {
 	addkills      *int
 	death         *int
 	adddeath      *int
-	game_id       *int
-	addgame_id    *int
-	user_id       *int
-	adduser_id    *int
 	clearedFields map[string]struct{}
 	game          *int
 	clearedgame   bool
@@ -3031,13 +3027,12 @@ func (m *ResultMutation) ResetDeath() {
 
 // SetGameID sets the "game_id" field.
 func (m *ResultMutation) SetGameID(i int) {
-	m.game_id = &i
-	m.addgame_id = nil
+	m.game = &i
 }
 
 // GameID returns the value of the "game_id" field in the mutation.
 func (m *ResultMutation) GameID() (r int, exists bool) {
-	v := m.game_id
+	v := m.game
 	if v == nil {
 		return
 	}
@@ -3061,39 +3056,19 @@ func (m *ResultMutation) OldGameID(ctx context.Context) (v int, err error) {
 	return oldValue.GameID, nil
 }
 
-// AddGameID adds i to the "game_id" field.
-func (m *ResultMutation) AddGameID(i int) {
-	if m.addgame_id != nil {
-		*m.addgame_id += i
-	} else {
-		m.addgame_id = &i
-	}
-}
-
-// AddedGameID returns the value that was added to the "game_id" field in this mutation.
-func (m *ResultMutation) AddedGameID() (r int, exists bool) {
-	v := m.addgame_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
 // ResetGameID resets all changes to the "game_id" field.
 func (m *ResultMutation) ResetGameID() {
-	m.game_id = nil
-	m.addgame_id = nil
+	m.game = nil
 }
 
 // SetUserID sets the "user_id" field.
 func (m *ResultMutation) SetUserID(i int) {
-	m.user_id = &i
-	m.adduser_id = nil
+	m.user = &i
 }
 
 // UserID returns the value of the "user_id" field in the mutation.
 func (m *ResultMutation) UserID() (r int, exists bool) {
-	v := m.user_id
+	v := m.user
 	if v == nil {
 		return
 	}
@@ -3117,51 +3092,20 @@ func (m *ResultMutation) OldUserID(ctx context.Context) (v int, err error) {
 	return oldValue.UserID, nil
 }
 
-// AddUserID adds i to the "user_id" field.
-func (m *ResultMutation) AddUserID(i int) {
-	if m.adduser_id != nil {
-		*m.adduser_id += i
-	} else {
-		m.adduser_id = &i
-	}
-}
-
-// AddedUserID returns the value that was added to the "user_id" field in this mutation.
-func (m *ResultMutation) AddedUserID() (r int, exists bool) {
-	v := m.adduser_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
 // ResetUserID resets all changes to the "user_id" field.
 func (m *ResultMutation) ResetUserID() {
-	m.user_id = nil
-	m.adduser_id = nil
-}
-
-// SetGameID sets the "game" edge to the Game entity by id.
-func (m *ResultMutation) SetGameID(id int) {
-	m.game = &id
+	m.user = nil
 }
 
 // ClearGame clears the "game" edge to the Game entity.
 func (m *ResultMutation) ClearGame() {
 	m.clearedgame = true
+	m.clearedFields[result.FieldGameID] = struct{}{}
 }
 
 // GameCleared reports if the "game" edge to the Game entity was cleared.
 func (m *ResultMutation) GameCleared() bool {
 	return m.clearedgame
-}
-
-// GameID returns the "game" edge ID in the mutation.
-func (m *ResultMutation) GameID() (id int, exists bool) {
-	if m.game != nil {
-		return *m.game, true
-	}
-	return
 }
 
 // GameIDs returns the "game" edge IDs in the mutation.
@@ -3180,27 +3124,15 @@ func (m *ResultMutation) ResetGame() {
 	m.clearedgame = false
 }
 
-// SetUserID sets the "user" edge to the User entity by id.
-func (m *ResultMutation) SetUserID(id int) {
-	m.user = &id
-}
-
 // ClearUser clears the "user" edge to the User entity.
 func (m *ResultMutation) ClearUser() {
 	m.cleareduser = true
+	m.clearedFields[result.FieldUserID] = struct{}{}
 }
 
 // UserCleared reports if the "user" edge to the User entity was cleared.
 func (m *ResultMutation) UserCleared() bool {
 	return m.cleareduser
-}
-
-// UserID returns the "user" edge ID in the mutation.
-func (m *ResultMutation) UserID() (id int, exists bool) {
-	if m.user != nil {
-		return *m.user, true
-	}
-	return
 }
 
 // UserIDs returns the "user" edge IDs in the mutation.
@@ -3263,10 +3195,10 @@ func (m *ResultMutation) Fields() []string {
 	if m.death != nil {
 		fields = append(fields, result.FieldDeath)
 	}
-	if m.game_id != nil {
+	if m.game != nil {
 		fields = append(fields, result.FieldGameID)
 	}
-	if m.user_id != nil {
+	if m.user != nil {
 		fields = append(fields, result.FieldUserID)
 	}
 	return fields
@@ -3367,12 +3299,6 @@ func (m *ResultMutation) AddedFields() []string {
 	if m.adddeath != nil {
 		fields = append(fields, result.FieldDeath)
 	}
-	if m.addgame_id != nil {
-		fields = append(fields, result.FieldGameID)
-	}
-	if m.adduser_id != nil {
-		fields = append(fields, result.FieldUserID)
-	}
 	return fields
 }
 
@@ -3387,10 +3313,6 @@ func (m *ResultMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedKills()
 	case result.FieldDeath:
 		return m.AddedDeath()
-	case result.FieldGameID:
-		return m.AddedGameID()
-	case result.FieldUserID:
-		return m.AddedUserID()
 	}
 	return nil, false
 }
@@ -3420,20 +3342,6 @@ func (m *ResultMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddDeath(v)
-		return nil
-	case result.FieldGameID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddGameID(v)
-		return nil
-	case result.FieldUserID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddUserID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Result numeric field %s", name)

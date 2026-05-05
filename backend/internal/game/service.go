@@ -5,6 +5,7 @@ import (
 	"backend/internal/config"
 	"backend/internal/mid"
 	"backend/internal/pkg/routes"
+	"net/http"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/samber/do/v2"
@@ -31,12 +32,12 @@ func ProvideAndRegister(i do.Injector) *GameService {
 func (gs *GameService) Register(api huma.API, m *mid.Middleware) {
 	huma.Register(api, huma.Operation{
 		OperationID: "GAME ADD",
-		Method:      "POST",
+		Method:      http.MethodPost,
 		Path:        routes.GameAdd,
 		Summary:     "Add a game to the database",
-		Middlewares: huma.Middlewares{m.Admin},
-		Security: []map[string][]string{
-			{"credentials": {}},
-		},
+		// Middlewares: huma.Middlewares{m.Admin},
+		// Security: []map[string][]string{
+		// 	{"credentials": {}},
+		// },
 	}, gs.GameResult)
 }

@@ -54,7 +54,7 @@ func (us *UserService) UploadPP(
 }
 
 type GetPPIn struct {
-	UserId int `path:"user_id"`
+	UserId int `path:"id"`
 }
 
 type GetPPOut struct {

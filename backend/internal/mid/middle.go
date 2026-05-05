@@ -3,7 +3,6 @@ package mid
 import (
 	"backend/internal/config"
 	"backend/internal/pkg"
-	"log"
 	"strconv"
 	"time"
 
@@ -34,7 +33,7 @@ func (mid *Middleware) Auth(ctx huma.Context, next func(huma.Context)) {
 		huma.WriteErr(mid.Api, ctx, 401, "Missing authentification token")
 		return
 	}
-	log.Printf("cooken.Value: %s\n", cooken.Value)
+	// log.Printf("cooken.Value: %s\n", cooken.Value)
 	token, err := jwt.Parse([]byte(cooken.Value), jwt.WithKey(jwa.RS256(), mid.PubKey))
 	exp, exp_exist := token.Expiration()
 	sub, sub_exist := token.Subject()
