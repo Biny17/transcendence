@@ -1,5 +1,4 @@
 export const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-const GAME_SERVER_BASE = process.env.NEXT_PUBLIC_GAME_SERVER_URL || 'ws://localhost:3002';
 
 export const api = {
   get: async <T>(path: string, options?: RequestInit): Promise<T | undefined> => {
@@ -105,9 +104,6 @@ export const api = {
     return `${wsBase}${path}`;
   },
 
-  getGameServerUrl: (): string => {
-    return `${GAME_SERVER_BASE}/ws`;
-  },
 };
 
 export default api;
