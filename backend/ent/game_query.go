@@ -413,9 +413,7 @@ func (_q *GameQuery) loadResults(ctx context.Context, query *ResultQuery, nodes 
 			init(nodes[i])
 		}
 	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(result.FieldGameID)
-	}
+	query.withFKs = true
 	query.Where(predicate.Result(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(game.ResultsColumn), fks...))
 	}))
@@ -424,10 +422,13 @@ func (_q *GameQuery) loadResults(ctx context.Context, query *ResultQuery, nodes 
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.GameID
-		node, ok := nodeids[fk]
+		fk := n.game_results
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "game_results" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "game_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "game_results" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

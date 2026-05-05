@@ -26,6 +26,7 @@ type ResultQuery struct {
 	predicates []predicate.Result
 	withGame   *GameQuery
 	withUser   *UserQuery
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -405,12 +406,19 @@ func (_q *ResultQuery) prepareQuery(ctx context.Context) error {
 func (_q *ResultQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Result, error) {
 	var (
 		nodes       = []*Result{}
+		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
 		loadedTypes = [2]bool{
 			_q.withGame != nil,
 			_q.withUser != nil,
 		}
 	)
+	if _q.withGame != nil || _q.withUser != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, result.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Result).scanValues(nil, columns)
 	}
@@ -448,7 +456,10 @@ func (_q *ResultQuery) loadGame(ctx context.Context, query *GameQuery, nodes []*
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Result)
 	for i := range nodes {
-		fk := nodes[i].GameID
+		if nodes[i].game_results == nil {
+			continue
+		}
+		fk := *nodes[i].game_results
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -465,7 +476,7 @@ func (_q *ResultQuery) loadGame(ctx context.Context, query *GameQuery, nodes []*
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "game_id" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "game_results" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -477,7 +488,10 @@ func (_q *ResultQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Result)
 	for i := range nodes {
-		fk := nodes[i].UserID
+		if nodes[i].user_results == nil {
+			continue
+		}
+		fk := *nodes[i].user_results
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -494,7 +508,7 @@ func (_q *ResultQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "user_results" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -527,12 +541,6 @@ func (_q *ResultQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != result.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
-		}
-		if _q.withGame != nil {
-			_spec.Node.AddColumnOnce(result.FieldGameID)
-		}
-		if _q.withUser != nil {
-			_spec.Node.AddColumnOnce(result.FieldUserID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

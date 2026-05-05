@@ -30,7 +30,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "result" package.
 	ResultsInverseTable = "results"
 	// ResultsColumn is the table column denoting the results relation/edge.
-	ResultsColumn = "game_id"
+	ResultsColumn = "game_results"
 )
 
 // Columns holds all SQL columns for game fields.

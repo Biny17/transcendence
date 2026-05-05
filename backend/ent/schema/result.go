@@ -28,12 +28,10 @@ func (Result) Edges() []ent.Edge {
 		edge.From("game", Game.Type).
 			Ref("results").
 			Unique().
-			Required().
-			Field("game_id"),
+			Required(),
 		edge.From("user", User.Type).
 			Ref("results").
 			Unique().
-			Required().
-			Field("user_id"),
+			Required(),
 	}
 }

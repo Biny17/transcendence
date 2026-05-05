@@ -34,14 +34,14 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "game" package.
 	GameInverseTable = "games"
 	// GameColumn is the table column denoting the game relation/edge.
-	GameColumn = "game_id"
+	GameColumn = "game_results"
 	// UserTable is the table that holds the user relation/edge.
 	UserTable = "results"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
-	UserColumn = "user_id"
+	UserColumn = "user_results"
 )
 
 // Columns holds all SQL columns for result fields.
@@ -54,10 +54,22 @@ var Columns = []string{
 	FieldUserID,
 }
 
+// ForeignKeys holds the SQL foreign-keys that are owned by the "results"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"game_results",
+	"user_results",
+}
+
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}

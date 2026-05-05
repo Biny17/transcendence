@@ -219,6 +219,26 @@ func GameIDNotIn(vs ...int) predicate.Result {
 	return predicate.Result(sql.FieldNotIn(FieldGameID, vs...))
 }
 
+// GameIDGT applies the GT predicate on the "game_id" field.
+func GameIDGT(v int) predicate.Result {
+	return predicate.Result(sql.FieldGT(FieldGameID, v))
+}
+
+// GameIDGTE applies the GTE predicate on the "game_id" field.
+func GameIDGTE(v int) predicate.Result {
+	return predicate.Result(sql.FieldGTE(FieldGameID, v))
+}
+
+// GameIDLT applies the LT predicate on the "game_id" field.
+func GameIDLT(v int) predicate.Result {
+	return predicate.Result(sql.FieldLT(FieldGameID, v))
+}
+
+// GameIDLTE applies the LTE predicate on the "game_id" field.
+func GameIDLTE(v int) predicate.Result {
+	return predicate.Result(sql.FieldLTE(FieldGameID, v))
+}
+
 // UserIDEQ applies the EQ predicate on the "user_id" field.
 func UserIDEQ(v int) predicate.Result {
 	return predicate.Result(sql.FieldEQ(FieldUserID, v))
@@ -237,6 +257,26 @@ func UserIDIn(vs ...int) predicate.Result {
 // UserIDNotIn applies the NotIn predicate on the "user_id" field.
 func UserIDNotIn(vs ...int) predicate.Result {
 	return predicate.Result(sql.FieldNotIn(FieldUserID, vs...))
+}
+
+// UserIDGT applies the GT predicate on the "user_id" field.
+func UserIDGT(v int) predicate.Result {
+	return predicate.Result(sql.FieldGT(FieldUserID, v))
+}
+
+// UserIDGTE applies the GTE predicate on the "user_id" field.
+func UserIDGTE(v int) predicate.Result {
+	return predicate.Result(sql.FieldGTE(FieldUserID, v))
+}
+
+// UserIDLT applies the LT predicate on the "user_id" field.
+func UserIDLT(v int) predicate.Result {
+	return predicate.Result(sql.FieldLT(FieldUserID, v))
+}
+
+// UserIDLTE applies the LTE predicate on the "user_id" field.
+func UserIDLTE(v int) predicate.Result {
+	return predicate.Result(sql.FieldLTE(FieldUserID, v))
 }
 
 // HasGame applies the HasEdge predicate on the "game" edge.

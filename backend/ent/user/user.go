@@ -87,7 +87,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "result" package.
 	ResultsInverseTable = "results"
 	// ResultsColumn is the table column denoting the results relation/edge.
-	ResultsColumn = "user_id"
+	ResultsColumn = "user_results"
 )
 
 // Columns holds all SQL columns for user fields.

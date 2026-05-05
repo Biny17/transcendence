@@ -31,12 +31,9 @@ type Config struct {
 	DB          ConfigDB
 	Gmail       ConfigMail
 	Net         ConfigNet
-	JwtSecret   string `mapstructure:"JWT_SECRET"`
+	Credentials string `mapstructure:"CREDENTIAL"`
 	Origins     string `mapstructure:"ORIGINS"`
 	KeyPath     string `mapstructure:"KEYPATH"`
-	CookieDomain string `mapstructure:"COOKIE_DOMAIN"`
-	Credentials  string `mapstructure:"CREDENTIAL"`
-	FrontendURL  string `mapstructure:"FRONTEND_URL"`
 }
 
 func ProvideConfig(i do.Injector) (Config, error) {

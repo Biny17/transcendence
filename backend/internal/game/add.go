@@ -18,24 +18,20 @@ type Player struct {
 }
 
 type GameIn struct {
-	Body struct {
-		LobbyType   string   `json:"lobbyType"`
-		TotalPlayer int      `json:"totalPlayer"`
-		Players     []Player `json:"players"`
-	}
+	LobbyType   string   `json:"lobbyType"`
+	TotalPlayer int      `json:"totalPlayer"`
+	Players     []Player `json:"players"`
 }
 
 type UserResult struct {
 	UserName string `json:"username"`
-	UserId   int    `json:"user_id,omitempty"`
+	UserId   *int   `json:"user_id,omitempty"`
 	Found    bool   `json:"found"`
 }
 
 type GameOut struct {
-	Body struct {
-		GameId  int          `json:"game_id"`
-		Results []UserResult `json:"players"`
-	}
+	GameId  int          `json:"game_id"`
+	Results []UserResult `json:"players"`
 }
 
 func (gs *GameService) GameResult(
@@ -45,40 +41,37 @@ func (gs *GameService) GameResult(
 	*GameOut,
 	error,
 ) {
-	log.Println("func GameResult")
-	log.Println("loby type: ", input.Body.LobbyType)
 	out := &GameOut{}
 	new_game, err := gs.Client.Game.
 		Create().
-		SetType(input.Body.LobbyType).
-		SetNbPlayer(input.Body.TotalPlayer).
+		SetType(input.LobbyType).
+		SetNbPlayer(input.TotalPlayer).
 		Save(ctx)
 	if err != nil {
 		log.Println(err)
 		return nil, huma.Error500InternalServerError("Try again later")
 	}
-	out.Body.GameId = new_game.ID
-	for _, player := range input.Body.Players {
+	out.GameId = new_game.ID
+	for _, player := range input.Players {
 		res, err := gs.makeResult(ctx, &player, new_game.ID)
 		if err != nil {
 			if ent.IsNotFound(err) {
-				out.Body.Results = append(out.Body.Results, UserResult{
+				out.Results = append(out.Results, UserResult{
 					UserName: player.Username,
-					UserId:   -1,
+					UserId:   nil,
 					Found:    false,
 				})
 			} else {
 				return nil, huma.Error500InternalServerError("Try again later")
 			}
-		} else {
-			out.Body.Results = append(out.Body.Results, UserResult{
-				UserName: player.Username,
-				UserId:   res.ID,
-				Found:    true,
-			})
 		}
+		id := res.ID
+		out.Results = append(out.Results, UserResult{
+			UserName: player.Username,
+			UserId:   &id,
+			Found:    true,
+		})
 	}
-	log.Println("here")
 	return out, nil
 }
 
