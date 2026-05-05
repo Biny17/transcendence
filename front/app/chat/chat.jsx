@@ -241,8 +241,8 @@ async function fetchImg() {
                     sendMessage();
                   }
                 }}
-                placeholder="Écrire un message..."
-                className="flex-1 resize-none bg-yellow outline-none text-sm py-2"
+                placeholder="Write a message..."
+                className="scrollbar-hidden flex-1 resize-none bg-yellow outline-none text-sm py-2"
                 rows={1}
               />
               <ChatToolbarAddon align="inline-end">               

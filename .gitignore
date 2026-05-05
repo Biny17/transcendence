@@ -9,6 +9,7 @@
 # Frontend (Next.js)
 # ========================
 front/node_modules
+front/server/node_modules
 front/.pnp
 front/.pnp.*
 front/bun.lock.bak
