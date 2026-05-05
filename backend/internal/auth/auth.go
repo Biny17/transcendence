@@ -2,10 +2,11 @@ package auth
 
 import (
 	"backend/ent"
-	"backend/internal/pkg/routes"
 	"backend/internal/pkg"
+	"backend/internal/pkg/routes"
 	"log"
 	"net/http"
+
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/lestrrat-go/jwx/v3/jwk"
 	"github.com/samber/do/v2"
@@ -44,6 +45,18 @@ func (auth *AuthService) Register(i do.Injector) {
 		Summary:       "LOGIN",
 		DefaultStatus: 200,
 	}, auth.VerifyPwd)
+
+	huma.Register(api, huma.Operation{
+		Method:        http.MethodGet,
+		Path:          routes.FortyTwoLogin,
+		Summary:       "42 Intranet Login Redirect",
+		DefaultStatus: 307,
+	}, auth.FortyTwoLogin)
+
+	huma.Register(api, huma.Operation{
+	Method:        http.MethodGet,
+	Path:          routes.FortyTwoLoginCallback,
+	Summary:       "42 Intranet Login Callback",
+	DefaultStatus: 200,
+	}, auth.FortyTwoCallback)
 }
-
-
