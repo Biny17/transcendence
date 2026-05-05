@@ -5,8 +5,10 @@ package ent
 import (
 	"backend/ent/conversation"
 	"backend/ent/friendship"
+	"backend/ent/game"
 	"backend/ent/mailverif"
 	"backend/ent/message"
+	"backend/ent/result"
 	"backend/ent/user"
 	"context"
 	"errors"
@@ -79,8 +81,10 @@ func checkColumn(t, c string) error {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			conversation.Table: conversation.ValidColumn,
 			friendship.Table:   friendship.ValidColumn,
+			game.Table:         game.ValidColumn,
 			mailverif.Table:    mailverif.ValidColumn,
 			message.Table:      message.ValidColumn,
+			result.Table:       result.ValidColumn,
 			user.Table:         user.ValidColumn,
 		})
 	})

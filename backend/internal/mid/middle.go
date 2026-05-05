@@ -1,6 +1,7 @@
 package mid
 
 import (
+	"backend/internal/config"
 	"backend/internal/pkg"
 	"log"
 	"strconv"
@@ -16,12 +17,14 @@ import (
 type Middleware struct {
 	Api    huma.API
 	PubKey jwk.Key
+	Conf   config.Config
 }
 
 func ProvideMiddleware(i do.Injector) (*Middleware, error) {
 	var mid Middleware
 	mid.Api = do.MustInvoke[huma.API](i)
 	mid.PubKey = do.MustInvokeNamed[jwk.Key](i, pkg.DoPublicKey)
+	mid.Conf = do.MustInvoke[config.Config](i)
 	return &mid, nil
 }
 

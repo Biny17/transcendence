@@ -12,11 +12,17 @@ type Conversation func(*sql.Selector)
 // Friendship is the predicate function for friendship builders.
 type Friendship func(*sql.Selector)
 
+// Game is the predicate function for game builders.
+type Game func(*sql.Selector)
+
 // MailVerif is the predicate function for mailverif builders.
 type MailVerif func(*sql.Selector)
 
 // Message is the predicate function for message builders.
 type Message func(*sql.Selector)
+
+// Result is the predicate function for result builders.
+type Result func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

@@ -56,9 +56,11 @@ type UserEdges struct {
 	SendMessages []*Message `json:"send_messages,omitempty"`
 	// Conversations holds the value of the conversations edge.
 	Conversations []*Conversation `json:"conversations,omitempty"`
+	// Results holds the value of the results edge.
+	Results []*Result `json:"results,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [5]bool
+	loadedTypes [6]bool
 }
 
 // MailVerifOrErr returns the MailVerif value or an error if the edge
@@ -106,6 +108,15 @@ func (e UserEdges) ConversationsOrErr() ([]*Conversation, error) {
 		return e.Conversations, nil
 	}
 	return nil, &NotLoadedError{edge: "conversations"}
+}
+
+// ResultsOrErr returns the Results value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) ResultsOrErr() ([]*Result, error) {
+	if e.loadedTypes[5] {
+		return e.Results, nil
+	}
+	return nil, &NotLoadedError{edge: "results"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -238,6 +249,11 @@ func (_m *User) QuerySendMessages() *MessageQuery {
 // QueryConversations queries the "conversations" edge of the User entity.
 func (_m *User) QueryConversations() *ConversationQuery {
 	return NewUserClient(_m.config).QueryConversations(_m)
+}
+
+// QueryResults queries the "results" edge of the User entity.
+func (_m *User) QueryResults() *ResultQuery {
+	return NewUserClient(_m.config).QueryResults(_m)
 }
 
 // Update returns a builder for updating this User.

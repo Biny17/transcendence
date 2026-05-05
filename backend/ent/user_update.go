@@ -8,6 +8,7 @@ import (
 	"backend/ent/mailverif"
 	"backend/ent/message"
 	"backend/ent/predicate"
+	"backend/ent/result"
 	"backend/ent/user"
 	"context"
 	"errors"
@@ -258,6 +259,21 @@ func (_u *UserUpdate) AddConversations(v ...*Conversation) *UserUpdate {
 	return _u.AddConversationIDs(ids...)
 }
 
+// AddResultIDs adds the "results" edge to the Result entity by IDs.
+func (_u *UserUpdate) AddResultIDs(ids ...int) *UserUpdate {
+	_u.mutation.AddResultIDs(ids...)
+	return _u
+}
+
+// AddResults adds the "results" edges to the Result entity.
+func (_u *UserUpdate) AddResults(v ...*Result) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddResultIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdate) Mutation() *UserMutation {
 	return _u.mutation
@@ -351,6 +367,27 @@ func (_u *UserUpdate) RemoveConversations(v ...*Conversation) *UserUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveConversationIDs(ids...)
+}
+
+// ClearResults clears all "results" edges to the Result entity.
+func (_u *UserUpdate) ClearResults() *UserUpdate {
+	_u.mutation.ClearResults()
+	return _u
+}
+
+// RemoveResultIDs removes the "results" edge to Result entities by IDs.
+func (_u *UserUpdate) RemoveResultIDs(ids ...int) *UserUpdate {
+	_u.mutation.RemoveResultIDs(ids...)
+	return _u
+}
+
+// RemoveResults removes "results" edges to Result entities.
+func (_u *UserUpdate) RemoveResults(v ...*Result) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveResultIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -654,6 +691,51 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.ResultsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ResultsTable,
+			Columns: []string{user.ResultsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(result.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedResultsIDs(); len(nodes) > 0 && !_u.mutation.ResultsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ResultsTable,
+			Columns: []string{user.ResultsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(result.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ResultsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ResultsTable,
+			Columns: []string{user.ResultsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(result.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -900,6 +982,21 @@ func (_u *UserUpdateOne) AddConversations(v ...*Conversation) *UserUpdateOne {
 	return _u.AddConversationIDs(ids...)
 }
 
+// AddResultIDs adds the "results" edge to the Result entity by IDs.
+func (_u *UserUpdateOne) AddResultIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.AddResultIDs(ids...)
+	return _u
+}
+
+// AddResults adds the "results" edges to the Result entity.
+func (_u *UserUpdateOne) AddResults(v ...*Result) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddResultIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdateOne) Mutation() *UserMutation {
 	return _u.mutation
@@ -993,6 +1090,27 @@ func (_u *UserUpdateOne) RemoveConversations(v ...*Conversation) *UserUpdateOne 
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveConversationIDs(ids...)
+}
+
+// ClearResults clears all "results" edges to the Result entity.
+func (_u *UserUpdateOne) ClearResults() *UserUpdateOne {
+	_u.mutation.ClearResults()
+	return _u
+}
+
+// RemoveResultIDs removes the "results" edge to Result entities by IDs.
+func (_u *UserUpdateOne) RemoveResultIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.RemoveResultIDs(ids...)
+	return _u
+}
+
+// RemoveResults removes "results" edges to Result entities.
+func (_u *UserUpdateOne) RemoveResults(v ...*Result) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveResultIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -1319,6 +1437,51 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(conversation.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ResultsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ResultsTable,
+			Columns: []string{user.ResultsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(result.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedResultsIDs(); len(nodes) > 0 && !_u.mutation.ResultsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ResultsTable,
+			Columns: []string{user.ResultsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(result.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ResultsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ResultsTable,
+			Columns: []string{user.ResultsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(result.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

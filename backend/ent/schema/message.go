@@ -17,21 +17,21 @@ func (Message) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("content").NotEmpty(),
 		field.Time("created_at").
-		Default(time.Now).
-		Immutable(),
+			Default(time.Now).
+			Immutable(),
 	}
 }
 
 func (Message) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("conversation", Conversation.Type).
-		Ref("messages").
-		Unique().
-		Required(),
+			Ref("messages").
+			Unique().
+			Required(),
 		edge.From("sender", User.Type).
-		Ref("send_messages").
-		Unique().
-		Required(),
+			Ref("send_messages").
+			Unique().
+			Required(),
 	}
 }
 
