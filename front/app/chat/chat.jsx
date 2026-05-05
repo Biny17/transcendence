@@ -134,7 +134,6 @@ async function fetchImg() {
    async function initChat() {
     const convId = 1;
     const pId = await definePlayerId();
-    // joinConversation(convId, pId);
     fetchConversationHistory(1);
 
     const socket = new WebSocket("ws://localhost:8080/api/chat/ws");
@@ -160,7 +159,7 @@ async function fetchImg() {
   }
   initChat()
   fetchImg()
-  }, [OptionsOpen]);
+  }, []);
 
   const sendMessage = async () => {
     const socket = socketRef.current;
@@ -235,7 +234,7 @@ async function fetchImg() {
                   
                   <PrimaryMessage
                     className="mt-4"
-                    key={i}
+                    key={msg.id}
                     avatarSrc={Img}
                     avatarAlt={senderName}
                     // avatarFallback={msg.sender.username.slice(0, 2)}
