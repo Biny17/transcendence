@@ -51,21 +51,9 @@ func (_c *ResultCreate) SetUserID(v int) *ResultCreate {
 	return _c
 }
 
-// SetGameID sets the "game" edge to the Game entity by ID.
-func (_c *ResultCreate) SetGameID(id int) *ResultCreate {
-	_c.mutation.SetGameID(id)
-	return _c
-}
-
 // SetGame sets the "game" edge to the Game entity.
 func (_c *ResultCreate) SetGame(v *Game) *ResultCreate {
 	return _c.SetGameID(v.ID)
-}
-
-// SetUserID sets the "user" edge to the User entity by ID.
-func (_c *ResultCreate) SetUserID(id int) *ResultCreate {
-	_c.mutation.SetUserID(id)
-	return _c
 }
 
 // SetUser sets the "user" edge to the User entity.
@@ -166,14 +154,6 @@ func (_c *ResultCreate) createSpec() (*Result, *sqlgraph.CreateSpec) {
 		_spec.SetField(result.FieldDeath, field.TypeInt, value)
 		_node.Death = value
 	}
-	if value, ok := _c.mutation.GameID(); ok {
-		_spec.SetField(result.FieldGameID, field.TypeInt, value)
-		_node.GameID = value
-	}
-	if value, ok := _c.mutation.UserID(); ok {
-		_spec.SetField(result.FieldUserID, field.TypeInt, value)
-		_node.UserID = value
-	}
 	if nodes := _c.mutation.GameIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -188,7 +168,7 @@ func (_c *ResultCreate) createSpec() (*Result, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.game_results = &nodes[0]
+		_node.GameID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
@@ -205,7 +185,7 @@ func (_c *ResultCreate) createSpec() (*Result, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.user_results = &nodes[0]
+		_node.UserID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

@@ -94,7 +94,6 @@ func (_u *ResultUpdate) AddDeath(v int) *ResultUpdate {
 
 // SetGameID sets the "game_id" field.
 func (_u *ResultUpdate) SetGameID(v int) *ResultUpdate {
-	_u.mutation.ResetGameID()
 	_u.mutation.SetGameID(v)
 	return _u
 }
@@ -107,15 +106,8 @@ func (_u *ResultUpdate) SetNillableGameID(v *int) *ResultUpdate {
 	return _u
 }
 
-// AddGameID adds value to the "game_id" field.
-func (_u *ResultUpdate) AddGameID(v int) *ResultUpdate {
-	_u.mutation.AddGameID(v)
-	return _u
-}
-
 // SetUserID sets the "user_id" field.
 func (_u *ResultUpdate) SetUserID(v int) *ResultUpdate {
-	_u.mutation.ResetUserID()
 	_u.mutation.SetUserID(v)
 	return _u
 }
@@ -128,27 +120,9 @@ func (_u *ResultUpdate) SetNillableUserID(v *int) *ResultUpdate {
 	return _u
 }
 
-// AddUserID adds value to the "user_id" field.
-func (_u *ResultUpdate) AddUserID(v int) *ResultUpdate {
-	_u.mutation.AddUserID(v)
-	return _u
-}
-
-// SetGameID sets the "game" edge to the Game entity by ID.
-func (_u *ResultUpdate) SetGameID(id int) *ResultUpdate {
-	_u.mutation.SetGameID(id)
-	return _u
-}
-
 // SetGame sets the "game" edge to the Game entity.
 func (_u *ResultUpdate) SetGame(v *Game) *ResultUpdate {
 	return _u.SetGameID(v.ID)
-}
-
-// SetUserID sets the "user" edge to the User entity by ID.
-func (_u *ResultUpdate) SetUserID(id int) *ResultUpdate {
-	_u.mutation.SetUserID(id)
-	return _u
 }
 
 // SetUser sets the "user" edge to the User entity.
@@ -240,18 +214,6 @@ func (_u *ResultUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddedDeath(); ok {
 		_spec.AddField(result.FieldDeath, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.GameID(); ok {
-		_spec.SetField(result.FieldGameID, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedGameID(); ok {
-		_spec.AddField(result.FieldGameID, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.UserID(); ok {
-		_spec.SetField(result.FieldUserID, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedUserID(); ok {
-		_spec.AddField(result.FieldUserID, field.TypeInt, value)
 	}
 	if _u.mutation.GameCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -396,7 +358,6 @@ func (_u *ResultUpdateOne) AddDeath(v int) *ResultUpdateOne {
 
 // SetGameID sets the "game_id" field.
 func (_u *ResultUpdateOne) SetGameID(v int) *ResultUpdateOne {
-	_u.mutation.ResetGameID()
 	_u.mutation.SetGameID(v)
 	return _u
 }
@@ -409,15 +370,8 @@ func (_u *ResultUpdateOne) SetNillableGameID(v *int) *ResultUpdateOne {
 	return _u
 }
 
-// AddGameID adds value to the "game_id" field.
-func (_u *ResultUpdateOne) AddGameID(v int) *ResultUpdateOne {
-	_u.mutation.AddGameID(v)
-	return _u
-}
-
 // SetUserID sets the "user_id" field.
 func (_u *ResultUpdateOne) SetUserID(v int) *ResultUpdateOne {
-	_u.mutation.ResetUserID()
 	_u.mutation.SetUserID(v)
 	return _u
 }
@@ -430,27 +384,9 @@ func (_u *ResultUpdateOne) SetNillableUserID(v *int) *ResultUpdateOne {
 	return _u
 }
 
-// AddUserID adds value to the "user_id" field.
-func (_u *ResultUpdateOne) AddUserID(v int) *ResultUpdateOne {
-	_u.mutation.AddUserID(v)
-	return _u
-}
-
-// SetGameID sets the "game" edge to the Game entity by ID.
-func (_u *ResultUpdateOne) SetGameID(id int) *ResultUpdateOne {
-	_u.mutation.SetGameID(id)
-	return _u
-}
-
 // SetGame sets the "game" edge to the Game entity.
 func (_u *ResultUpdateOne) SetGame(v *Game) *ResultUpdateOne {
 	return _u.SetGameID(v.ID)
-}
-
-// SetUserID sets the "user" edge to the User entity by ID.
-func (_u *ResultUpdateOne) SetUserID(id int) *ResultUpdateOne {
-	_u.mutation.SetUserID(id)
-	return _u
 }
 
 // SetUser sets the "user" edge to the User entity.
@@ -572,18 +508,6 @@ func (_u *ResultUpdateOne) sqlSave(ctx context.Context) (_node *Result, err erro
 	}
 	if value, ok := _u.mutation.AddedDeath(); ok {
 		_spec.AddField(result.FieldDeath, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.GameID(); ok {
-		_spec.SetField(result.FieldGameID, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedGameID(); ok {
-		_spec.AddField(result.FieldGameID, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.UserID(); ok {
-		_spec.SetField(result.FieldUserID, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedUserID(); ok {
-		_spec.AddField(result.FieldUserID, field.TypeInt, value)
 	}
 	if _u.mutation.GameCleared() {
 		edge := &sqlgraph.EdgeSpec{
