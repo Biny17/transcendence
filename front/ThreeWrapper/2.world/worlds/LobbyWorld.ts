@@ -3,6 +3,7 @@ import { World } from "../WorldClass";
 import { OnlineEnvironement } from "@/ThreeWrapper/3.environment/envs/OnlineEnvironement";
 import { GeometryFactory, LightFactory, OBJECT_TYPE } from "../tools";
 import { ParkourEnvironement } from "@/ThreeWrapper/3.environment/envs/ParkourEnvironment";
+import { LobbyEnvironment } from "@/ThreeWrapper/3.environment/envs/LobbyEnvironment";
 interface FloatingPlatform {
 	mesh: THREE.Mesh;
 	initialY: number;
@@ -18,7 +19,7 @@ export class LobbyWorld extends World {
 		super({ id: "lobby" });
 	}
 	protected setupEnvironment(): void {
-		this.applyEnvironment(new ParkourEnvironement());
+		this.applyEnvironment(new LobbyEnvironment());
 	}
 	protected override async onLoad(): Promise<void> {
 		const { sun, sky, bounce } = LightFactory.createCinematicLighting();

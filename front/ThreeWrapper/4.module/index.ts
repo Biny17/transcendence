@@ -9,6 +9,7 @@ export { TeamModule } from "./modules/players/TeamModule";
 export type { Team, TeamColor, TeamModuleOptions } from "./modules/players/TeamModule";
 export { PlayerBodyModule } from "./modules/players/PlayerBodyModule";
 export type { PlayerBodyModuleOptions } from "./modules/players/PlayerBodyModule";
+export { LobbyReadyModule } from "./modules/players/LobbyReadyModule";
 export { PlayerSyncModule } from "./modules/online/PlayerSyncModule";
 export { ResizeModule } from "./modules/rendering/ResizeModule";
 export { SkyboxModule } from "./modules/assets/SkyboxModule";
