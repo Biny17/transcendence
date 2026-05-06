@@ -14,8 +14,10 @@ COPY . .
 
 EXPOSE 8080
 
-#install RUN openssl
-#COPY entrypoint.sh /entrypoint.sh
-#RUN chmod +x /entrypoint.sh
-#ENTRYPOINT ["/entrypoint.sh"]
+RUN apk add --no-cache \
+    openssl \
+    openssl-dev
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["gow", "run", "./cmd/api"]
