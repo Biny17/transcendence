@@ -18,6 +18,7 @@ export default function ListCard({OptionsOpen}) {
   const [players, setPlayers] = useState([]);
   const [img, setImg] = useState(null);
   const [UserName, setUserName] = useState("");
+  const [playerImgs, setPlayerImgs] = useState({});
 
   async function fetchData() {
     try {
@@ -27,20 +28,33 @@ export default function ListCard({OptionsOpen}) {
       console.error(error);
     }
   }
+useEffect(() => {
+  async function loadImages() {
+    const imgs = {};
+    for (const player of players) {
+      const url = await fetchImg(player.id);
+      console.log(url)
+      imgs[player.id] = url;
+    }
+    setPlayerImgs(imgs);
+  }
+  if (players.length > 0) {
+    loadImages();
+  }
+}, [players]);
 
-async function fetchImg() {
-  const url = `${API_BASE}/api/users/me/profile-picture`;
+async function fetchImg(id) {
+  const url = `${API_BASE}/api/users/${id}/picture`;
   const options = {method: 'GET', credentials: 'include'};
   try {
     const response = await fetch(url, options);
     if (!response.ok) {
-      setImg(null);
       return;
     }
     const blob = await response.blob();
     const imgUrl = URL.createObjectURL(blob);
-    console.log(img)
-    setImg(imgUrl);
+    return (imgUrl);
+
   } catch (error) {
     console.error(error);
     setImg(null);
@@ -71,7 +85,6 @@ useEffect(() => {
   const decoded = JSON.parse(atob(payload));
   fetchUserById(decoded.sub);
   fetchData();
-  fetchImg();
 }, [OptionsOpen]);
 
 players.sort((a, b) => b.win - a.win);
@@ -97,7 +110,7 @@ players.sort((a, b) => b.win - a.win);
               >
                 <img
                   alt={player.username}
-                  src={img}
+                  src={playerImgs[player.id]}
                   className="relative inline-block h-12 w-12 rounded-full object-cover object-center"
                 />
               </Badge>
