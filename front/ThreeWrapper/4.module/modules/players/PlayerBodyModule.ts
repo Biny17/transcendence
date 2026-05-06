@@ -44,7 +44,7 @@ export class PlayerBodyModule implements Module {
 	async init(ctx: WorldContext): Promise<void> {
 		this.ctx = ctx;
 		const allMapObjs = ctx.objects.getByType(OBJECT_TYPE.MAP);
-		const spawnObjs = allMapObjs.filter((o) => o.extraData?.componentId === "spawn_point");
+		const spawnObjs = allMapObjs.filter((o) => o.componentId === "spawn_point");
 		const players = ctx.objects.getByType(OBJECT_TYPE.PLAYER);
 		console.log("[PlayerBody] Players found:", players.length);
 		for (const player of players) {
@@ -71,8 +71,7 @@ export class PlayerBodyModule implements Module {
 			ctx.logger.log("INFO", "PlayerBodyModule", `Attached character to player ${player.id}`);
 		}
 	}
-	update(_delta: number): void {
-	}
+	update(_delta: number): void {}
 	dispose(): void {
 		this.ctx = null;
 	}
