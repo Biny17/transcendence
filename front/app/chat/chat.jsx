@@ -61,25 +61,42 @@ export default function Chat(OptionsOpen) {
   const [ConversationId, setConversationId] = useState("");
   const [Img, setImg] = useState("");
   const socketRef = useRef(null);
+  const [playerImgs, setPlayerImgs] = useState({});
 
 
-async function fetchImg() {
-  const url = `${API_BASE}/api/users/me/profile-picture`;
-  const options = {method: 'GET',  credentials: 'include', headers: {Accept: 'application/json, application/problem+json'}};
+async function fetchImg(id) {
+  const url = `${API_BASE}/api/users/${id}/picture`;
+  const options = {method: 'GET', credentials: 'include'};
   try {
     const response = await fetch(url, options);
     if (!response.ok) {
-      setImg("");
       return;
     }
     const blob = await response.blob();
     const imgUrl = URL.createObjectURL(blob);
-    setImg(imgUrl);
+    return (imgUrl);
+
   } catch (error) {
     console.error(error);
-    setImg("");
+    setImg(null);
   }
 }
+
+useEffect(() => {
+  async function loadImages() {
+    const imgs = {};
+    for (const message of messages) {
+      const url = await fetchImg(message.sender.id);
+      console.log(url)
+      imgs[message.sender.id] = url;
+    }
+    setPlayerImgs(imgs);
+  }
+   if (messages.length > 0) {
+    loadImages();
+  }
+  
+}, [messages]);
 
   async function fetchConversationHistory(convId){
     try 
@@ -217,7 +234,7 @@ async function fetchImg() {
                   <PrimaryMessage
                     className="mt-4"
                     key={msg.id}
-                    avatarSrc={Img}
+                    avatarSrc={msg.sender ? (playerImgs[msg.sender.id] || "/default-avatar.png") : "/default-avatar.png"}
                     avatarAlt={senderName}
                     // avatarFallback={msg.sender.username.slice(0, 2)}
                     senderName={senderName }
