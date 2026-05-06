@@ -7,6 +7,7 @@ import (
 	"backend/ent/friendship"
 	"backend/ent/mailverif"
 	"backend/ent/message"
+	"backend/ent/result"
 	"backend/ent/user"
 	"context"
 	"errors"
@@ -201,6 +202,21 @@ func (_c *UserCreate) AddConversations(v ...*Conversation) *UserCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddConversationIDs(ids...)
+}
+
+// AddResultIDs adds the "results" edge to the Result entity by IDs.
+func (_c *UserCreate) AddResultIDs(ids ...int) *UserCreate {
+	_c.mutation.AddResultIDs(ids...)
+	return _c
+}
+
+// AddResults adds the "results" edges to the Result entity.
+func (_c *UserCreate) AddResults(v ...*Result) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddResultIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -446,6 +462,22 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(conversation.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ResultsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ResultsTable,
+			Columns: []string{user.ResultsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(result.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

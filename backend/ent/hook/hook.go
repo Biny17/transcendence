@@ -32,6 +32,18 @@ func (f FriendshipFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, 
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FriendshipMutation", m)
 }
 
+// The GameFunc type is an adapter to allow the use of ordinary
+// function as Game mutator.
+type GameFunc func(context.Context, *ent.GameMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f GameFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.GameMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GameMutation", m)
+}
+
 // The MailVerifFunc type is an adapter to allow the use of ordinary
 // function as MailVerif mutator.
 type MailVerifFunc func(context.Context, *ent.MailVerifMutation) (ent.Value, error)
@@ -54,6 +66,18 @@ func (f MessageFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.MessageMutation", m)
+}
+
+// The ResultFunc type is an adapter to allow the use of ordinary
+// function as Result mutator.
+type ResultFunc func(context.Context, *ent.ResultMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ResultFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ResultMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ResultMutation", m)
 }
 
 // The UserFunc type is an adapter to allow the use of ordinary

@@ -44,6 +44,8 @@ const (
 	EdgeSendMessages = "send_messages"
 	// EdgeConversations holds the string denoting the conversations edge name in mutations.
 	EdgeConversations = "conversations"
+	// EdgeResults holds the string denoting the results edge name in mutations.
+	EdgeResults = "results"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// MailVerifTable is the table that holds the mail_verif relation/edge.
@@ -79,6 +81,13 @@ const (
 	// ConversationsInverseTable is the table name for the Conversation entity.
 	// It exists in this package in order to avoid circular dependency with the "conversation" package.
 	ConversationsInverseTable = "conversations"
+	// ResultsTable is the table that holds the results relation/edge.
+	ResultsTable = "results"
+	// ResultsInverseTable is the table name for the Result entity.
+	// It exists in this package in order to avoid circular dependency with the "result" package.
+	ResultsInverseTable = "results"
+	// ResultsColumn is the table column denoting the results relation/edge.
+	ResultsColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -251,6 +260,20 @@ func ByConversations(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newConversationsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByResultsCount orders the results by results count.
+func ByResultsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newResultsStep(), opts...)
+	}
+}
+
+// ByResults orders the results by results terms.
+func ByResults(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newResultsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newMailVerifStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -284,5 +307,12 @@ func newConversationsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ConversationsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2M, false, ConversationsTable, ConversationsPrimaryKey...),
+	)
+}
+func newResultsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ResultsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ResultsTable, ResultsColumn),
 	)
 }

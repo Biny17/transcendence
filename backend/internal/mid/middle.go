@@ -1,8 +1,8 @@
 package mid
 
 import (
+	"backend/internal/config"
 	"backend/internal/pkg"
-	"log"
 	"strconv"
 	"time"
 
@@ -16,12 +16,14 @@ import (
 type Middleware struct {
 	Api    huma.API
 	PubKey jwk.Key
+	Conf   config.Config
 }
 
 func ProvideMiddleware(i do.Injector) (*Middleware, error) {
 	var mid Middleware
 	mid.Api = do.MustInvoke[huma.API](i)
 	mid.PubKey = do.MustInvokeNamed[jwk.Key](i, pkg.DoPublicKey)
+	mid.Conf = do.MustInvoke[config.Config](i)
 	return &mid, nil
 }
 
@@ -31,7 +33,7 @@ func (mid *Middleware) Auth(ctx huma.Context, next func(huma.Context)) {
 		huma.WriteErr(mid.Api, ctx, 401, "Missing authentification token")
 		return
 	}
-	log.Printf("cooken.Value: %s\n", cooken.Value)
+	// log.Printf("cooken.Value: %s\n", cooken.Value)
 	token, err := jwt.Parse([]byte(cooken.Value), jwt.WithKey(jwa.RS256(), mid.PubKey))
 	exp, exp_exist := token.Expiration()
 	sub, sub_exist := token.Subject()

@@ -5,6 +5,7 @@ package ent
 import (
 	"backend/ent/conversation"
 	"backend/ent/friendship"
+	"backend/ent/game"
 	"backend/ent/mailverif"
 	"backend/ent/message"
 	"backend/ent/schema"
@@ -36,6 +37,12 @@ func init() {
 	friendshipDescStatus := friendshipFields[1].Descriptor()
 	// friendship.DefaultStatus holds the default value on creation for the status field.
 	friendship.DefaultStatus = friendshipDescStatus.Default.(string)
+	gameFields := schema.Game{}.Fields()
+	_ = gameFields
+	// gameDescTimeStamp is the schema descriptor for time_stamp field.
+	gameDescTimeStamp := gameFields[0].Descriptor()
+	// game.DefaultTimeStamp holds the default value on creation for the time_stamp field.
+	game.DefaultTimeStamp = gameDescTimeStamp.Default.(func() time.Time)
 	mailverifFields := schema.MailVerif{}.Fields()
 	_ = mailverifFields
 	// mailverifDescUserID is the schema descriptor for user_id field.

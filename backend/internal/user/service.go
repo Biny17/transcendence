@@ -112,12 +112,17 @@ func (us *UserService) Register(api huma.API, m *mid.Middleware) {
 		},
 	}, us.UploadPP)
 	huma.Register(api, huma.Operation{
-		Method:			http.MethodGet,
-		Path:				routes.GetMyPicture,
-		Summary: 		"PICTURE MINE",
+		Method:      http.MethodGet,
+		Path:        routes.GetMyPicture,
+		Summary:     "PICTURE MINE",
 		Middlewares: huma.Middlewares{m.Auth},
 		Security: []map[string][]string{
 			{"cookieAuth": {}},
 		},
 	}, us.GetMyPicture)
+	huma.Register(api, huma.Operation{
+		Method:  http.MethodGet,
+		Path:    routes.GetPicture,
+		Summary: "PICTURE USERID",
+	}, us.GetPicture)
 }

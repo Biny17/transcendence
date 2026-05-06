@@ -54,6 +54,10 @@ services:
                         - ORIGINS=http://${FRONT_HOST},https://${FRONT_HOST}
                         - KEYPATH=${KEYPATH}
                         - COOKIE_DOMAIN=${COOKIE_DOMAIN}
+                        - FORTYTWO_CLIENT_ID=${FORTYTWO_CLIENT_ID}
+                        - FORTYTWO_CLIENT_SECRET=${FORTYTWO_CLIENT_SECRET}
+                        - FORTYTWO_REDIRECT_URI=${FORTYTWO_REDIRECT_URI}
+                        - CREDENTIAL=${CREDENTIAL}
                 volumes:
                         - ./backend:/app
                         - ./secret:/app/secret

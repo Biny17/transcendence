@@ -56,6 +56,19 @@ var (
 			},
 		},
 	}
+	// GamesColumns holds the columns for the "games" table.
+	GamesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "time_stamp", Type: field.TypeTime},
+		{Name: "type", Type: field.TypeString},
+		{Name: "nb_player", Type: field.TypeInt},
+	}
+	// GamesTable holds the schema information for the "games" table.
+	GamesTable = &schema.Table{
+		Name:       "games",
+		Columns:    GamesColumns,
+		PrimaryKey: []*schema.Column{GamesColumns[0]},
+	}
 	// MailVerifsColumns holds the columns for the "mail_verifs" table.
 	MailVerifsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -112,6 +125,35 @@ var (
 			},
 		},
 	}
+	// ResultsColumns holds the columns for the "results" table.
+	ResultsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "rank", Type: field.TypeInt},
+		{Name: "kills", Type: field.TypeInt},
+		{Name: "death", Type: field.TypeInt},
+		{Name: "game_id", Type: field.TypeInt},
+		{Name: "user_id", Type: field.TypeInt},
+	}
+	// ResultsTable holds the schema information for the "results" table.
+	ResultsTable = &schema.Table{
+		Name:       "results",
+		Columns:    ResultsColumns,
+		PrimaryKey: []*schema.Column{ResultsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "results_games_results",
+				Columns:    []*schema.Column{ResultsColumns[4]},
+				RefColumns: []*schema.Column{GamesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "results_users_results",
+				Columns:    []*schema.Column{ResultsColumns[5]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -161,8 +203,10 @@ var (
 	Tables = []*schema.Table{
 		ConversationsTable,
 		FriendshipsTable,
+		GamesTable,
 		MailVerifsTable,
 		MessagesTable,
+		ResultsTable,
 		UsersTable,
 		UserConversationsTable,
 	}
@@ -174,6 +218,8 @@ func init() {
 	MailVerifsTable.ForeignKeys[0].RefTable = UsersTable
 	MessagesTable.ForeignKeys[0].RefTable = ConversationsTable
 	MessagesTable.ForeignKeys[1].RefTable = UsersTable
+	ResultsTable.ForeignKeys[0].RefTable = GamesTable
+	ResultsTable.ForeignKeys[1].RefTable = UsersTable
 	UserConversationsTable.ForeignKeys[0].RefTable = UsersTable
 	UserConversationsTable.ForeignKeys[1].RefTable = ConversationsTable
 }

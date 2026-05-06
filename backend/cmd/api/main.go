@@ -5,6 +5,7 @@ import (
 	"backend/internal/chat"
 	"backend/internal/config"
 	"backend/internal/friend"
+	"backend/internal/game"
 	"backend/internal/mid"
 	"backend/internal/pkg"
 	"backend/internal/server"
@@ -28,6 +29,7 @@ func addServices(i do.Injector) {
 	do.ProvideValue(i, user.ProvideAndRegister(i))
 	do.ProvideValue(i, friend.ProvideAndRegister(i))
 	do.ProvideValue(i, chat.ProvideAndRegister(i))
+	do.ProvideValue(i, game.ProvideAndRegister(i))
 }
 
 func main() {

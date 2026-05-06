@@ -16,10 +16,14 @@ type Tx struct {
 	Conversation *ConversationClient
 	// Friendship is the client for interacting with the Friendship builders.
 	Friendship *FriendshipClient
+	// Game is the client for interacting with the Game builders.
+	Game *GameClient
 	// MailVerif is the client for interacting with the MailVerif builders.
 	MailVerif *MailVerifClient
 	// Message is the client for interacting with the Message builders.
 	Message *MessageClient
+	// Result is the client for interacting with the Result builders.
+	Result *ResultClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 
@@ -155,8 +159,10 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Conversation = NewConversationClient(tx.config)
 	tx.Friendship = NewFriendshipClient(tx.config)
+	tx.Game = NewGameClient(tx.config)
 	tx.MailVerif = NewMailVerifClient(tx.config)
 	tx.Message = NewMessageClient(tx.config)
+	tx.Result = NewResultClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
 
