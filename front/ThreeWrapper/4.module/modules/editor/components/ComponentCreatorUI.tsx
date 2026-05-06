@@ -634,7 +634,8 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 				fontSize: "12px",
 				color: C.text,
 				userSelect: "none",
-				overflow: "hidden"
+				overflow: "hidden",
+				pointerEvents: "auto"
 			}}>
 			{}
 			<div

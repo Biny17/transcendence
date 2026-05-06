@@ -51,7 +51,6 @@ export class CharacterCustomizerUIModule implements Module {
         onDownloadTexture: () => this._handleDownloadTexture()
       })
     )
-    this.ui?.enablePointer("character-customizer")
     this._onMouseDown = (e) => this._handlePaintEvent(e, true)
     this._onMouseMove = (e) => { if (this.isPainting) this._handlePaintEvent(e, false) }
     this._onMouseUp = () => { this.isPainting = false }

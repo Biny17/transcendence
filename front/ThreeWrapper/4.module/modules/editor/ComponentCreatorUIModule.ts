@@ -146,7 +146,6 @@ export class ComponentCreatorUIModule implements Module {
 				}
 			})
 		);
-		this.ui?.enablePointer("component-creator");
 	}
 	update(delta: number): void {
 		this.preview?.update(delta);

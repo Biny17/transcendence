@@ -158,6 +158,7 @@ export function EditorUI({
       fontFamily: 'monospace',
       fontSize: '12px',
       color: C.text,
+      pointerEvents: 'auto',
       userSelect: 'none',
     }}>
       {}
