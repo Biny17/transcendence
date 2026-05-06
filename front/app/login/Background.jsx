@@ -3,15 +3,102 @@ import "./Background.css";
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { motion } from "motion/react"
 import {Button } from "../animations/Button.jsx"
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import lottie from "lottie-web";
 import Mascot from "@/public/mascot.json";
 import MascotCartoon from "@/public/mascot-cartoon.json";
 import Celeb from "@/public/celebrations.json";
+import { useRouter } from 'next/navigation';
 
 
+export function Background({ signInOpen,setSignInOpen }) {
 
-export function Background({ signInOpen }) {
+const [isSignUp, setIsSignUp] = useState(false);
+const [isSignIn, setIsSignIn] = useState(false);
+const[isSignUpMode, setisSignUpMode] = useState(false);
+const [form, setForm] = useState({ age: "", email: "", password: "", username: "" });
+const [Profile, setProfile] = useState([])
+const [error, setError] = useState("");
+const router = useRouter();
+
+async function fetchVerified() {
+	const url =  'http://localhost:8080/api/users/find?email=' + form.email;
+	const options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
+    try {
+      const response = await fetch(url, options);
+	  const data = await response.json();
+	  console.log(data)
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.title);
+      }
+    if (response.status === 200 ) 
+      setProfile(data[0]);
+	setIsSignIn(true);
+    } 
+  catch (error) {
+      console.log(error);
+      setError("Invalid credentials");
+      setForm({ email: "", password: ""});
+    }
+}
+
+const handleSubmit = () => {
+  if (!form.email || !form.password) { setError("Remplissez tous les champs !"); return; }
+  if (isSignUpMode && !form.age) { setError("Remplissez tous les champs !"); return; }
+  if (isSignUpMode && !form.username) { setError("Choisissez un pseudo !"); return; }
+  else if (isSignUpMode) { setIsSignUp(true); return; }
+  else { fetchVerified(); return; }
+};
+
+useEffect(function() {
+  if (!isSignUp && !isSignIn) {
+    return;
+  }
+  async function fetchData() {
+    const url = isSignUp ? 'http://localhost:8080/api/users/add' : 'http://localhost:8080/api/auth/login';
+  let payload;
+  if (isSignUp)
+    payload = { ...form, age: Number(form.age), verified: false };
+  else
+    payload = {email: form.email,password: form.password};
+    const options = {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/problem+json' },
+      body: JSON.stringify(payload)
+    };
+    try {
+      const response = await fetch(url, options);
+      setIsSignIn(false);
+      setIsSignUp(false);
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.title);
+      }
+      if (isSignUpMode && (response.status === 200 || response.status === 201)) 
+	    {
+        setisSignUpMode(false);
+        setForm({ email: "", password: "", age: "", username: "" });
+	    }
+      else if (Profile.verified && (response.status === 200 || response.status === 201))
+        router.push("/home");
+      else
+     {
+        setError("Mail not verified");
+        setForm({ email: "", password: "", age: "", username: "" });
+     }
+
+    } 
+	catch (error) 
+	{
+      console.log(error);
+      setError("Invalid credentials");
+      setForm({ email: "", password: "", age: "", username: "" });
+  }
+}
+  fetchData();
+}, [isSignUp, isSignIn])
 
   const mascotRef = useRef(null);
   const mascotRef2 = useRef(null);
@@ -102,11 +189,109 @@ export function Background({ signInOpen }) {
                 Here comes the Fun
               </p>
           </motion.h1>
-           <Button statement= "Let's play"/>
+           <Button onClick={() => { setSignInOpen(true);}} statement= "Let's play"/>
         </div>
         
       </div>
     </div>
+    {signInOpen && (
+  <div
+    data-dialog-backdrop="web-3-dialog"
+    data-dialog-backdrop-close="true"
+    className="modal-overlay"
+    onClick={() => setSignInOpen(false)}
+  >
+    <div
+      className="relative m-4 h-auto max-w-5xl overflow-hidden rounded-3xl border-20 border-double shadow-xl"
+      style={{
+        fontFamily: "var(--font-party-title), var(--font-geist-sans), sans-serif",
+        borderColor: "var(--color-yellow, #facc15)"
+      }}
+      data-dialog="web-3-dialog"
+      onClick={e => e.stopPropagation()}
+    >
+      <div className="flex items-center justify-between border-b bg-yellow px-4 py-3">
+        <h3 className="text-lg font-medium text-white">
+          {isSignUpMode ? "Let's get to know each other!" : "Let's Play!"}
+        </h3>
+      </div>
+      <div className="flex flex-col justify-between bg-[#05113a] px-4 py-5">
+        <div className="space-y-4">
+          {isSignUpMode && (
+            <fieldset className="flex items-center gap-4">
+              <label className="w-24 text-right text-[15px] text-slate-200">Pseudo</label>
+              <input
+                type="text"
+                value={form.username}
+                className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"
+                onChange={e => setForm({ ...form, username: e.target.value })}
+                placeholder={error ? error : "Your Pseudo here"}
+              />
+            </fieldset>
+          )}
+          <fieldset className="flex items-center gap-4">
+            <label className="w-24 text-right text-[15px] text-slate-200">Email</label>
+            <input
+              type="email"
+              value={form.email}
+              className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"
+              onChange={e => setForm({ ...form, email: e.target.value })}
+              placeholder={error ? error : "Your Email here"}
+            />
+          </fieldset>
+           {isSignUpMode && (
+                       <fieldset className="flex items-center gap-4">
+            <label className="w-24 text-right text-[15px] text-slate-200">Age</label>
+            <input
+              type="age"
+              value={form.age}
+              className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"
+              onChange={e => setForm({ ...form, age: e.target.value })}
+              placeholder={error ? error : "Your Age here"}
+            />
+          </fieldset>
+          )}
+          <fieldset className="flex items-center gap-4">
+            <label className="w-24 text-right text-[15px] text-slate-200">Password</label>
+            <input
+              id = "password"
+              type="password"
+              value={form.password}
+              className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"
+              onChange={e => setForm({ ...form, password: e.target.value })}
+              placeholder={error ? error : "Your Password here"}
+            />
+          </fieldset>
+          <div className="flex items-center gap-2 mt-2">
+            <input type="checkbox" className="checkbox-input" id="check-2" />
+            <label className="text-slate-200" htmlFor="check-2">Remember Me</label>
+          </div>
+        </div>
+        <div className="mt-6 flex flex-col gap-5 justify-end pr-1">
+          <Button statement={isSignUpMode ? "Sign Up" : "Sign In"} onClick={handleSubmit} />
+          <Button
+            statement={
+              <span className="flex items-center gap-2">
+                <img src="https://docs.material-tailwind.com/icons/google.svg" alt="google" className="w-5 h-5" />
+                Continue with Google
+              </span>
+            }
+            onClick={() => {/* handle Google sign-in */}}
+          />
+          <p className="text-center text-slate-300 mt-2">
+            {isSignUpMode ? "Already have an account?" : "Don't have an account?"}
+            <button
+              onClick={function(){setisSignUpMode(!isSignUpMode); setError("")}}
+              className="ml-2 text-blue-400 hover:underline"
+            >
+              {isSignUpMode ? "Sign In?" : "Sign up"}
+            </button>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
 	</>
   );
 }

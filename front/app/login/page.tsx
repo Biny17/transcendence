@@ -9,7 +9,7 @@ export default function Home() {
   return (
     <>
     <OrientationGuard>
-      <Background signInOpen={signInOpen} />
+      <Background signInOpen={signInOpen} setSignInOpen={setSignInOpen}/>
       <Navbar signInOpen={signInOpen} setSignInOpen={setSignInOpen} />
     </OrientationGuard>
     </>
