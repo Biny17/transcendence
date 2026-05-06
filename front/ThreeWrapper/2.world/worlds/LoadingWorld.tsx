@@ -1,9 +1,9 @@
 import * as THREE from "three";
 import { World } from "../WorldClass";
-import { LoadingUI } from "@/ThreeWrapper/5.modules/ui/LoadingUI";
-import type { UIModule } from "@/ThreeWrapper/5.modules/ui/UIModule";
+import { LoadingUI } from "@/ThreeWrapper/4.module/modules/ui/LoadingUI";
+import type { UIModule } from "@/ThreeWrapper/4.module/modules/ui/UIModule";
 
-const STORAGE_KEY = 'loading_progress';
+const STORAGE_KEY = "loading_progress";
 
 export class LoadingWorld extends World {
 	constructor() {
@@ -13,7 +13,7 @@ export class LoadingWorld extends World {
 	protected setupEnvironment(): void {}
 
 	protected override async onLoad(): Promise<void> {
-		localStorage.setItem(STORAGE_KEY, '1');
+		localStorage.setItem(STORAGE_KEY, "1");
 		const uiModule = this.ctx.getModule<UIModule>("ui");
 		if (uiModule) {
 			uiModule.show("loading", <LoadingUI />);
