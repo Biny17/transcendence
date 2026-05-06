@@ -51,7 +51,7 @@ export default function FriendList(props) {
 
   async function fetchDelete(id) {
   try {
-    await api.delete('/api/friends/delete', { body: JSON.stringify({ friend_id: id }) });
+    await api.delete('/api/friends/delete', { friend_id: id });
       setDeleted(!deleted)
       setAdded([])
   } catch (error) {
@@ -97,7 +97,7 @@ export default function FriendList(props) {
 
   async function fetchImg() {
   try {
-    const response = await fetch(`${API_BASE}/api/update/profile-picture`, {
+    const response = await fetch(`${API_BASE}/api/users/me/profile-picture`, {
       method: 'GET',
       credentials: 'include',
       headers: {Accept: 'application/json, application/problem+json'}

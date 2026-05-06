@@ -11,9 +11,9 @@ import Chat from "../chat/chat";
 import Online from "@/components/cards/Onlineplayers";
 import SimpleFooter from "@/components/footers/footer";
 import "./page.css";
-import Privacy  from './Privacy.jsx';
-import  LeaderBoard  from "@/components/cards/Leaderboard.jsx";
-import  YourFriends  from "@/components/friends/friends_cards.jsx";
+import Privacy from "./Privacy.jsx";
+import LeaderBoard from "@/components/cards/Leaderboard.jsx";
+import YourFriends from "@/components/friends/friends_cards.jsx";
 import lottie from "lottie-web";
 import Bear from "@/public/cute-bear.json";
 import { CharacterVisualizerWorld } from "@/ThreeWrapper/2.world/worlds/CharacterVisualizerWorld";
@@ -73,12 +73,12 @@ export default function Home() {
 	const [isChangingColor, setIsChangingColor] = useState(false);
 	const bearRef = useRef(null);
 	const characterArgsRef = useRef({
-		bodyColor: "#c000c0",
+		bodyColor: "#c0ccc0",
 		faceColor: "#ffffff",
-		eyeColor: "#00ff00",
+		eyeColor: "#00fff0",
 		cameraPos: { x: 0, y: 1.1, z: 1.5 },
 		cameraTarget: { x: 0, y: 0.95, z: 0 },
-		animation: "FG_Emote_Chicken_A", //"FG_Idle_A",
+		animation: "FG_Emote_Pattycake_A", //"FG_Idle_A",
 		background: false
 	});
 	useEffect(() => {
@@ -121,9 +121,9 @@ export default function Home() {
 		<OrientationGuard>
 			<main className="relative min-h-screen">
 				<motion.div animate={{ opacity: isTransitioning ? 0 : 1 }} transition={{ duration: 0.3 }}>
-				<Navbar OptionsOpen={OptionsOpen} setOptionsOpen={setOptionsOpen} />
+					<Navbar OptionsOpen={OptionsOpen} setOptionsOpen={setOptionsOpen} />
 
-				{/*<div className={`character-controls ${isChangingColor ? "loading" : ""}`}>
+					{/*<div className={`character-controls ${isChangingColor ? "loading" : ""}`}>
 					<div className="control-section">
 						<span className="control-label">Animation</span>
 						<div className="control-buttons">
@@ -159,38 +159,44 @@ export default function Home() {
 						</div>
 					</div>
 				</div>*/}
-				<div className="absolute inset-0 flex items-center justify-center gap-12">
-					<div className="flex flex-row items-center gap-12">
-						<div className="baloo_button fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-6">
-							<div className="w-[200px] h-[200px] sm:w-[200px] sm:h-[200px] md:w-[300px] md:h-[300px] lg:w-[300px] lg:h-[300px] xl:w-[500px] xl:h-[500px]">
-								<EngineCanvas config={{ mode: "standalone" }} world={() => new CharacterVisualizerWorld(characterArgsRef.current)} onReady={(world) => setWorldApi(world)} style={{ width: "full", height: "500px" /*TODO FIX HEIGHT */ }} />
-							</div>
-							<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: OptionsOpen ? 0 : 1, y: OptionsOpen ? 20 : 0 }} transition={{ duration: 0.4, ease: "easeOut" }}>
-								<div className="grid grid-flow-col auto-cols-max gap-4">
-									<Button statement="Your Friends" onClick={() => setYourFriendsOpen(true)} />
-									<Button statement="Let's play" onClick={() => { setIsTransitioning(true); router.push("/online"); }} />
-									<Button statement="LeaderBoard" onClick={() => setLeaderBoardOpen(true)} />
+					<div className="absolute inset-0 flex items-center justify-center gap-12">
+						<div className="flex flex-row items-center gap-12">
+							<div className="baloo_button fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-6">
+								<div className="w-[200px] h-[200px] sm:w-[200px] sm:h-[200px] md:w-[300px] md:h-[300px] lg:w-[300px] lg:h-[300px] xl:w-[500px] xl:h-[500px]">
+									<EngineCanvas config={{ mode: "standalone" }} world={() => new CharacterVisualizerWorld(characterArgsRef.current)} onReady={(world) => setWorldApi(world)} style={{ width: "full", height: "500px" /*TODO FIX HEIGHT */ }} />
 								</div>
-							</motion.div>
-						</div>
-						<div className="chat xl:fixed xl:right-2 xl:top-1/2 xl:-translate-y-1/2">
-							<Online OptionsOpen={OptionsOpen} />
+								<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: OptionsOpen ? 0 : 1, y: OptionsOpen ? 20 : 0 }} transition={{ duration: 0.4, ease: "easeOut" }}>
+									<div className="grid grid-flow-col auto-cols-max gap-4">
+										<Button statement="Your Friends" onClick={() => setYourFriendsOpen(true)} />
+										<Button
+											statement="Let's play"
+											onClick={() => {
+												setIsTransitioning(true);
+												router.push("/online");
+											}}
+										/>
+										<Button statement="LeaderBoard" onClick={() => setLeaderBoardOpen(true)} />
+									</div>
+								</motion.div>
+							</div>
+							<div className="chat xl:fixed xl:right-2 xl:top-1/2 xl:-translate-y-1/2">
+								<Online OptionsOpen={OptionsOpen} />
+							</div>
 						</div>
 					</div>
-				</div>
-				<div className="chat">
-					<Chat OptionsOpen={OptionsOpen} />
-				</div>
-				<div className="absolute inset-x-4 bottom-5 h-17 ...">
-					<SimpleFooter setPrivacyOpen={setPrivacyOpen} />
-				</div>
-				{PrivacyOpen && (
-					<div className="modal-overlay backdrop-blur-sm">
-						<Privacy setPrivacyOpen={setPrivacyOpen} />
+					<div className="chat">
+						<Chat OptionsOpen={OptionsOpen} />
 					</div>
-				)}
-				{LeaderBoardOpen && <LeaderBoard setLeaderBoardOpen={setLeaderBoardOpen} />}
-				{YourFriendsOpen && <YourFriends setYourFriendsOpen={setYourFriendsOpen} />}
+					<div className="absolute inset-x-4 bottom-5 h-17 ...">
+						<SimpleFooter setPrivacyOpen={setPrivacyOpen} />
+					</div>
+					{PrivacyOpen && (
+						<div className="modal-overlay backdrop-blur-sm">
+							<Privacy setPrivacyOpen={setPrivacyOpen} />
+						</div>
+					)}
+					{LeaderBoardOpen && <LeaderBoard setLeaderBoardOpen={setLeaderBoardOpen} />}
+					{YourFriendsOpen && <YourFriends setYourFriendsOpen={setYourFriendsOpen} />}
 				</motion.div>
 			</main>
 		</OrientationGuard>

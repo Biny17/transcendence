@@ -78,7 +78,7 @@ func (auth *AuthService) VerifyPwd(
 		Path:     "/",
 		Domain:   domain,
 		Secure:   secure,
-		HttpOnly: true,
+		HttpOnly: false,
 		SameSite: http.SameSiteLaxMode,
 	}
 	return &out, nil

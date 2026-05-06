@@ -29,7 +29,7 @@ export default function LeaderBoardList() {
   }
 
 async function fetchImg() {
-  const url = `${API_BASE}/api/update/profile-picture`;
+  const url = `${API_BASE}/api/users/me/profile-picture`;
   const options = {method: 'GET',  credentials: 'include', headers: {Accept: 'application/json, application/problem+json'}};
   try {
     const response = await fetch(url, options);

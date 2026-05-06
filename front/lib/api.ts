@@ -26,10 +26,10 @@ export const api = {
       credentials: 'include',
       headers: {
         'Accept': 'application/problem+json',
-        'Content-Type': 'application/json',
+        ...(body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
         ...options?.headers,
       },
-      body: body ? JSON.stringify(body) : undefined,
+      body: body instanceof FormData ? body : (body ? JSON.stringify(body) : undefined),
     });
     if (!response.ok) {
       const text = await response.text();
@@ -46,10 +46,10 @@ export const api = {
       credentials: 'include',
       headers: {
         'Accept': 'application/problem+json',
-        'Content-Type': 'application/json',
+        ...(body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
         ...options?.headers,
       },
-      body: body ? JSON.stringify(body) : undefined,
+      body: body instanceof FormData ? body : (body ? JSON.stringify(body) : undefined),
     });
     if (!response.ok) {
       const text = await response.text();
@@ -66,10 +66,10 @@ export const api = {
       credentials: 'include',
       headers: {
         'Accept': 'application/problem+json',
-        'Content-Type': 'application/json',
+        ...(body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
         ...options?.headers,
       },
-      body: body ? JSON.stringify(body) : undefined,
+      body: body instanceof FormData ? body : (body ? JSON.stringify(body) : undefined),
     });
     if (!response.ok) {
       const text = await response.text();
@@ -86,10 +86,10 @@ export const api = {
       credentials: 'include',
       headers: {
         'Accept': 'application/problem+json',
-        'Content-Type': 'application/json',
+        ...(body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
         ...options?.headers,
       },
-      body: body ? JSON.stringify(body) : undefined,
+      body: body instanceof FormData ? body : (body ? JSON.stringify(body) : undefined),
     });
     if (!response.ok) {
       const text = await response.text();
