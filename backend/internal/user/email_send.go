@@ -28,9 +28,8 @@ func (us *UserService) verifEmail(
 		return nil
 	}
 	token := pkg.NewSalt()
-	link := fmt.Sprintf("http://%s:%s%s?token=%s&user_id=%s",
+	link := fmt.Sprintf("http://%s:%s?token=%s&user_id=%s",
 		us.Conf.Net.Host,
-		us.Conf.Net.Port,
 		routes.ConfirmEmail,
 		token,
 		fmt.Sprintf("%d", user.ID),
