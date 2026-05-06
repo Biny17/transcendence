@@ -9,8 +9,8 @@ services:
                 ports:
                         - "${FRONT_PORT}:3000"
                 environment:
-                        - NEXT_PUBLIC_API_URL=${API_PROTOCOL}://${API_HOST}${LOCAL:+:${API_PORT}}
-                        - NEXT_PUBLIC_GAME_SERVER_URL=${GAME_SERVER_PROTOCOL}://${GAME_SERVER_HOST}${LOCAL:+:${GAME_SERVER_PORT}}
+                        - NEXT_PUBLIC_API_URL=${API_PROTOCOL}://${API_HOST}:${API_PORT}
+                        - NEXT_PUBLIC_GAME_SERVER_URL=${GAME_SERVER_PROTOCOL}://${GAME_SERVER_HOST}:${GAME_SERVER_PORT}
                         - NODE_ENV=development
                 depends_on:
                         - api
@@ -25,7 +25,7 @@ services:
                         - ./shared:/app/server/shared
                         - /app/server/node_modules
                 ports:
-                        - "${GAME_SERVER_PORT}:3000"
+                        - "${GAME_SERVER_PORT}:3002"
                 environment:
                         - NODE_ENV=development
                         - LOBBY_CONFIG=${LOBBY_CONFIG:-one_game}
