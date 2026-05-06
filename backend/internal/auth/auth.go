@@ -5,7 +5,6 @@ import (
 	"backend/internal/config"
 	"backend/internal/pkg/routes"
 	"backend/internal/pkg"
-	"backend/internal/pkg/routes"
 	"log"
 	"net/http"
 
