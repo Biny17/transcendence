@@ -85,8 +85,9 @@ export type ComponentState = {
 type Props = {
 	onMount: (updater: (state: ComponentState) => void) => void;
 	onStateChange: (state: ComponentState) => void;
-	onExportYaml: (state: ComponentState) => void;
-	onExportZip: (state: ComponentState) => Promise<void>;
+	onSave: (state: ComponentState) => Promise<void>;
+	onLoadComponentList: () => Promise<string[]>;
+	onLoadComponent: (path: string) => Promise<ComponentState | null>;
 	onGltfLoad: (meshLocalId: string, url: string, manager?: THREE.LoadingManager) => Promise<string[]>;
 	onPlayAnimation: (meshLocalId: string, clipName: string, speed?: number, loop?: boolean) => void;
 	onStopAnimation: (meshLocalId?: string) => void;
@@ -152,7 +153,7 @@ function ModeBtn({ label, selected, onClick }: { label: string; selected: boolea
 		</button>
 	);
 }
-export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExportZip, onGltfLoad, onPlayAnimation, onStopAnimation, onPlayAnimationItem, onHelpersChange, onStartPhysicsTest, onStopPhysicsTest, onAutoGenerateHitboxes, onSceneHitboxSelect }: Props) {
+export function ComponentCreatorUI({ onMount, onStateChange, onSave, onLoadComponentList, onLoadComponent, onGltfLoad, onPlayAnimation, onStopAnimation, onPlayAnimationItem, onHelpersChange, onStartPhysicsTest, onStopPhysicsTest, onAutoGenerateHitboxes, onSceneHitboxSelect }: Props) {
 	const [state, _setState] = useState<ComponentState>({
 		id: "my_component",
 		meshes: [
@@ -206,6 +207,11 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 	const histRef = useRef({ past: [] as ComponentState[], future: [] as ComponentState[] });
 	const [canUndo, setCanUndo] = useState(false);
 	const [canRedo, setCanRedo] = useState(false);
+	const [componentList, setComponentList] = useState<string[]>([]);
+	const [selectedLoadPath, setSelectedLoadPath] = useState<string>("");
+	const [loadedPath, setLoadedPath] = useState<string | null>(null);
+	const [isSaving, setIsSaving] = useState(false);
+	const [loadError, setLoadError] = useState<string | null>(null);
 	const setState = useCallback((updater: ComponentState | ((prev: ComponentState) => ComponentState)) => {
 		histRef.current.past.push(structuredClone(stateRef.current));
 		histRef.current.future = [];
@@ -236,7 +242,6 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 	const [expandedMeshParts, setExpandedMeshParts] = useState<Set<string>>(new Set());
 	const [expandedHitboxes, setExpandedHitboxes] = useState<Set<string>>(new Set());
 	const [expandedAnimations, setExpandedAnimations] = useState<Set<string>>(new Set());
-	const [isExporting, setIsExporting] = useState(false);
 	const [autoGenOptions, setAutoGenOptions] = useState<AutoMeshOptions>({
 		mode: "single", minSize: 0.05,
 	});
@@ -260,6 +265,13 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 	useEffect(() => {
 		onMount(setState);
 	}, [onMount]);
+	useEffect(() => {
+		onLoadComponentList().then(list => {
+			setComponentList(list);
+		}).catch(() => {
+			setComponentList([]);
+		});
+	}, [onLoadComponentList]);
 	useEffect(() => {
 		onStateChange(state);
 	}, [state, onStateChange]);
@@ -690,12 +702,31 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 			)
 		}));
 	};
-	const handleExportZip = async () => {
-		setIsExporting(true);
+	const handleSave = async () => {
+		setIsSaving(true);
+		setLoadError(null);
 		try {
-			await onExportZip(state);
+			await onSave(state);
+			setLoadedPath(`/game/components/${state.id}.yaml`);
+		} catch (e) {
+			setLoadError((e as Error).message || 'Failed to save');
 		} finally {
-			setIsExporting(false);
+			setIsSaving(false);
+		}
+	};
+	const handleLoad = async () => {
+		if (!selectedLoadPath) return;
+		setLoadError(null);
+		try {
+			const loaded = await onLoadComponent(selectedLoadPath);
+			if (loaded) {
+				setState(loaded);
+				setLoadedPath(selectedLoadPath);
+			} else {
+				setLoadError('Failed to load component');
+			}
+		} catch (e) {
+			setLoadError((e as Error).message || 'Failed to load component');
 		}
 	};
 	useEffect(() => {
@@ -796,6 +827,39 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 				<div style={{ borderTop: `1px solid ${C.border}`, padding: "8px 12px" }}>
 					<div style={labelStyle}>Component ID</div>
 					<input type="text" value={state.id} onChange={(e) => handleStateChange({ id: e.target.value })} style={{ width: "100%", ...inputStyle }} />
+				</div>
+				{}
+				<div style={{ borderTop: `1px solid ${C.border}`, padding: "8px 12px" }}>
+					<div style={labelStyle}>Load Component</div>
+					<div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+						<select
+							value={selectedLoadPath}
+							onChange={(e) => setSelectedLoadPath(e.target.value)}
+							style={{ flex: 1, ...inputStyle }}>
+							<option value="">-- Select component --</option>
+							{componentList.map(path => {
+								const fileName = path.split('/').pop()?.replace('.yaml', '') ?? path;
+								return <option key={path} value={path}>{fileName}</option>;
+							})}
+						</select>
+						<button
+							onClick={handleLoad}
+							disabled={!selectedLoadPath}
+							style={{
+								padding: "4px 8px",
+								background: selectedLoadPath ? C.btnBg : "transparent",
+								border: `1px solid ${selectedLoadPath ? C.btnBorder : C.btnDisabledBorder}`,
+								borderRadius: "3px",
+								color: selectedLoadPath ? C.textBright : C.textDim,
+								cursor: selectedLoadPath ? "pointer" : "default",
+								fontFamily: "monospace",
+								fontSize: "11px"
+							}}>
+							Load
+						</button>
+					</div>
+					{loadError && <div style={{ marginTop: "4px", fontSize: "10px", color: "#ff8844" }}>⚠ {loadError}</div>}
+					{loadedPath && <div style={{ marginTop: "4px", fontSize: "10px", color: C.accent }}>Loaded: {loadedPath}</div>}
 				</div>
 				{}
 				<div style={{ borderTop: `1px solid ${C.border}`, padding: "8px 12px" }}>
@@ -1960,11 +2024,8 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 			</div>
 			{}
 			<div style={{ flex: "0 0 auto", borderTop: `1px solid ${C.border}`, padding: "8px 12px", display: "flex", gap: "6px" }}>
-				<Btn onClick={() => onExportYaml(state)} style={{ flex: 1, padding: "7px 0" }}>
-					Export YAML
-				</Btn>
-				<Btn onClick={handleExportZip} disabled={isExporting} style={{ flex: 1, padding: "7px 0" }}>
-					{isExporting ? "Exporting..." : "Export ZIP"}
+				<Btn onClick={handleSave} disabled={isSaving} style={{ flex: 1, padding: "7px 0" }}>
+					{isSaving ? "Saving..." : "Save"}
 				</Btn>
 			</div>
 		</div>

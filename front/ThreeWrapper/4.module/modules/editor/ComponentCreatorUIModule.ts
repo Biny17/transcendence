@@ -4,9 +4,8 @@ import { ModuleKey } from "@/ThreeWrapper/4.module";
 import type { UIModule } from "@/ThreeWrapper/4.module/modules/ui/UIModule";
 import type { ComponentPreviewModule } from "./ComponentPreviewModule";
 import type { ComponentState } from "./components/ComponentCreatorUI";
-import type { AutoMeshOptions, AutoHitboxResult } from "@/ThreeWrapper/2.world/util/autoMeshHitbox";
 import { ComponentCreatorUI } from "./components/ComponentCreatorUI";
-import { downloadYaml, downloadZip } from "./componentExport";
+import { buildYamlString, parseYamlToState } from "./componentExport";
 export class ComponentCreatorUIModule implements Module {
 	readonly type = ModuleKey.componentCreatorUI;
 	readonly requires = [ModuleKey.ui, ModuleKey.componentCreatorPreview] as const;
@@ -14,7 +13,9 @@ export class ComponentCreatorUIModule implements Module {
 	private preview: ComponentPreviewModule | null = null;
 	private lastWireframe = false;
 	private physicsTestActive = false;
-	constructor(_dep1: typeof ModuleKey.ui, _dep2: typeof ModuleKey.componentCreatorPreview) {}
+	constructor(_dep1: typeof ModuleKey.ui, _dep2: typeof ModuleKey.componentCreatorPreview) {
+		void _dep1; void _dep2;
+	}
 	async init(ctx: WorldContext): Promise<void> {
 		this.ui = ctx.getModule<UIModule>(ModuleKey.ui) ?? null;
 		this.preview = ctx.getModule<ComponentPreviewModule>(ModuleKey.componentCreatorPreview) ?? null;
@@ -102,11 +103,32 @@ export class ComponentCreatorUIModule implements Module {
 						}
 					}
 				},
-				onExportYaml: (state: ComponentState) => {
-					downloadYaml(state);
+				onSave: async (state: ComponentState) => {
+					const yaml = buildYamlString(state);
+					const res = await fetch('/api/components', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ id: state.id, yaml }),
+					});
+					if (!res.ok) {
+						const err = await res.json();
+						throw new Error(err.error || 'Failed to save component');
+					}
 				},
-				onExportZip: (state: ComponentState) => {
-					return downloadZip(state);
+				onLoadComponentList: async () => {
+					const res = await fetch('/api/components');
+					if (!res.ok) return [];
+					return res.json();
+				},
+				onLoadComponent: async (path: string) => {
+					const res = await fetch(path);
+					if (!res.ok) return null;
+					const text = await res.text();
+					try {
+						return parseYamlToState(text);
+					} catch {
+						return null;
+					}
 				},
 				onGltfLoad: async (meshLocalId: string, url: string, manager) => {
 					gltfLoadedMeshes.set(meshLocalId, url);

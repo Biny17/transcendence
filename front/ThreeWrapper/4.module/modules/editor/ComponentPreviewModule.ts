@@ -201,6 +201,8 @@ export class ComponentPreviewModule implements Module {
 	private _wireframe = false;
 	private waypointAnims = new Map<string, WaypointAnimTracker>(); // animId -> tracker
 	private gltfBounds = new Map<string, THREE.Vector3>(); // localId -> bounds
+	private pendingGltfScale = new Map<string, { x: number; y: number; z: number }>(); // localId -> pending scale
+	private pendingGltfOffset = new Map<string, { x: number; y: number; z: number }>(); // localId -> pending offset
 	private _physicsTestActive = false;
 	private _physicsTestFloorId = "__cc_floor__";
 	private _physicsTestObjectId = "__cc_drop__";
@@ -302,6 +304,7 @@ export class ComponentPreviewModule implements Module {
 	rebuild(state: ComponentState): void {
 		if (!this.ctx) return;
 		this._clearScene();
+		this._clearGltf();
 
 		// Build all meshes
 		for (const mesh of state.meshes) {
@@ -582,6 +585,18 @@ export class ComponentPreviewModule implements Module {
 			this.ctx.objects.addRaw(scene);
 		}
 
+		// Apply pending scale and offset if any were set before loading
+		const pendingScale = this.pendingGltfScale.get(meshLocalId);
+		if (pendingScale) {
+			scene.scale.set(pendingScale.x, pendingScale.y, pendingScale.z);
+			this.pendingGltfScale.delete(meshLocalId);
+		}
+		const pendingOffset = this.pendingGltfOffset.get(meshLocalId);
+		if (pendingOffset) {
+			scene.position.set(pendingOffset.x, pendingOffset.y, pendingOffset.z);
+			this.pendingGltfOffset.delete(meshLocalId);
+		}
+
 		return gltf.animations.map((a: any) => a.name);
 	}
 
@@ -642,6 +657,8 @@ export class ComponentPreviewModule implements Module {
 		const scene = this.gltfScenes.get(meshLocalId);
 		if (scene) {
 			scene.scale.set(x, y, z);
+		} else {
+			this.pendingGltfScale.set(meshLocalId, { x, y, z });
 		}
 	}
 
@@ -649,6 +666,8 @@ export class ComponentPreviewModule implements Module {
 		const scene = this.gltfScenes.get(meshLocalId);
 		if (scene) {
 			scene.position.set(x, y, z);
+		} else {
+			this.pendingGltfOffset.set(meshLocalId, { x, y, z });
 		}
 	}
 
