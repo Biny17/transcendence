@@ -1,3 +1,14 @@
+export type GameConfigAction = {
+  id: string
+  type: string
+  label?: string
+}
+
+export type GameConfigEvent = {
+  name: string
+  actions: string[]
+}
+
 export type GameConfig = {
   id: string
   maxPlayers: number
@@ -6,7 +17,9 @@ export type GameConfig = {
   allowRejoin: boolean
   spectatorAllowed: boolean
   teams?: TeamConfig[]
-  emits?: string[]  
+  emits?: string[]
+  actions?: GameConfigAction[]
+  events?: GameConfigEvent[]
 }
 export type TeamConfig = {
   id: string

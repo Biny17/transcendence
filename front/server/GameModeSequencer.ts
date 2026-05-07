@@ -46,13 +46,13 @@ export class GameModeSequencer {
       players: [],
       events: [],
     }
-    this.broadcast(JSON.stringify(createMessage(SERVER_MSG.GAMEMODE_START, { initialState })))
+    this.broadcast(JSON.stringify(createMessage("GAMEMODE_START", { initialState })))
     console.log(`[Sequencer] GameMode started: ${entry.modeId}`)
   }
   endCurrentGameMode(scores: { playerId: string; value: number }[]): void {
     const rankings = scores
       .sort((a, b) => b.value - a.value)
       .map((s, i) => ({ playerId: s.playerId, rank: i + 1, score: s.value }))
-    this.broadcast(JSON.stringify(createMessage(SERVER_MSG.GAMEMODE_END, { scores, rankings })))
+    this.broadcast(JSON.stringify(createMessage("GAMEMODE_END", { scores, rankings })))
   }
 }

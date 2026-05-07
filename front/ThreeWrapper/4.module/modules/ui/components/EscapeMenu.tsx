@@ -19,14 +19,14 @@ export function EscapeMenu({ onResume, onKeybinds, onReset }: EscapeMenuProps) {
           <div className="min-h-0 flex-1 flex items-center justify-center overflow-y-auto scrollbar-hide pr-1">
             <div className="w-full max-w-xs flex flex-col gap-4 items-center">
               <div className="w-full flex justify-center">
-                <Button statement="Reprendre" onClick={onResume} />
+                <Button statement="Reprendre" onClick={onResume} isAdded={false} />
               </div>
               <div className="w-full flex justify-center">
-                <Button statement="Keybinds" onClick={onKeybinds} />
+                <Button statement="Keybinds" onClick={onKeybinds} isAdded={false} />
               </div>
               {onReset && (
                 <div className="w-full flex justify-center">
-                  <Button statement="Reset" onClick={onReset} />
+                  <Button statement="Reset" onClick={onReset} isAdded={false} />
                 </div>
               )}
             </div>

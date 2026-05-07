@@ -1,4 +1,4 @@
-# $schema: /game/components/component.schema.json
+# $schema: ./component.schema.json
 # -----------------------------------------------------------
 # A checkpoint arch — visual GLTF mesh with a sensor zone.
 # No physics body (players pass through freely).

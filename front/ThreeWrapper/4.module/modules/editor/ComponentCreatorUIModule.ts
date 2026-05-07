@@ -98,7 +98,9 @@ export class ComponentCreatorUIModule implements Module {
 						}
 					}
 					for (const [meshId] of gltfLoadedMeshes) {
-						if (!state.meshes.find((m) => m.localId === meshId)) {
+						const currentMesh = state.meshes.find((m) => m.localId === meshId);
+						if (!currentMesh || currentMesh.meshKind !== "gltf") {
+							this.preview?.removeGltfModel(meshId);
 							gltfLoadedMeshes.delete(meshId);
 						}
 					}

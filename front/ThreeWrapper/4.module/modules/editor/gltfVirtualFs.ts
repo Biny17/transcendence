@@ -25,7 +25,7 @@ export async function extractGltfZip(file: File): Promise<GltfVirtualFs> {
   )
   if (!mainFileName) throw new Error('No .glb or .gltf file found in zip')
   const manager = new THREE.LoadingManager()
-  manager.setURLModifier(url => {
+  manager.setURLModifier((url: string) => {
     const basename = url.split('/').pop()!
     return blobUrls.get(basename) ?? url
   })

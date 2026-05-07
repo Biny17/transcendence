@@ -1,6 +1,6 @@
 # $schema: /schemas/component.schema.json
 # ---
-id: my_component
+id: map
 meshes:
         - gltf: /game/modeles/city/scene.gltf
           scale:

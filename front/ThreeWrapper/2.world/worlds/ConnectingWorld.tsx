@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { World } from "../WorldClass";
+import { ModuleKey } from "@/ThreeWrapper/4.module";
 import { ConnectingUI } from "@/ThreeWrapper/4.module/modules/ui/ConnectingUI";
 import type { UIModule } from "@/ThreeWrapper/4.module/modules/ui/UIModule";
 
@@ -11,7 +12,7 @@ export class ConnectingWorld extends World {
 	protected setupEnvironment(): void {}
 
 	protected override async onLoad(): Promise<void> {
-		const uiModule = this.ctx.getModule<UIModule>("ui");
+		const uiModule = this.ctx.getModule<UIModule>(ModuleKey.ui);
 		if (uiModule) {
 			uiModule.show("connecting", <ConnectingUI />);
 		}
@@ -24,7 +25,7 @@ export class ConnectingWorld extends World {
 	protected override onStart(): void {}
 
 	protected override onDispose(): void {
-		const uiModule = this.ctx.getModule<UIModule>("ui");
+		const uiModule = this.ctx.getModule<UIModule>(ModuleKey.ui);
 		if (uiModule) {
 			uiModule.hide("connecting");
 		}

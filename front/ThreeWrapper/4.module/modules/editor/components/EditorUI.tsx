@@ -16,6 +16,11 @@ type Props = {
   components: string[]
   onSelect: (path: string) => void
   onDeselect: () => void
+  onExport: () => void
+  onUndo: () => void
+  onRedo: () => void
+  onDelete: () => void
+  onHeightChange: (y: number) => void
   onLoadMap: (yamlText: string) => void
   onMount: (updater: (state: EditorUIState) => void) => void
   onRotationChange: (rot: { x: number; y: number; z: number }) => void

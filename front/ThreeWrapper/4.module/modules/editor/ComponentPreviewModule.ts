@@ -304,7 +304,6 @@ export class ComponentPreviewModule implements Module {
 	rebuild(state: ComponentState): void {
 		if (!this.ctx) return;
 		this._clearScene();
-		this._clearGltf();
 
 		// Build all meshes
 		for (const mesh of state.meshes) {
@@ -368,7 +367,8 @@ export class ComponentPreviewModule implements Module {
 				}
 			} else if (mesh.meshKind === "gltf") {
 				// GLTF meshes are loaded separately via loadGltfModel
-				// Just create an empty group for now
+				// Skip empty group if scene is already loaded
+				if (this.gltfScenes.has(mesh.localId)) continue;
 				const group = new THREE.Group();
 				group.name = mesh.name;
 				group.position.set(mesh.offsetX, mesh.offsetY, mesh.offsetZ);
@@ -548,6 +548,10 @@ export class ComponentPreviewModule implements Module {
 		if (entry) {
 			entry.mat.color.setHex(highlight ? _HIGHLIGHT_COLOR : entry.origColor);
 		}
+	}
+
+	removeGltfModel(meshLocalId: string): void {
+		this._clearGltfForMesh(meshLocalId);
 	}
 
 	async loadGltfModel(meshLocalId: string, url: string, manager?: THREE.LoadingManager): Promise<string[]> {
@@ -935,7 +939,9 @@ export class ComponentPreviewModule implements Module {
 		for (const clickMesh of this.hitboxClickMeshes.values()) {
 			this.ctx.objects.removeRaw(clickMesh);
 			clickMesh.geometry.dispose();
-			clickMesh.material.dispose();
+			const mat = clickMesh.material;
+			if (Array.isArray(mat)) mat.forEach(m => m.dispose());
+			else mat?.dispose();
 		}
 		this.hitboxClickMeshes.clear();
 

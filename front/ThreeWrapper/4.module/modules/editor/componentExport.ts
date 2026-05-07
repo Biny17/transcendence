@@ -151,7 +151,7 @@ function buildHitboxes(hitboxes: HitboxState[]): HitboxDef[] {
 
 export function buildYamlString(state: ComponentState): string {
   const def = buildComponentDef(state)
-  return `# $schema: /game/components/component.schema.json\n# ---\n` +
+  return `# $schema: ./component.schema.json\n# ---\n` +
     yamlDump(def, { lineWidth: -1 })
 }
 
