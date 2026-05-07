@@ -15,6 +15,7 @@ export function Background({ signInOpen,setSignInOpen }) {
 
 const [isSignUp, setIsSignUp] = useState(false);
 const [isSignIn, setIsSignIn] = useState(false);
+const [Submit, setSubmit] = useState(false);
 const[isSignUpMode, setisSignUpMode] = useState(false);
 const [form, setForm] = useState({ age: "", email: "", password: "", username: "" });
 const [Profile, setProfile] = useState([])
@@ -47,7 +48,7 @@ const handleSubmit = () => {
   if (!form.email || !form.password) { setError("Remplissez tous les champs !"); return; }
   if (isSignUpMode && !form.age) { setError("Remplissez tous les champs !"); return; }
   if (isSignUpMode && !form.username) { setError("Choisissez un pseudo !"); return; }
-  else if (isSignUpMode) { setIsSignUp(true); return; }
+  else if (isSignUpMode) { setIsSignUp(true); setSubmit(!Submit); return; }
   else { fetchVerified(); return; }
 };
 
@@ -72,6 +73,7 @@ useEffect(function() {
       const response = await fetch(url, options);
       setIsSignIn(false);
       setIsSignUp(false);
+      setSubmit(false);
       if (!response.ok) {
         const err = await response.json();
         throw new Error(err.title);
@@ -98,7 +100,7 @@ useEffect(function() {
   }
 }
   fetchData();
-}, [isSignUp, isSignIn])
+}, [isSignUp, isSignIn, Submit])
 
   const mascotRef = useRef(null);
   const mascotRef2 = useRef(null);

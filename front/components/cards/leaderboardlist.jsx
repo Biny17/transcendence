@@ -5,16 +5,6 @@ import { Badge } from "@material-tailwind/react";
 import { api, API_BASE } from "@/lib/api";
 
 export default function LeaderBoardList() {
-  const play = [
-    {  username: "Tania Andrew", img: "https://docs.material-tailwind.com/img/face-1.jpg", win: 20 },
-    {  username: "Alexander", img: "https://docs.material-tailwind.com/img/face-2.jpg", win: 18 },
-    {  username: "Emma Willever", img: "https://docs.material-tailwind.com/img/face-3.jpg", win: 15 },
-    { username: "Candice", img: "https://docs.material-tailwind.com/img/face-1.jpg", win: 10 },
-    { username: "John Doe", img: "https://randomuser.me/api/portraits/men/1.jpg", win: 9 },
-    { username: "Jane Smith", img: "https://randomuser.me/api/portraits/women/2.jpg", win: 8 },
-    { username: "Lucas", img: "https://randomuser.me/api/portraits/men/3.jpg", win: 7 },
-    { username: "Sophie", img: "https://randomuser.me/api/portraits/women/4.jpg", win: 6 },
-  ];
   const [players, setPlayers] = useState([]);
   const [img, setImg] = useState([]);
   const [UserName, setUserName] = useState("");
@@ -23,7 +13,7 @@ export default function LeaderBoardList() {
   async function fetchData() {
     try {
       const data = await api.get("/api/users");
-      setPlayers([...data, ...play]);
+      setPlayers([...data]);
     } catch (error) {
       console.error(error);
     }
