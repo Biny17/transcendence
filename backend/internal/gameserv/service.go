@@ -46,8 +46,8 @@ func (gs *GameService) Register(api huma.API, m *mid.Middleware) {
 		Path:    routes.GetGames,
 	}, gs.GetUserGames)
 	huma.Register(api, huma.Operation{
-		Summary: "STATS USER",
 		Method:  http.MethodGet,
 		Path:    routes.GetStats,
+		Summary: "STATS USER",
 	}, gs.GetPlayerStats)
 }
