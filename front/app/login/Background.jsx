@@ -44,6 +44,10 @@ async function fetchVerified() {
     }
 }
 
+async function handle42Login(){
+   window.location.href = "http://localhost:8080/api/auth/42/login";
+}
+
 const handleSubmit = () => {
   if (!form.email || !form.password) { setError("Remplissez tous les champs !"); return; }
   if (isSignUpMode && !form.age) { setError("Remplissez tous les champs !"); return; }
@@ -276,10 +280,10 @@ useEffect(function() {
               <span className="flex items-center gap-2">
                 {/* <img src="https://upload.wikimedia.org/wikipedia/commons/8/8d/42_Logo.svg" alt="google" className="w-5 h-5" /> */}
                 Continue with
-                <img src="42.svg" alt="google" className="w-5 h-5" />
+                <img src="42.svg" alt="42" className="w-5 h-5" />
               </span>
             }
-            onClick={() => {/* handle Google sign-in */}}
+            onClick={() => {handle42Login()}}
           />
           <p className="text-center text-slate-300 mt-2">
             {isSignUpMode ? "Already have an account?" : "Don't have an account?"}

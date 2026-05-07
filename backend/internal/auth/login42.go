@@ -201,7 +201,7 @@ func (auth *AuthService) FortyTwoCallback(ctx context.Context, input *FortyTwoCa
 
 	return &FortyTwoCallbackOut{
 		Status:   307,
-		Location: "http://localhost:3000",
+		Location: "http://localhost:3001",
 		SetCookie: http.Cookie{
 			Name:    "auth_token",
 			Value:   jwt,
