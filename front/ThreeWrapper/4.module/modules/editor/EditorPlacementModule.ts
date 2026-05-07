@@ -50,11 +50,11 @@ export class EditorPlacementModule implements Module {
   private _showGrid = true
   get showGrid(): boolean { return this._showGrid }
   private placementY = 0
-  private _waypointAnim: { waypoints: THREE.Vector3[]; rotations: THREE.Euler[]; speed: number; loop: boolean; targetIdx: number; direction: number; progress: number } | null = null
+  private _waypointAnim: { waypoints: THREE.Vector3[]; rotations: THREE.Euler[]; speed: number; loop: boolean; revert: boolean; targetIdx: number; direction: number; progress: number } | null = null
   private _waypointOrigPos: THREE.Vector3 | null = null
   private _waypointOrigRot: THREE.Euler | null = null
   private _playingAnimationName: string | null = null
-  private _allAnimTrackers = new Map<string, { tracker: { waypoints: THREE.Vector3[]; rotations: THREE.Euler[]; speed: number; loop: boolean; targetIdx: number; direction: number; progress: number }; origPos: THREE.Vector3; origRot: THREE.Euler }>()
+  private _allAnimTrackers = new Map<string, { tracker: { waypoints: THREE.Vector3[]; rotations: THREE.Euler[]; speed: number; loop: boolean; revert: boolean; targetIdx: number; direction: number; progress: number }; origPos: THREE.Vector3; origRot: THREE.Euler }>()
   private _isPlayingAll = false
   private _env: { sky: any; fog: any; lights: any[]; clouds: boolean } = { sky: null, fog: null, lights: [], clouds: false }
   private _skyDispose: (() => void) | null = null
@@ -199,7 +199,10 @@ export class EditorPlacementModule implements Module {
               anim.progress -= 1
               const next = anim.targetIdx + anim.direction
               if (next >= anim.waypoints.length) {
-                if (anim.loop) { anim.direction = -1; anim.targetIdx = anim.waypoints.length - 2 }
+                if (anim.loop) {
+                  if (anim.revert) { anim.direction = -1; anim.targetIdx = anim.waypoints.length - 2 }
+                  else { anim.targetIdx = 1 }
+                }
                 else { anim.progress = 1; break }
               } else if (next < 0) {
                 if (anim.loop) { anim.direction = 1; anim.targetIdx = 1 }
@@ -237,7 +240,10 @@ export class EditorPlacementModule implements Module {
         anim.progress -= 1
         const next = anim.targetIdx + anim.direction
         if (next >= anim.waypoints.length) {
-          if (anim.loop) { anim.direction = -1; anim.targetIdx = anim.waypoints.length - 2 }
+          if (anim.loop) {
+            if (anim.revert) { anim.direction = -1; anim.targetIdx = anim.waypoints.length - 2 }
+            else { anim.targetIdx = 1 }
+          }
           else { anim.progress = 1; break }
         } else if (next < 0) {
           if (anim.loop) { anim.direction = 1; anim.targetIdx = 1 }
@@ -337,6 +343,7 @@ export class EditorPlacementModule implements Module {
       )),
       speed: animDef.speed ?? 2,
       loop: animDef.loop ?? true,
+      revert: animDef.revert ?? true,
       targetIdx: 1,
       direction: 1,
       progress: 0,
@@ -383,6 +390,7 @@ export class EditorPlacementModule implements Module {
         )),
         speed: animDef.speed ?? 2,
         loop: animDef.loop ?? true,
+        revert: animDef.revert ?? true,
         targetIdx: 1,
         direction: 1,
         progress: 0,

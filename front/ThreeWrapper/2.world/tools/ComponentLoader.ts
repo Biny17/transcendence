@@ -56,13 +56,14 @@ export type WaypointDef = {
   rotation?: Vec3
 }
 export type WaypointAnimDef = {
-  kind: 'waypoints'
-  targetMesh?: number 
-  waypoints: WaypointDef[]
-  speed?: number
-  loop?: boolean
-  autoPlay?: boolean
-  pauseAtWaypoint?: number
+	kind: 'waypoints'
+	targetMesh?: number 
+	waypoints: WaypointDef[]
+	speed?: number
+	loop?: boolean
+	revert?: boolean
+	autoPlay?: boolean
+	pauseAtWaypoint?: number
 }
 export type ClipAnimDef = {
   kind: 'clip'

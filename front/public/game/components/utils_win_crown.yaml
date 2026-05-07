@@ -1,0 +1,44 @@
+# $schema: ./component.schema.json
+# ---
+id: utils_win_crown
+meshes:
+  - gltf: /game/modeles/fall_guys_crown/scene.gltf
+    offset:
+      x: 0
+      'y': 1.7
+      z: 0
+physics:
+  bodyType: static
+  restitution: 0.1
+hitboxes:
+  - shape: box
+    size:
+      x: 3.0804709043366785
+      'y': 2.172566533088684
+      z: 3.2354941006479265
+    offset:
+      x: -8.028745668298143e-8
+      'y': 1.7862832665443422
+      z: 8.028745668298143e-8
+    isSensor: true
+    tag: win
+animations:
+  anim_1:
+    kind: waypoints
+    targetMesh: 0
+    waypoints:
+      - position:
+          x: 0
+          'y': 1.7
+          z: 0
+      - position:
+          x: 0
+          'y': 1.7
+          z: 0
+        rotation:
+          x: 0
+          'y': 3.2
+    speed: 0.0001
+    loop: true
+    revert: false
+    autoPlay: true

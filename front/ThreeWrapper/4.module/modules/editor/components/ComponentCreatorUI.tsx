@@ -69,6 +69,7 @@ export type AnimationState = {
 	loop: boolean;
 	autoPlay: boolean;
 	pauseAtWaypoint: number;
+	revert: boolean;
 };
 export type ComponentState = {
 	id: string;
@@ -602,13 +603,14 @@ export function ComponentCreatorUI({ onMount, onStateChange, onSave, onLoadCompo
 				name: clipName,
 				targetMeshId: meshLocalId,
 				type: 'clip' as const,
-				clipName,
-				waypoints: [],
-				speed: 1,
-				loop: true,
-				autoPlay: false,
-				pauseAtWaypoint: 0,
-			}));
+			clipName,
+			waypoints: [],
+			speed: 1,
+			loop: true,
+			autoPlay: false,
+			pauseAtWaypoint: 0,
+			revert: true,
+		}));
 		if (newClips.length === 0) return prev;
 		return { ...prev, animations: [...prev.animations, ...newClips] };
 	};
@@ -624,7 +626,8 @@ export function ComponentCreatorUI({ onMount, onStateChange, onSave, onLoadCompo
 			speed: 2,
 			loop: true,
 			autoPlay: true,
-			pauseAtWaypoint: 0
+			pauseAtWaypoint: 0,
+			revert: true,
 		};
 		setState((prev) => ({ ...prev, animations: [...prev.animations, newAnim] }));
 	};
@@ -644,6 +647,7 @@ export function ComponentCreatorUI({ onMount, onStateChange, onSave, onLoadCompo
 			loop: true,
 			autoPlay: false,
 			pauseAtWaypoint: 0,
+			revert: true,
 		};
 		setState((prev) => ({ ...prev, animations: [...prev.animations, newAnim] }));
 	};
@@ -1942,6 +1946,12 @@ export function ComponentCreatorUI({ onMount, onStateChange, onSave, onLoadCompo
 											<input type="checkbox" checked={anim.loop} onChange={(e) => handleAnimationChange(anim.localId, { loop: e.target.checked })} />
 											Loop
 										</label>
+										{anim.type === 'waypoints' && (
+											<label style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", flex: 1 }}>
+												<input type="checkbox" checked={anim.revert} onChange={(e) => handleAnimationChange(anim.localId, { revert: e.target.checked })} />
+												Revert
+											</label>
+										)}
 										<label style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", flex: 1 }}>
 											<input type="checkbox" checked={anim.autoPlay} onChange={(e) => handleAnimationChange(anim.localId, { autoPlay: e.target.checked })} />
 											Auto-trigger

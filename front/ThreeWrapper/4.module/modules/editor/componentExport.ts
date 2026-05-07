@@ -83,6 +83,7 @@ function buildAnimations(animations: AnimationState[], meshes: MeshPartState[]):
         })),
         speed: anim.speed,
         loop: anim.loop,
+        revert: anim.revert,
         autoPlay: anim.autoPlay,
         ...(anim.pauseAtWaypoint > 0 && { pauseAtWaypoint: anim.pauseAtWaypoint }),
       }
@@ -336,6 +337,7 @@ export function parseYamlToState(yaml: string): ComponentState {
           clipName: '',
           speed: anim.speed ?? 2,
           loop: anim.loop ?? true,
+          revert: anim.revert ?? true,
           autoPlay: anim.autoPlay ?? false,
           pauseAtWaypoint: anim.pauseAtWaypoint ?? 0,
         })
@@ -351,6 +353,7 @@ export function parseYamlToState(yaml: string): ComponentState {
           loop: anim.loop ?? true,
           autoPlay: anim.autoPlay ?? false,
           pauseAtWaypoint: 0,
+          revert: true,
         })
       }
     }

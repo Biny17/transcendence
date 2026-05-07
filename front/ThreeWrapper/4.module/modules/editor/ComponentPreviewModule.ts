@@ -140,6 +140,7 @@ type WaypointAnimTracker = {
 	rotations: THREE.Euler[];
 	speed: number;
 	loop: boolean;
+	revert: boolean;
 	targetIdx: number;
 	direction: number;
 	progress: number;
@@ -247,8 +248,8 @@ export class ComponentPreviewModule implements Module {
 
 		// Update waypoint animations for each mesh
 		for (const [animId, anim] of this.waypointAnims) {
-			const meshGroup = this.meshGroups.get(animId);
-			if (!meshGroup) continue;
+			const target = this.meshGroups.get(animId) ?? this.gltfScenes.get(animId);
+			if (!target) continue;
 
 			if (anim.waypoints.length < 2) continue;
 
@@ -265,8 +266,12 @@ export class ComponentPreviewModule implements Module {
 				const next = anim.targetIdx + anim.direction;
 				if (next >= anim.waypoints.length) {
 					if (anim.loop) {
-						anim.direction = -1;
-						anim.targetIdx = anim.waypoints.length - 2;
+						if (anim.revert) {
+							anim.direction = -1;
+							anim.targetIdx = anim.waypoints.length - 2;
+						} else {
+							anim.targetIdx = 1;
+						}
 					} else {
 						anim.progress = 1;
 						break;
@@ -288,16 +293,16 @@ export class ComponentPreviewModule implements Module {
 			const newTo = anim.waypoints[anim.targetIdx];
 			if (newTo) {
 				const newFrom = anim.waypoints[newSrc];
-				meshGroup.position.lerpVectors(newFrom, newTo, Math.min(anim.progress, 1));
+				target.position.lerpVectors(newFrom, newTo, Math.min(anim.progress, 1));
 			}
 			// Interpolate rotation
 			if (anim.rotations && anim.rotations.length >= 2) {
 				const rotFrom = anim.rotations[newSrc];
 				const rotTo = anim.rotations[anim.targetIdx];
 				if (rotFrom && rotTo) {
-					meshGroup.rotation.x = rotFrom.x + (rotTo.x - rotFrom.x) * Math.min(anim.progress, 1);
-					meshGroup.rotation.y = rotFrom.y + (rotTo.y - rotFrom.y) * Math.min(anim.progress, 1);
-					meshGroup.rotation.z = rotFrom.z + (rotTo.z - rotFrom.z) * Math.min(anim.progress, 1);
+					target.rotation.x = rotFrom.x + (rotTo.x - rotFrom.x) * Math.min(anim.progress, 1);
+					target.rotation.y = rotFrom.y + (rotTo.y - rotFrom.y) * Math.min(anim.progress, 1);
+					target.rotation.z = rotFrom.z + (rotTo.z - rotFrom.z) * Math.min(anim.progress, 1);
 				}
 			}
 		}
@@ -474,6 +479,7 @@ export class ComponentPreviewModule implements Module {
 						)),
 						speed: anim.speed || 2,
 						loop: anim.loop,
+						revert: anim.revert ?? true,
 						targetIdx: 1,
 						direction: 1,
 						progress: 0
@@ -697,8 +703,8 @@ export class ComponentPreviewModule implements Module {
 
 	startWaypointAnimation(anim: AnimationState): void {
 		if (anim.type !== 'waypoints' || anim.waypoints.length < 2) return;
-		const meshGroup = this.meshGroups.get(anim.targetMeshId);
-		if (!meshGroup) return;
+		const target = this.meshGroups.get(anim.targetMeshId) ?? this.gltfScenes.get(anim.targetMeshId);
+		if (!target) return;
 
 		this.waypointAnims.delete(anim.targetMeshId);
 
@@ -709,6 +715,7 @@ export class ComponentPreviewModule implements Module {
 			)),
 			speed: anim.speed || 2,
 			loop: anim.loop,
+			revert: anim.revert ?? true,
 			targetIdx: 1,
 			direction: 1,
 			progress: 0,
