@@ -39,14 +39,14 @@ export default function FriendList(props) {
     const data = await api.get('/api/users');
     setPlayers(data)
   } catch (error) {
-    console.error(error);
+    // console.error(error);
   }
 }
   async function fetchSendRequest(id) {
   try {
     await api.post('/api/friends/request', { friend_id: id });
   } catch (error) {
-    console.error(error);
+    // // console.error(error);
   }
 }
 
@@ -56,7 +56,7 @@ export default function FriendList(props) {
       setDeleted(!deleted)
       setAdded([])
   } catch (error) {
-    console.error(error);
+    // console.error(error);
   }
 }
 
@@ -65,7 +65,7 @@ export default function FriendList(props) {
     const data = await api.get('/api/friends/friendlist');
     setPlayers(data)
   } catch (error) {
-    console.error(error);
+    // console.error(error);
   }
 }
 
@@ -74,7 +74,7 @@ export default function FriendList(props) {
     const data = await api.get('/api/friends/pending');
     setRequests(data)
   } catch (error) {
-    console.error(error);
+    // console.error(error);
   }
 }
 
@@ -83,7 +83,7 @@ export default function FriendList(props) {
     const data = await api.get('/api/friends/sent');
     setSentRequests(data)
   } catch (error) {
-    console.error(error);
+    // console.error(error);
   }
 }
 
@@ -92,7 +92,7 @@ export default function FriendList(props) {
     const data = await api.get('/api/friends/friendlist');
     setFriends(data)
   } catch (error) {
-    console.error(error);
+    // console.error(error);
   }
 }
 
@@ -109,7 +109,7 @@ export default function FriendList(props) {
     return (imgUrl);
 
   } catch (error) {
-    console.error(error);
+    // console.error(error);
     setImg(null);
   }
 }
@@ -119,7 +119,7 @@ export default function FriendList(props) {
     const data = await api.get('/api/users/' + id);
     setUserName(data[0].username);
   } catch (error) {
-    console.error(error);
+    // console.error(error);
   }
 }
 
