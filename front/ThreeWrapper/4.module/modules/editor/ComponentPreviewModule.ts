@@ -209,6 +209,7 @@ export class ComponentPreviewModule implements Module {
 	private _selectedHitboxId: string | null = null;
 	private raycaster = new THREE.Raycaster();
 	private mouseNdc = new THREE.Vector2();
+	private hitboxParentMap = new Map<string, string>(); // hitboxLocalId -> meshLocalId
 	private _onCanvasClick: ((e: MouseEvent) => void) | null = null;
 	onHitboxClick: ((localId: string | null) => void) | null = null;
 
@@ -286,11 +287,12 @@ export class ComponentPreviewModule implements Module {
 			const newSrc = Math.max(0, Math.min(anim.waypoints.length - 1, anim.targetIdx - anim.direction));
 			const newTo = anim.waypoints[anim.targetIdx];
 			if (newTo) {
-				meshGroup.position.lerpVectors(from, newTo, Math.min(anim.progress, 1));
+				const newFrom = anim.waypoints[newSrc];
+				meshGroup.position.lerpVectors(newFrom, newTo, Math.min(anim.progress, 1));
 			}
 			// Interpolate rotation
 			if (anim.rotations && anim.rotations.length >= 2) {
-				const rotFrom = anim.rotations[srcIdx];
+				const rotFrom = anim.rotations[newSrc];
 				const rotTo = anim.rotations[anim.targetIdx];
 				if (rotFrom && rotTo) {
 					meshGroup.rotation.x = rotFrom.x + (rotTo.x - rotFrom.x) * Math.min(anim.progress, 1);
@@ -386,17 +388,68 @@ export class ComponentPreviewModule implements Module {
 
 		this.hitboxMaterials.clear();
 		this.hitboxClickMeshes.clear();
+		this.hitboxParentMap.clear();
 
 		for (const hb of state.hitboxes) {
 			const { group: helper, material } = buildHitboxHelper(hb, combinedBounds);
-			helper.position.set(hb.offsetX, hb.offsetY, hb.offsetZ);
-			this.ctx.objects.addRaw(helper);
+
+			const parentMeshId = this._findNearestMesh(hb, state);
+			let isParented = false;
+
+			if (parentMeshId) {
+				const parentGroup = this.meshGroups.get(parentMeshId);
+				const meshDef = state.meshes.find(m => m.localId === parentMeshId);
+				if (parentGroup && meshDef && meshDef.meshKind === "primitive") {
+					const hbPos = new THREE.Vector3(hb.offsetX, hb.offsetY, hb.offsetZ);
+					const meshPos = new THREE.Vector3(meshDef.offsetX, meshDef.offsetY, meshDef.offsetZ);
+					const meshQuat = new THREE.Quaternion().setFromEuler(
+						new THREE.Euler(
+							THREE.MathUtils.degToRad(meshDef.rotationX ?? 0),
+							THREE.MathUtils.degToRad(meshDef.rotationY ?? 0),
+							THREE.MathUtils.degToRad(meshDef.rotationZ ?? 0)
+						)
+					);
+					const localPos = hbPos.clone().sub(meshPos);
+					localPos.applyQuaternion(meshQuat.clone().invert());
+					helper.position.copy(localPos);
+
+					parentGroup.add(helper);
+					this.hitboxParentMap.set(hb.localId, parentMeshId);
+					isParented = true;
+				}
+			}
+
+			if (!isParented) {
+				helper.position.set(hb.offsetX, hb.offsetY, hb.offsetZ);
+				this.ctx.objects.addRaw(helper);
+			}
+
 			this.hitboxHelpers.push(helper);
 			this.hitboxMaterials.set(hb.localId, { mat: material, origColor: material.color.getHex() });
 
 			const clickMesh = buildHitboxClickMesh(hb, combinedBounds);
 			if (clickMesh) {
-				this.ctx.objects.addRaw(clickMesh);
+				if (isParented) {
+					const parentGroup = this.meshGroups.get(parentMeshId!);
+					const meshDef = state.meshes.find(m => m.localId === parentMeshId!);
+					if (parentGroup && meshDef) {
+						const hbPos = new THREE.Vector3(hb.offsetX, hb.offsetY, hb.offsetZ);
+						const meshPos = new THREE.Vector3(meshDef.offsetX, meshDef.offsetY, meshDef.offsetZ);
+						const meshQuat = new THREE.Quaternion().setFromEuler(
+							new THREE.Euler(
+								THREE.MathUtils.degToRad(meshDef.rotationX ?? 0),
+								THREE.MathUtils.degToRad(meshDef.rotationY ?? 0),
+								THREE.MathUtils.degToRad(meshDef.rotationZ ?? 0)
+							)
+						);
+						const localPos = hbPos.clone().sub(meshPos);
+						localPos.applyQuaternion(meshQuat.clone().invert());
+						clickMesh.position.copy(localPos);
+						parentGroup.add(clickMesh);
+					}
+				} else {
+					this.ctx.objects.addRaw(clickMesh);
+				}
 				this.hitboxClickMeshes.set(hb.localId, clickMesh);
 			}
 		}
@@ -513,6 +566,27 @@ export class ComponentPreviewModule implements Module {
 			rotationY: 0,
 			rotationZ: 0,
 		};
+	}
+
+	private _findNearestMesh(hb: HitboxState, state: ComponentState): string | null {
+		if (state.meshes.length === 0) return null;
+		if (state.meshes.length === 1) return state.meshes[0].localId;
+
+		const hbPos = new THREE.Vector3(hb.offsetX, hb.offsetY, hb.offsetZ);
+		let nearestId: string | null = null;
+		let nearestDist = Infinity;
+		const THRESHOLD = 10;
+
+		for (const mesh of state.meshes) {
+			const meshPos = new THREE.Vector3(mesh.offsetX, mesh.offsetY, mesh.offsetZ);
+			const dist = hbPos.distanceTo(meshPos);
+			if (dist < nearestDist) {
+				nearestDist = dist;
+				nearestId = mesh.localId;
+			}
+		}
+
+		return nearestDist <= THRESHOLD ? nearestId : null;
 	}
 
 	private _handleCanvasClick(e: MouseEvent): void {
@@ -908,7 +982,7 @@ export class ComponentPreviewModule implements Module {
 		for (const group of this.meshGroups.values()) {
 			this.ctx.objects.removeRaw(group);
 			group.traverse((c: THREE.Object3D) => {
-				if (c instanceof THREE.Mesh) {
+				if (c instanceof THREE.Mesh || c instanceof THREE.LineSegments) {
 					c.geometry.dispose();
 					if (Array.isArray(c.material)) {
 						c.material.forEach((m: THREE.Material) => m.dispose());
@@ -921,6 +995,10 @@ export class ComponentPreviewModule implements Module {
 		this.meshGroups.clear();
 
 		for (const helper of this.hitboxHelpers) {
+			if (helper.parent) {
+				helper.removeFromParent();
+				continue;
+			}
 			this.ctx.objects.removeRaw(helper);
 			helper.traverse((c: THREE.Object3D) => {
 				if (c instanceof THREE.LineSegments) {
@@ -935,8 +1013,13 @@ export class ComponentPreviewModule implements Module {
 		}
 		this.hitboxHelpers = [];
 		this.hitboxMaterials.clear();
+		this.hitboxParentMap.clear();
 
 		for (const clickMesh of this.hitboxClickMeshes.values()) {
+			if (clickMesh.parent) {
+				clickMesh.removeFromParent();
+				continue;
+			}
 			this.ctx.objects.removeRaw(clickMesh);
 			clickMesh.geometry.dispose();
 			const mat = clickMesh.material;

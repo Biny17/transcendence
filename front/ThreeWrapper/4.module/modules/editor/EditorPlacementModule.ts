@@ -210,7 +210,7 @@ export class EditorPlacementModule implements Module {
             const newTo = anim.waypoints[anim.targetIdx]
             if (newTo) mesh.position.lerpVectors(newFrom, newTo, Math.min(anim.progress, 1))
             if (anim.rotations && anim.rotations.length >= 2) {
-              const rotFrom = anim.rotations[srcIdx]
+              const rotFrom = anim.rotations[Math.max(0, Math.min(anim.waypoints.length - 1, anim.targetIdx - anim.direction))]
               const rotTo = anim.rotations[anim.targetIdx]
               if (rotFrom && rotTo) {
                 mesh.rotation.x = rotFrom.x + (rotTo.x - rotFrom.x) * Math.min(anim.progress, 1)
@@ -248,7 +248,7 @@ export class EditorPlacementModule implements Module {
       const newTo = anim.waypoints[anim.targetIdx]
       if (newTo) mesh.position.lerpVectors(newFrom, newTo, Math.min(anim.progress, 1))
       if (anim.rotations && anim.rotations.length >= 2) {
-        const rotFrom = anim.rotations[srcIdx]
+        const rotFrom = anim.rotations[Math.max(0, Math.min(anim.waypoints.length - 1, anim.targetIdx - anim.direction))]
         const rotTo = anim.rotations[anim.targetIdx]
         if (rotFrom && rotTo) {
           mesh.rotation.x = rotFrom.x + (rotTo.x - rotFrom.x) * Math.min(anim.progress, 1)
