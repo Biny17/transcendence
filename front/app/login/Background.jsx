@@ -264,10 +264,10 @@ useEffect(function() {
               placeholder={error ? error : "Your Password here"}
             />
           </fieldset>
-          <div className="flex items-center gap-2 mt-2">
+          {/* <div className="flex items-center gap-2 mt-2">
             <input type="checkbox" className="checkbox-input" id="check-2" />
             <label className="text-slate-200" htmlFor="check-2">Remember Me</label>
-          </div>
+          </div> */}
         </div>
         <div className="mt-6 flex flex-col gap-5 justify-end pr-1">
           <Button statement={isSignUpMode ? "Sign Up" : "Sign In"} onClick={handleSubmit} />
@@ -275,7 +275,7 @@ useEffect(function() {
             statement={
               <span className="flex items-center gap-2">
                 <img src="https://docs.material-tailwind.com/icons/google.svg" alt="google" className="w-5 h-5" />
-                Continue with Google
+                Continue with 42
               </span>
             }
             onClick={() => {/* handle Google sign-in */}}
