@@ -14,8 +14,9 @@ services:
                         - NODE_ENV=development
                         - FRONT_HOST=${FRONT_HOST}
                 depends_on:
-                        - api
-                entrypoint: sh -c "bun install && bun dev"
+                        game-server:
+                                condition: service_healthy
+                entrypoint: sh -c "bun install --silent && bun dev"
                 restart: unless-stopped
 
         game-server:
@@ -31,8 +32,15 @@ services:
                         - NODE_ENV=development
                         - LOBBY_CONFIG=${LOBBY_CONFIG:-one_game}
                 depends_on:
-                        - api
-                entrypoint: sh -c "bun install && bun --watch src/index.ts"
+                        api:
+                                condition: service_healthy
+                entrypoint: sh -c "bun install --silent && bun --watch src/index.ts"
+                healthcheck:
+                        test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/3000"]
+                        interval: 5s
+                        timeout: 5s
+                        retries: 5
+                        start_period: 10s
                 restart: unless-stopped
 
         api:
@@ -66,6 +74,12 @@ services:
                 depends_on:
                         db:
                                 condition: service_healthy
+                healthcheck:
+                        test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/docs"]
+                        interval: 5s
+                        timeout: 5s
+                        retries: 5
+                        start_period: 15s
                 restart: unless-stopped
 
         db:
