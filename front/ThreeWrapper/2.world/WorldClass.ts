@@ -190,6 +190,9 @@ export abstract class World {
 		const onStartPhase = this.ctx.logger.pushPhase("onStart");
 		this.onStart(initialState);
 		onStartPhase.close();
+		for (const module of this.modules.values()) {
+			module.start?.();
+		}
 		startPhase.close();
 	}
 	update(delta: number): void {

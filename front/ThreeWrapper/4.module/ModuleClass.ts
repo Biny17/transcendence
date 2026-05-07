@@ -66,6 +66,7 @@ export interface Module {
 	readonly type: string;
 	readonly requires?: readonly ModuleKey[];
 	init(ctx: WorldContext): void | Promise<void>;
+	start?(): void;
 	update?(delta: number): void;
 	dispose(): void;
 }
