@@ -25,14 +25,14 @@ export default function FriendList(props) {
   const [Requested, setRequested] = useState(false)
   const [playerImgs, setPlayerImgs] = useState({});
 
-  function handleAdd(idx) {
+  // function handleAdd(idx) {
 
-    setAdded((prev) => {
-      const updated = [...prev];
-      updated[idx] = !updated[idx];
-      return updated;
-    });
-  }
+  //   setAdded((prev) => {
+  //     const updated = [...prev];
+  //     updated[idx] = !updated[idx];
+  //     return updated;
+  //   });
+  // }
 
     async function fetchUsers() {
   try {

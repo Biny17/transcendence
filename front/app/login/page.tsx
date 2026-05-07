@@ -10,7 +10,7 @@ export default function Home() {
     <>
     <OrientationGuard>
       <Background signInOpen={signInOpen} setSignInOpen={setSignInOpen}/>
-      <Navbar signInOpen={signInOpen} setSignInOpen={setSignInOpen} />
+      {/* <Navbar signInOpen={signInOpen} setSignInOpen={setSignInOpen} /> */}
     </OrientationGuard>
     </>
   );
