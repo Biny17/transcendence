@@ -23,6 +23,7 @@ export default function FriendList(props) {
   const [SentRequests,setSentRequests] = useState([])
   const [deleted, setDeleted] = useState(false)
   const [Requested, setRequested] = useState(false)
+  const [playerImgs, setPlayerImgs] = useState({});
 
   function handleAdd(idx) {
 
@@ -95,23 +96,21 @@ export default function FriendList(props) {
   }
 }
 
-  async function fetchImg() {
+  async function fetchImg(id) {
+  const url = `${API_BASE}/api/users/${id}/picture`;
+  const options = {method: 'GET', credentials: 'include'};
   try {
-    const response = await fetch(`${API_BASE}/api/users/me/profile-picture`, {
-      method: 'GET',
-      credentials: 'include',
-      headers: {Accept: 'application/json, application/problem+json'}
-    });
+    const response = await fetch(url, options);
     if (!response.ok) {
-      setImg("");
       return;
     }
     const blob = await response.blob();
     const imgUrl = URL.createObjectURL(blob);
-    setImg(imgUrl);
+    return (imgUrl);
+
   } catch (error) {
     console.error(error);
-    setImg("");
+    setImg(null);
   }
 }
 
@@ -130,6 +129,21 @@ function getCookie(name) {
     .find(row => row.startsWith(name + '='))
     ?.split('=')[1];
 }
+
+useEffect(() => {
+  async function loadImages() {
+    const imgs = {};
+    for (const player of players) {
+      const url = await fetchImg(player.id);
+      console.log(url)
+      imgs[player.id] = url;
+    }
+    setPlayerImgs(imgs);
+  }
+  if (players.length > 0) {
+    loadImages();
+  }
+}, [players]);
 
 useEffect(() => {
   const token = getCookie('auth_token');
@@ -197,7 +211,7 @@ useEffect(() => {
               <span className="font-bold w-6 text-center">{idx + 1}</span>
               <img
                 alt={player.username}
-                src={Img}
+                src={playerImgs[player.id]}
                 className="relative inline-block h-12 w-12 rounded-full! object-cover object-center"
               />
             </div>
