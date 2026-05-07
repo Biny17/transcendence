@@ -51,15 +51,12 @@ func (_c *ResultCreate) SetUserID(v int) *ResultCreate {
 	return _c
 }
 
-<<<<<<< HEAD
 // SetUsername sets the "username" field.
 func (_c *ResultCreate) SetUsername(v string) *ResultCreate {
 	_c.mutation.SetUsername(v)
 	return _c
 }
 
-=======
->>>>>>> origin/backend
 // SetGame sets the "game" edge to the Game entity.
 func (_c *ResultCreate) SetGame(v *Game) *ResultCreate {
 	return _c.SetGameID(v.ID)
@@ -119,12 +116,9 @@ func (_c *ResultCreate) check() error {
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Result.user_id"`)}
 	}
-<<<<<<< HEAD
 	if _, ok := _c.mutation.Username(); !ok {
 		return &ValidationError{Name: "username", err: errors.New(`ent: missing required field "Result.username"`)}
 	}
-=======
->>>>>>> origin/backend
 	if len(_c.mutation.GameIDs()) == 0 {
 		return &ValidationError{Name: "game", err: errors.New(`ent: missing required edge "Result.game"`)}
 	}
@@ -169,13 +163,10 @@ func (_c *ResultCreate) createSpec() (*Result, *sqlgraph.CreateSpec) {
 		_spec.SetField(result.FieldDeath, field.TypeInt, value)
 		_node.Death = value
 	}
-<<<<<<< HEAD
 	if value, ok := _c.mutation.Username(); ok {
 		_spec.SetField(result.FieldUsername, field.TypeString, value)
 		_node.Username = value
 	}
-=======
->>>>>>> origin/backend
 	if nodes := _c.mutation.GameIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,

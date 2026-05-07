@@ -120,7 +120,6 @@ func (_u *ResultUpdate) SetNillableUserID(v *int) *ResultUpdate {
 	return _u
 }
 
-<<<<<<< HEAD
 // SetUsername sets the "username" field.
 func (_u *ResultUpdate) SetUsername(v string) *ResultUpdate {
 	_u.mutation.SetUsername(v)
@@ -135,8 +134,6 @@ func (_u *ResultUpdate) SetNillableUsername(v *string) *ResultUpdate {
 	return _u
 }
 
-=======
->>>>>>> origin/backend
 // SetGame sets the "game" edge to the Game entity.
 func (_u *ResultUpdate) SetGame(v *Game) *ResultUpdate {
 	return _u.SetGameID(v.ID)
@@ -232,12 +229,9 @@ func (_u *ResultUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddedDeath(); ok {
 		_spec.AddField(result.FieldDeath, field.TypeInt, value)
 	}
-<<<<<<< HEAD
 	if value, ok := _u.mutation.Username(); ok {
 		_spec.SetField(result.FieldUsername, field.TypeString, value)
 	}
-=======
->>>>>>> origin/backend
 	if _u.mutation.GameCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -407,7 +401,6 @@ func (_u *ResultUpdateOne) SetNillableUserID(v *int) *ResultUpdateOne {
 	return _u
 }
 
-<<<<<<< HEAD
 // SetUsername sets the "username" field.
 func (_u *ResultUpdateOne) SetUsername(v string) *ResultUpdateOne {
 	_u.mutation.SetUsername(v)
@@ -422,8 +415,6 @@ func (_u *ResultUpdateOne) SetNillableUsername(v *string) *ResultUpdateOne {
 	return _u
 }
 
-=======
->>>>>>> origin/backend
 // SetGame sets the "game" edge to the Game entity.
 func (_u *ResultUpdateOne) SetGame(v *Game) *ResultUpdateOne {
 	return _u.SetGameID(v.ID)
@@ -549,12 +540,9 @@ func (_u *ResultUpdateOne) sqlSave(ctx context.Context) (_node *Result, err erro
 	if value, ok := _u.mutation.AddedDeath(); ok {
 		_spec.AddField(result.FieldDeath, field.TypeInt, value)
 	}
-<<<<<<< HEAD
 	if value, ok := _u.mutation.Username(); ok {
 		_spec.SetField(result.FieldUsername, field.TypeString, value)
 	}
-=======
->>>>>>> origin/backend
 	if _u.mutation.GameCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
