@@ -3,6 +3,7 @@ import type { Module, WorldContext } from "@/ThreeWrapper/4.module";
 import { ModuleKey } from "@/ThreeWrapper/4.module";
 import type { UIModule } from "@/ThreeWrapper/4.module/modules/ui/UIModule";
 import type { EditorPlacementModule } from "./EditorPlacementModule";
+import type { EditorTestModeModule } from "./EditorTestModeModule";
 import type { EditorUIState } from "./components/EditorUI";
 import { EditorUI } from "./components/EditorUI";
 const COMPONENT_PATHS: string[] = []
@@ -80,7 +81,11 @@ export class EditorHotbarModule implements Module {
 				onStopAnimation: () => placement?.stopAnimation(),
 				onPlayAll: () => placement?.playAllAnimations(),
 				onStopAll: () => placement?.stopAllAnimations(),
-				onEnvChange: (env) => placement?.setEnv(env)
+				onEnvChange: (env) => placement?.setEnv(env),
+				onTestMode: () => {
+					const testMode = ctx.getModule<EditorTestModeModule>(ModuleKey.editorTestMode)
+					testMode?.enterTestMode()
+				}
 			})
 		);
 	}

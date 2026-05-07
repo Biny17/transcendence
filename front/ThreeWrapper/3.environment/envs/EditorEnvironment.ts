@@ -3,6 +3,7 @@ import { ResizeModule, ModuleKey } from '@/ThreeWrapper/4.module'
 import { EditorOrbitCameraModule } from '@/ThreeWrapper/4.module/modules/editor/EditorOrbitCameraModule'
 import { EditorPlacementModule } from '@/ThreeWrapper/4.module/modules/editor/EditorPlacementModule'
 import { EditorHotbarModule } from '@/ThreeWrapper/4.module/modules/editor/EditorHotbarModule'
+import { EditorTestModeModule } from '@/ThreeWrapper/4.module/modules/editor/EditorTestModeModule'
 export class EditorEnvironment extends Environment {
   constructor() {
     super({})
@@ -10,5 +11,6 @@ export class EditorEnvironment extends Environment {
     this.addModule(new EditorOrbitCameraModule())
     this.addModule(new EditorPlacementModule())
     this.addModule(new EditorHotbarModule(ModuleKey.ui, ModuleKey.editorPlacement))
+    this.addModule(new EditorTestModeModule())
   }
 }

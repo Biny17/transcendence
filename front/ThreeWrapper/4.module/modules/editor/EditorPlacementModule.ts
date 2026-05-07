@@ -3,7 +3,7 @@ import { dump as yamlDump, load as yamlLoad } from 'js-yaml'
 import type { Module, WorldContext } from '@/ThreeWrapper/4.module'
 import { ModuleKey } from '@/ThreeWrapper/4.module'
 import { ComponentLoader, OBJECT_TYPE } from '@/ThreeWrapper/2.world/tools'
-import type { ComponentDef, MapObjectInstance } from '@/ThreeWrapper/2.world/tools'
+import type { ComponentDef, MapObjectInstance, MapDef } from '@/ThreeWrapper/2.world/tools'
 type PlacedObject = {
   id: string
   component: string
@@ -799,6 +799,29 @@ export class EditorPlacementModule implements Module {
       })
       this.ghostGroup = null
     }
+  }
+  get componentLoader(): ComponentLoader { return this.loader }
+  get placedCopy(): PlacedObject[] { return JSON.parse(JSON.stringify(this.placed)) }
+  get historyCopy(): HistoryEntry[] { return JSON.parse(JSON.stringify(this.history)) }
+  get historyIndexValue(): number { return this.historyIndex }
+  setHistoryState(history: HistoryEntry[], index: number): void { this.history = history; this.historyIndex = index }
+  buildMapDef(): MapDef {
+    const round = (n: number, d = 6) => Math.round(n * 10 ** d) / 10 ** d
+    const def: MapDef = {
+      id: 'editor_export',
+      objects: this.placed.map(o => ({
+        id: o.id,
+        component: o.component,
+        type: 'map',
+        position: { x: round(o.position.x), y: round(o.position.y), z: round(o.position.z) },
+        rotation: { x: round(o.rotation.x), y: round(o.rotation.y), z: round(o.rotation.z) },
+        scale:    { x: round(o.scale.x),    y: round(o.scale.y),    z: round(o.scale.z) },
+      }))
+    }
+    if (this._env.sky) def.sky = this._env.sky
+    if (this._env.fog) def.fog = this._env.fog
+    if (this._env.lights.length > 0) def.lights = this._env.lights
+    return def
   }
   exportYaml(): string {
     const round = (n: number, d = 6) => Math.round(n * 10 ** d) / 10 ** d

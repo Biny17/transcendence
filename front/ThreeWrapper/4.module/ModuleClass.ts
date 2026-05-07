@@ -40,7 +40,8 @@ export enum ModuleKey {
 	characterOrbitCamera = "character_orbit_camera",
 	characterCustomizerPreview = "character_customizer_preview",
 	characterCustomizerUI = "character_customizer_ui",
-	debugControl = "debug_control"
+	debugControl = "debug_control",
+	editorTestMode = "editor_test_mode"
 }
 export type WorldContext = {
 	renderer: THREE.WebGLRenderer;
@@ -57,6 +58,8 @@ export type WorldContext = {
 	map: MapLoader;
 	selfWorldPlayer: ManagedObject<typeof OBJECT_TYPE.PLAYER> | null;
 	getModule: <T extends Module>(type: ModuleKey) => T | undefined;
+	addModule?: (module: Module) => void;
+	removeModule?: (type: string) => void;
 	uiModule?: UIModule;
 };
 export interface Module {

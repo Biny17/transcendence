@@ -29,6 +29,8 @@ export class EditorWorld extends World {
     })
     this.ctx.objects.addRaw(fill)
     this.ctx.objects.addRaw(fill.target)
-    this.ctx.objects.addRaw(new THREE.GridHelper(200, 200, 0x444466, 0x222244))
+    const bgGrid = new THREE.GridHelper(200, 200, 0x444466, 0x222244)
+    bgGrid.name = '__editor_bg_grid__'
+    this.ctx.objects.addRaw(bgGrid)
   }
 }

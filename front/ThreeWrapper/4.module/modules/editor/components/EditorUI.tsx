@@ -34,6 +34,7 @@ type Props = {
   onSaveMap: (name: string) => Promise<void>
   onLoadMapList: () => Promise<string[]>
   onLoadSavedMap: (path: string) => Promise<void>
+  onTestMode: () => void
 }
 const C = {
   bg: 'rgba(10, 10, 28, 0.88)',
@@ -87,7 +88,7 @@ export function EditorUI({
   onRotationChange, onGridSizeChange, onToggleGrid,
   onPlayAnimation, onStopAnimation,
   onPlayAll, onStopAll, onEnvChange,
-  onSaveMap, onLoadMapList, onLoadSavedMap,
+  onSaveMap, onLoadMapList, onLoadSavedMap, onTestMode,
 }: Props) {
   const [selected, setSelected] = useState<string | null>(null)
   const [envOpen, setEnvOpen] = useState(false)
@@ -246,6 +247,11 @@ export function EditorUI({
           <Btn onClick={handleLoadSavedMap} disabled={!selectedMapPath}>Load</Btn>
         </div>
         {loadError && <div style={{ marginTop: '4px', fontSize: '10px', color: '#ff8844' }}>⚠ {loadError}</div>}
+      </div>
+      <div style={{ ...sectionBorder, padding: '6px 12px' }}>
+        <Btn onClick={onTestMode} style={{ width: '100%', padding: '8px 4px', fontSize: '12px' }}>
+          ▶ Test Map
+        </Btn>
       </div>
       <div style={{ borderBottom: `1px solid ${C.border}` }}>
         <div
@@ -438,7 +444,7 @@ export function EditorUI({
         {selected && <span style={{ color: C.textBright, display: 'block' }}>▸ {componentName(selected)}</span>}
       </div>
       {}
-      <div style={{ flex: '0 0 auto', flex: 1, minHeight: '120px', overflowY: 'auto', borderBottom: `1px solid ${C.border}`, padding: '6px 0' }}>
+      <div style={{ flex: 1, minHeight: '120px', overflowY: 'auto', borderBottom: `1px solid ${C.border}`, padding: '6px 0' }}>
         <div style={{ padding: '2px 12px 4px', fontSize: '10px', color: C.textDim, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Components</div>
         <div style={{ padding: '0 12px 6px' }}>
           <input

@@ -16,6 +16,7 @@ export class EditorOrbitCameraModule implements Module {
   update(_delta: number): void {
     this.controls?.update()
   }
+  getControls(): OrbitControls | null { return this.controls }
   setEnabled(enabled: boolean): void {
     if (this.controls) this.controls.enabled = enabled
   }

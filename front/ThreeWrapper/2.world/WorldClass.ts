@@ -79,7 +79,13 @@ export abstract class World {
 			objects: this._objects,
 			map: this._map,
 			selfWorldPlayer,
-			getModule: <T extends Module>(type: string) => this.modules.get(type) as T | undefined
+			getModule: <T extends Module>(type: string) => this.modules.get(type) as T | undefined,
+			addModule: (module: Module) => { this.modules.set(module.type, module) },
+			removeModule: (type: string) => {
+				const module = this.modules.get(type);
+				module?.dispose();
+				this.modules.delete(type);
+			}
 		};
 	}
 	get scene(): THREE.Scene {

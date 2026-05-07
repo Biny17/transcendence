@@ -47,6 +47,7 @@ export { DebugControlModule } from "./modules/debug/DebugControlModule";
 export { EditorOrbitCameraModule } from "./modules/editor/EditorOrbitCameraModule";
 export { EditorPlacementModule } from "./modules/editor/EditorPlacementModule";
 export { EditorHotbarModule } from "./modules/editor/EditorHotbarModule";
+export { EditorTestModeModule } from "./modules/editor/EditorTestModeModule";
 export { ComponentOrbitCameraModule } from "./modules/editor/ComponentOrbitCameraModule";
 export { ComponentPreviewModule } from "./modules/editor/ComponentPreviewModule";
 export { ComponentCreatorUIModule } from "./modules/editor/ComponentCreatorUIModule";
