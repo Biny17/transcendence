@@ -120,17 +120,22 @@ export class InputModule implements Module {
 	}
 	setKeyBinding(code: string, binding: KeyBinding): void {
 		this.keymap.set(code, binding);
+		if (this.ctx) {
+			this.ctx.keymap.register({ action: binding.action, key: code });
+		}
 	}
 	onKeymapRebind(action: string, newKey: string, oldKey?: string): void {
+		let binding: KeyBinding = { action };
 		if (oldKey) {
 			const existing = this.keymap.get(oldKey);
 			if (existing && existing.action === action) {
+				binding = { ...existing, action };
 				this.keymap.delete(oldKey);
 			}
 		}
 		const existing = this.keymap.get(newKey);
 		if (!existing || existing.action !== action) {
-			this.keymap.set(newKey, { action });
+			this.keymap.set(newKey, binding);
 		}
 	}
 	isActionPressed(action: string): boolean {

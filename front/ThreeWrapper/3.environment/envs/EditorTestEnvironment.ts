@@ -1,4 +1,4 @@
-import { ResizeModule, PlayerControlModule, InputModule, ModuleKey, PlayerAnimationModule, RagdollModule, TriggerZoneModule, RespawnModule, CheckpointModule, PlayerBodyModule, FPVModule, AntiFallModule, TPVModule } from "@/ThreeWrapper/4.module";
+import { ResizeModule, PlayerControlModule, InputModule, ModuleKey, PlayerAnimationModule, RagdollModule, TriggerZoneModule, RespawnModule, CheckpointModule, PlayerBodyModule, FPVModule, AntiFallModule, TPVModule, UIModule, EscapeUIModule } from "@/ThreeWrapper/4.module";
 import { Environment } from "../EnvironmentClass";
 export class EditorTestEnvironment extends Environment {
 	constructor() {
@@ -13,6 +13,7 @@ export class EditorTestEnvironment extends Environment {
 		this.addModule(new PlayerAnimationModule());
 		this.addModule(new RagdollModule());
 		this.addModule(new TriggerZoneModule());
+		this.addModule(new EscapeUIModule(ModuleKey.ui, ModuleKey.input));
 		this.addModule(new TPVModule({}, ModuleKey.input));
 	}
 }

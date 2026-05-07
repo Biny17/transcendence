@@ -17,8 +17,9 @@ export class LobbyReadyModule implements Module {
 			console.warn("[LobbyReadyModule] InputModule not found");
 			return;
 		}
-		this.input.setKeyBinding("KeyE", {
-			action: "player_ready",
+		const interactKey = ctx.keymap.getKey("interact")!;
+		this.input.setKeyBinding(interactKey, {
+			action: "interact",
 			onDown: () => {
 				if (!this.isReady) {
 					this.readyPressed = true;

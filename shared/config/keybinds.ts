@@ -7,6 +7,7 @@ export enum KeyAction {
   SPRINT = 'sprint',
   CROUCH = 'crouch',
   PAUSE = 'pause',
+  INTERACT = 'interact',
 }
 export const KeyActionLabels: Record<KeyAction, string> = {
   [KeyAction.MOVE_FORWARD]: 'Move Forward',
@@ -17,6 +18,7 @@ export const KeyActionLabels: Record<KeyAction, string> = {
   [KeyAction.SPRINT]: 'Sprint',
   [KeyAction.CROUCH]: 'Crouch',
   [KeyAction.PAUSE]: 'Pause Menu',
+  [KeyAction.INTERACT]: 'Interact',
 }
 export const DEFAULT_KEYBINDINGS: Record<KeyAction, string> = {
   [KeyAction.MOVE_FORWARD]: 'KeyW',
@@ -27,4 +29,5 @@ export const DEFAULT_KEYBINDINGS: Record<KeyAction, string> = {
   [KeyAction.SPRINT]: 'ShiftLeft',
   [KeyAction.CROUCH]: 'ControlLeft',
   [KeyAction.PAUSE]: 'Escape',
+  [KeyAction.INTERACT]: 'KeyE',
 }

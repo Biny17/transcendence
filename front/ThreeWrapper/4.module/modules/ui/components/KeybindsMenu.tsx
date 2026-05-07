@@ -5,6 +5,7 @@ import { Button } from '../../../../../app/animations/Button.jsx'
 import Key from '../../../../../components/keyboard/key.jsx'
 import Space from '../../../../../components/keyboard/space.jsx'
 import type { KeyBinding } from 'shared/config'
+import { KeyActionLabels } from 'shared/config'
 
 type KeybindsMenuProps = {
   getBindings: () => KeyBinding[]
@@ -12,15 +13,12 @@ type KeybindsMenuProps = {
   onClose: () => void
 }
 
-const ACTION_LABELS: Record<string, string> = {
-  forward: 'Forward',
-  backward: 'Backward',
-  left: 'Left',
-  right: 'Right',
-  space: 'Space',
-  shift: 'Shift',
-  pause: 'Pause',
-  detach: 'Detach',
+function actionLabel(action: string): string {
+  const label = KeyActionLabels[action as keyof typeof KeyActionLabels]
+  if (label) return label
+  return action
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, c => c.toUpperCase())
 }
 
 function codeToLabel(code: string | undefined): string {
@@ -88,10 +86,10 @@ export function KeybindsMenu({ getBindings, onRebind, onClose }: KeybindsMenuPro
             </div>
             {bindings.map((b) => {
               const isListening = listening === b.action
-              const label = ACTION_LABELS[b.action] || b.action
+              const label = actionLabel(b.action)
               const keyName = isListening ? '…' : codeToLabel(b.key)
 
-              if (b.action === 'space' || b.action === 'shift') {
+              if (b.key === 'Space' || b.key?.startsWith('Shift')) {
                 return (
                   <fieldset key={b.action} className="flex items-center gap-4">
                     <label className="w-24 text-right text-[15px] text-slate-200">{label}</label>

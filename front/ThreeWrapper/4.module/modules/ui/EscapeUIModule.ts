@@ -27,6 +27,9 @@ export class EscapeUIModule implements Module {
 			if (stored) {
 				const bindings = JSON.parse(stored);
 				for (const binding of bindings) {
+					if (binding.action === "player_ready") {
+						binding.action = "interact";
+					}
 					ctx.keymap.rebind(binding.action, binding.key);
 				}
 			}
@@ -35,6 +38,7 @@ export class EscapeUIModule implements Module {
 		}
 		const pauseKey = ctx.keymap.getKey("pause") ?? "Escape";
 		this.input?.setKeyBinding(pauseKey, { action: "pause", onDown: () => this.togglePause() });
+		ctx.keymap.register({ action: "detach", key: "F2" });
 		this.input?.setKeyBinding("F2", { action: "detach", onDown: () => {
 			this._detachRequested = true;
 			document.exitPointerLock?.();
