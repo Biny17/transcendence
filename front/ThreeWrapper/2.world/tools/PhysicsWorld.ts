@@ -319,6 +319,13 @@ export class PhysicsWorld {
       }
     }
   }
+  setBodyEnabled(id: string, enabled: boolean): void {
+    for (const [pieceId, entry] of this.entries) {
+      if (pieceId.startsWith(id + '_') || pieceId === id) {
+        entry.body.setEnabled(enabled)
+      }
+    }
+  }
   dispose(): void {
     if (this._disposed) return
     this._disposed = true

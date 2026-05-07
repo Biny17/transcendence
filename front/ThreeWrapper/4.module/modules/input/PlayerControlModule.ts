@@ -34,6 +34,13 @@ export class PlayerControlModule implements Module {
 		if (!this.input || !this.ctx) return;
 		const player: ManagedObject<OBJECT_TYPE.PLAYER> | null = this.ctx.selfWorldPlayer;
 		if (!player || player.pieces.length === 0) return;
+
+		const noclip = (player.extraData as Record<string, unknown>).noclip === true;
+		if (noclip) {
+			this.handleNoclipMovement(delta, player);
+			return;
+		}
+
 		const fwd = this.input.isActionPressed(KeyAction.MOVE_FORWARD);
 		const back = this.input.isActionPressed(KeyAction.MOVE_BACKWARD);
 		const left = this.input.isActionPressed(KeyAction.MOVE_LEFT);
@@ -82,6 +89,48 @@ export class PlayerControlModule implements Module {
 			});
 		}
 	}
+
+	private handleNoclipMovement(delta: number, player: ManagedObject<OBJECT_TYPE.PLAYER>): void {
+		if (!this.input || !this.ctx) return;
+		const fwd = this.input.isActionPressed(KeyAction.MOVE_FORWARD);
+		const back = this.input.isActionPressed(KeyAction.MOVE_BACKWARD);
+		const left = this.input.isActionPressed(KeyAction.MOVE_LEFT);
+		const right = this.input.isActionPressed(KeyAction.MOVE_RIGHT);
+		const up = this.input.isActionPressed(KeyAction.JUMP);
+		const down = this.input.isActionPressed(KeyAction.CROUCH);
+		const noclipSpeed = 15;
+		const forward = new THREE.Vector3();
+		this.ctx.camera.getWorldDirection(forward);
+		forward.normalize();
+		const rightVec = new THREE.Vector3();
+		rightVec.crossVectors(forward, THREE.Object3D.DEFAULT_UP).normalize();
+		const moveDir = new THREE.Vector3();
+		if (fwd) moveDir.addScaledVector(forward, 1);
+		if (back) moveDir.addScaledVector(forward, -1);
+		if (right) moveDir.addScaledVector(rightVec, 1);
+		if (left) moveDir.addScaledVector(rightVec, -1);
+		if (up) moveDir.y += 1;
+		if (down) moveDir.y -= 1;
+		if (moveDir.lengthSq() > 0) moveDir.normalize();
+		this.ctx.objects.setPosition(player.id, {
+			x: player.position.x + moveDir.x * noclipSpeed * delta,
+			y: player.position.y + moveDir.y * noclipSpeed * delta,
+			z: player.position.z + moveDir.z * noclipSpeed * delta,
+		});
+		if (moveDir.lengthSq() > 0) {
+			const horizontalDir = new THREE.Vector3(moveDir.x, 0, moveDir.z);
+			if (horizontalDir.lengthSq() > 0.001) {
+				const targetAngle = Math.atan2(horizontalDir.x, horizontalDir.z);
+				let diff = targetAngle - this.currentYaw;
+				while (diff < -Math.PI) diff += Math.PI * 2;
+				while (diff > Math.PI) diff -= Math.PI * 2;
+				this.currentYaw += diff * Math.min(1, this.rotationSmoothing * delta);
+				const quat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), this.currentYaw);
+				this.ctx.objects.setRotation(player.id, { x: quat.x, y: quat.y, z: quat.z, w: quat.w });
+			}
+		}
+	}
+
 	dispose(): void {
 		this.input = null;
 	}

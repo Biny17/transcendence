@@ -912,9 +912,7 @@ export class DebugControlModule implements Module {
 	}
 	setGodMode(enabled: boolean): void {
 		if (!this.ctx) return;
-		const selfId = this.ctx.selfServerClient.id;
-		if (!selfId) return;
-		const player = this.ctx.objects.getById(selfId);
+		const player = this.ctx.selfWorldPlayer;
 		if (!player) return;
 		if (enabled) {
 			this.ctx.objects.setVelocity(player.id, { x: 0, y: 0, z: 0 });
@@ -927,17 +925,25 @@ export class DebugControlModule implements Module {
 	}
 	setNoclip(enabled: boolean): void {
 		if (!this.ctx) return;
-		const selfId = this.ctx.selfServerClient.id;
-		if (!selfId) return;
-		const player = this.ctx.objects.getById(selfId);
+		const player = this.ctx.selfWorldPlayer;
 		if (!player) return;
 		this.ctx.objects.setExtra(player.id, "noclip", enabled);
+		if (enabled) {
+			this.ctx.objects.setGravityScale(player.id, 0);
+			this.ctx.objects.setPhysicsEnabled(player.id, false);
+		} else {
+			this.ctx.objects.setPosition(player.id, {
+				x: player.position.x,
+				y: player.position.y,
+				z: player.position.z
+			});
+			this.ctx.objects.setPhysicsEnabled(player.id, true);
+			this.ctx.objects.setGravityScale(player.id, 1);
+		}
 	}
 	setInfiniteResources(enabled: boolean): void {
 		if (!this.ctx) return;
-		const selfId = this.ctx.selfServerClient.id;
-		if (!selfId) return;
-		const player = this.ctx.objects.getById(selfId);
+		const player = this.ctx.selfWorldPlayer;
 		if (!player) return;
 		this.ctx.objects.setExtra(player.id, "infiniteResources", enabled);
 	}

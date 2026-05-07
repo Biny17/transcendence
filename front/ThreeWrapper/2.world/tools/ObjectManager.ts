@@ -378,6 +378,9 @@ const solidHitboxes = piece.hitboxes.filter(h => !h.isSensor).map(h => this.reso
 	setGravityScale(id: string, scale: number): void {
 		this.physicsWorld?.setGravityScale(id, scale);
 	}
+	setPhysicsEnabled(id: string, enabled: boolean): void {
+		this.physicsWorld?.setBodyEnabled(id, enabled);
+	}
 	isGrounded(id: string, threshold = 0.15): boolean {
 		return this.physicsWorld?.isGrounded(id, threshold) ?? false;
 	}
