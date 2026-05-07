@@ -35,7 +35,8 @@ type Config struct {
 	Origins     string `mapstructure:"ORIGINS"`
 	KeyPath     string `mapstructure:"KEYPATH"`
 	CookieDomain string `mapstructure:"COOKIE_DOMAIN"`
-	Credentials string `mapstructure:"CREDENTIAL"`
+	Credentials  string `mapstructure:"CREDENTIAL"`
+	FrontendURL  string `mapstructure:"FRONTEND_URL"`
 }
 
 func ProvideConfig(i do.Injector) (Config, error) {

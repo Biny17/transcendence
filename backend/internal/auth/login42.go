@@ -199,14 +199,19 @@ func (auth *AuthService) FortyTwoCallback(ctx context.Context, input *FortyTwoCa
 		return nil, huma.Error500InternalServerError("Failed to generate token")
 	}
 
+	domain, secure := auth.getCookieSettings()
 	return &FortyTwoCallbackOut{
 		Status:   307,
-		Location: "http://localhost:3001",
+		Location: auth.FrontendURL,
 		SetCookie: http.Cookie{
-			Name:    "auth_token",
-			Value:   jwt,
-			Expires: time.Now().Add(pkg.TokenLifetime),
-			Path:    "/",
+			Name:     "auth_token",
+			Value:    jwt,
+			Expires:  time.Now().Add(pkg.TokenLifetime),
+			Path:     "/",
+			Domain:   domain,
+			Secure:   secure,
+			HttpOnly: false,
+			SameSite: http.SameSiteLaxMode,
 		},
 	}, nil
 }

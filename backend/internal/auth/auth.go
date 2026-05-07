@@ -18,6 +18,7 @@ type AuthService struct {
 	PrivKey      jwk.Key
 	PubKey       jwk.Key
 	CookieDomain string
+	FrontendURL  string
 }
 
 func (auth *AuthService) getCookieSettings() (domain string, secure bool) {
@@ -43,7 +44,9 @@ func ProvideAuthService(i do.Injector) (*AuthService, error) {
 	auth.PubKey = do.MustInvokeNamed[jwk.Key](i, pkg.DoPublicKey)
 	auth.PrivKey = do.MustInvokeNamed[jwk.Key](i, pkg.DoPrivateKey)
 	auth.Client = do.MustInvoke[*ent.Client](i)
-	auth.CookieDomain = do.MustInvoke[config.Config](i).CookieDomain
+	cfg := do.MustInvoke[config.Config](i)
+	auth.CookieDomain = cfg.CookieDomain
+	auth.FrontendURL = cfg.FrontendURL
 	return &auth, nil
 }
 
