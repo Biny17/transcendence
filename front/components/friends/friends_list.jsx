@@ -82,6 +82,7 @@ export default function FriendList(props) {
   try {
     const data = await api.get('/api/friends/sent');
     setSentRequests(data)
+    console.log(data)
   } catch (error) {
     // console.error(error);
   }
@@ -201,10 +202,10 @@ useEffect(() => {
               && !Requests.some((request) => request.id === player.id)
           )
           .map((player, idx) => {
-            const isPending = SentRequests.some((req) => req.username === player.username);
+            const isPending = SentRequests.some((req) => req.id === player.id);
             return (
           <div
-            key={idx}
+            key={player.id}
             className="flex w-full items-center rounded-lg p-4 bg-[#0b1328] text-white shadow-md border border-slate-700 transition-all hover:bg-[#162447] focus:bg-[#162447] active:bg-[#162447]"
           >
             <div className="mr-4 flex items-center gap-2">
@@ -222,14 +223,13 @@ useEffect(() => {
             <div className="ml-auto">
               {!props.FriendsDisplay && (
                 <Button
-                  statement={isPending || Added[idx] ? "Pending" : "Add"}
-                  isAdded={isPending || Added[idx]}
-                 onClick={() => {
-                    if (!isPending && !Added[idx]) {
-                    handleAdd(idx);
-                   fetchSendRequest(player.id);
+                  statement={isPending ? "Pending" : "Add"}
+                  isAdded={isPending}
+                  onClick={() => {
+                    if (!isPending) {
+                      fetchSendRequest(player.id);
                     }
-                }}
+                  }}
                 />
               )}
               {props.FriendsDisplay && <Button statement="Delete" onClick={() => {fetchDelete(player.id)}} />}

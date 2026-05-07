@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "../../app/animations/Button.jsx";
 import { useState, useEffect} from "react";
-import { api } from "@/lib/api";
+import { api, API_BASE } from "@/lib/api";
 export default function FriendsRequestsList(props) {
   // const players = [
   //   {  name: "Tania Andrew", img: "https://docs.material-tailwind.com/img/face-1.jpg", win: 20 },
@@ -19,6 +19,7 @@ export default function FriendsRequestsList(props) {
   const [Added, setAdded] = useState([])
   const [UserName,setUserName] = useState("")
   const [FriendsClick,setFriendsClick] = useState(false)
+  const [playerImgs, setPlayerImgs] = useState({});
 
   function handleAdd(idx) {
     setAdded((prev) => {
@@ -33,19 +34,39 @@ export default function FriendsRequestsList(props) {
     const data = await api.get('/api/friends/pending');
     setRequests(data)
   } catch (error) {
-    console.error(error);
+    // console.error(error);
   }
 }
 
-async function fetchImg() {
-  const url = 'https://picsum.photos/v2/list?page=2&limit=30'
-  const options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
+useEffect(() => {
+  async function loadImages() {
+    const imgs = {};
+    for (const Request of Requests) {
+      const url = await fetchImg(Request.id);
+      imgs[Request.id] = url;
+    }
+    setPlayerImgs(imgs);
+  }
+  if (Requests.length > 0) {
+    loadImages();
+  }
+}, [Requests]);
+
+async function fetchImg(id) {
+  const url = `${API_BASE}/api/users/${id}/picture`;
+  const options = {method: 'GET', credentials: 'include'};
   try {
     const response = await fetch(url, options);
-    const data = await response.json();
-    setImg(data)
+    if (!response.ok) {
+      return;
+    }
+    const blob = await response.blob();
+    const imgUrl = URL.createObjectURL(blob);
+    return (imgUrl);
+
   } catch (error) {
-    console.error(error);
+    // console.error(error);
+    setImg(null);
   }
 }
 
@@ -54,7 +75,7 @@ async function fetchAccept(id) {
     await api.patch('/api/friends/accept', { friend_id: id });
     setFriendsClick(!FriendsClick)
   } catch (error) {
-    console.error(error);
+    // console.error(error);
   }
 }
 
@@ -63,7 +84,7 @@ async function fetchDecline(id) {
     await api.delete('/api/friends/reject', { friend_id: id });
     setFriendsClick(!FriendsClick)
   } catch (error) {
-    console.error(error);
+    // console.error(error);
   }
 }
 
@@ -90,9 +111,6 @@ useEffect(() => {
   return () => clearInterval(pendingRequestsIntervalId);
 }, [FriendsClick]);
 
-useEffect(() => {
-  fetchImg();
-}, []);
   return (
     <div className="w-full h-full flex flex-col items-center justify-center bg-[#0b1328]">
       <nav
@@ -100,13 +118,13 @@ useEffect(() => {
       >
         {Array.isArray(Requests) && Requests.map((player, idx) => (
           <div
-            key={idx}
+            key={player.id}
             className="flex w-full items-center rounded-lg p-4 bg-[#0b1328] text-white shadow-md border border-slate-700 transition-all hover:bg-[#162447] focus:bg-[#162447] active:bg-[#162447]"
           >
             <div className="mr-4 flex items-center gap-2">
               <img
                 alt={player.username}
-                src={Img[idx]?.download_url || Img[idx]?.url }
+                src={playerImgs[player.id]}
                 className="relative inline-block h-12 w-12 rounded-full! object-cover object-center"
               />
             </div>
