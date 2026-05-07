@@ -2749,6 +2749,7 @@ type ResultMutation struct {
 	addkills      *int
 	death         *int
 	adddeath      *int
+	username      *string
 	clearedFields map[string]struct{}
 	game          *int
 	clearedgame   bool
@@ -3097,6 +3098,42 @@ func (m *ResultMutation) ResetUserID() {
 	m.user = nil
 }
 
+// SetUsername sets the "username" field.
+func (m *ResultMutation) SetUsername(s string) {
+	m.username = &s
+}
+
+// Username returns the value of the "username" field in the mutation.
+func (m *ResultMutation) Username() (r string, exists bool) {
+	v := m.username
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUsername returns the old "username" field's value of the Result entity.
+// If the Result object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ResultMutation) OldUsername(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUsername is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUsername requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUsername: %w", err)
+	}
+	return oldValue.Username, nil
+}
+
+// ResetUsername resets all changes to the "username" field.
+func (m *ResultMutation) ResetUsername() {
+	m.username = nil
+}
+
 // ClearGame clears the "game" edge to the Game entity.
 func (m *ResultMutation) ClearGame() {
 	m.clearedgame = true
@@ -3185,7 +3222,7 @@ func (m *ResultMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ResultMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.rank != nil {
 		fields = append(fields, result.FieldRank)
 	}
@@ -3200,6 +3237,9 @@ func (m *ResultMutation) Fields() []string {
 	}
 	if m.user != nil {
 		fields = append(fields, result.FieldUserID)
+	}
+	if m.username != nil {
+		fields = append(fields, result.FieldUsername)
 	}
 	return fields
 }
@@ -3219,6 +3259,8 @@ func (m *ResultMutation) Field(name string) (ent.Value, bool) {
 		return m.GameID()
 	case result.FieldUserID:
 		return m.UserID()
+	case result.FieldUsername:
+		return m.Username()
 	}
 	return nil, false
 }
@@ -3238,6 +3280,8 @@ func (m *ResultMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldGameID(ctx)
 	case result.FieldUserID:
 		return m.OldUserID(ctx)
+	case result.FieldUsername:
+		return m.OldUsername(ctx)
 	}
 	return nil, fmt.Errorf("unknown Result field %s", name)
 }
@@ -3281,6 +3325,13 @@ func (m *ResultMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUserID(v)
+		return nil
+	case result.FieldUsername:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUsername(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Result field %s", name)
@@ -3384,6 +3435,9 @@ func (m *ResultMutation) ResetField(name string) error {
 		return nil
 	case result.FieldUserID:
 		m.ResetUserID()
+		return nil
+	case result.FieldUsername:
+		m.ResetUsername()
 		return nil
 	}
 	return fmt.Errorf("unknown Result field %s", name)

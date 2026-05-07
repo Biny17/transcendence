@@ -32,4 +32,6 @@ const (
 	GetMyPicture            = "/api/users/me/profile-picture"
 	GameAdd                 = "/api/game/add"
 	GetPicture              = "/api/users/{id}/picture"
+	GetGames                = "/api/users/{id}/games"
+	GetStats                = "/api/users/{id}/stats"
 )
