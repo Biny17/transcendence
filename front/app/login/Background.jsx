@@ -15,6 +15,7 @@ export function Background({ signInOpen,setSignInOpen }) {
 
 const [isSignUp, setIsSignUp] = useState(false);
 const [isSignIn, setIsSignIn] = useState(false);
+const [Submit, setSubmit] = useState(false);
 const[isSignUpMode, setisSignUpMode] = useState(false);
 const [form, setForm] = useState({ age: "", email: "", password: "", username: "" });
 const [Profile, setProfile] = useState([])
@@ -43,11 +44,15 @@ async function fetchVerified() {
     }
 }
 
+async function handle42Login(){
+   window.location.href = "http://localhost:8080/api/auth/42/login";
+}
+
 const handleSubmit = () => {
   if (!form.email || !form.password) { setError("Remplissez tous les champs !"); return; }
   if (isSignUpMode && !form.age) { setError("Remplissez tous les champs !"); return; }
   if (isSignUpMode && !form.username) { setError("Choisissez un pseudo !"); return; }
-  else if (isSignUpMode) { setIsSignUp(true); return; }
+  else if (isSignUpMode) { setIsSignUp(true); setSubmit(!Submit); return; }
   else { fetchVerified(); return; }
 };
 
@@ -72,6 +77,7 @@ useEffect(function() {
       const response = await fetch(url, options);
       setIsSignIn(false);
       setIsSignUp(false);
+      setSubmit(false);
       if (!response.ok) {
         const err = await response.json();
         throw new Error(err.title);
@@ -98,7 +104,7 @@ useEffect(function() {
   }
 }
   fetchData();
-}, [isSignUp, isSignIn])
+}, [isSignUp, isSignIn, Submit])
 
   const mascotRef = useRef(null);
   const mascotRef2 = useRef(null);
@@ -262,21 +268,22 @@ useEffect(function() {
               placeholder={error ? error : "Your Password here"}
             />
           </fieldset>
-          <div className="flex items-center gap-2 mt-2">
+          {/* <div className="flex items-center gap-2 mt-2">
             <input type="checkbox" className="checkbox-input" id="check-2" />
             <label className="text-slate-200" htmlFor="check-2">Remember Me</label>
-          </div>
+          </div> */}
         </div>
         <div className="mt-6 flex flex-col gap-5 justify-end pr-1">
           <Button statement={isSignUpMode ? "Sign Up" : "Sign In"} onClick={handleSubmit} />
           <Button
             statement={
               <span className="flex items-center gap-2">
-                <img src="https://docs.material-tailwind.com/icons/google.svg" alt="google" className="w-5 h-5" />
-                Continue with Google
+                {/* <img src="https://upload.wikimedia.org/wikipedia/commons/8/8d/42_Logo.svg" alt="google" className="w-5 h-5" /> */}
+                Continue with
+                <img src="42.svg" alt="42" className="w-5 h-5" />
               </span>
             }
-            onClick={() => {/* handle Google sign-in */}}
+            onClick={() => {handle42Login()}}
           />
           <p className="text-center text-slate-300 mt-2">
             {isSignUpMode ? "Already have an account?" : "Don't have an account?"}

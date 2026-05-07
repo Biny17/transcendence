@@ -51,7 +51,7 @@ const[FriendsRequestsOpen, setFriendsRequestsOpen] = useState(false);
                 <Button statement="Friends Requests" onClick={() => { setFriendsRequestsOpen(true); }} />
                 </Fragment>
               )}
-              <Button statement="Go back" onClick={() => { FriendsDisplay ? props.setYourFriendsOpen(false) : setFriendsDisplay(true); }} />
+              <Button statement="Go back" onClick={() => { FriendsDisplay ? props.setYourFriendsOpen(false) : setFriendsDisplay(true); setFriendsRequestsOpen(false)}} />
             </div>
           </ChatContainer>
         </div>
