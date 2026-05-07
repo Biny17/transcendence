@@ -39,6 +39,7 @@ export type HitboxDef = {
   radius?: number
   height?: number
   offset?: Vec3
+  rotation?: Vec3
   collidesWith?: string[]
   isSensor?: boolean
   tag?: string

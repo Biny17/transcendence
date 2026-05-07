@@ -120,6 +120,9 @@ function buildHitboxes(hitboxes: HitboxState[]): HitboxDef[] {
     if (hb.offsetX !== 0 || hb.offsetY !== 0 || hb.offsetZ !== 0) {
       def.offset = { x: hb.offsetX, y: hb.offsetY, z: hb.offsetZ }
     }
+    if (hb.rotationX !== 0 || hb.rotationY !== 0 || hb.rotationZ !== 0) {
+      def.rotation = { x: hb.rotationX, y: hb.rotationY, z: hb.rotationZ }
+    }
     if (hb.collidesWith.length > 0) {
       def.collidesWith = hb.collidesWith as any
     }

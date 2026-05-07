@@ -17,6 +17,7 @@ export type HitboxShape =
 export type PieceHitbox = {
 	shape: HitboxShape;
 	relativeOffset: Vec3;
+	relativeRotation?: Vec3;
 	collidesWith?: string[];
 	isSensor?: boolean;
 	tag?: string;

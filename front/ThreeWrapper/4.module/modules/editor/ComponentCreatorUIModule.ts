@@ -1,10 +1,10 @@
 import { createElement } from "react";
-import * as THREE from "three";
 import type { Module, WorldContext } from "@/ThreeWrapper/4.module";
 import { ModuleKey } from "@/ThreeWrapper/4.module";
 import type { UIModule } from "@/ThreeWrapper/4.module/modules/ui/UIModule";
 import type { ComponentPreviewModule } from "./ComponentPreviewModule";
 import type { ComponentState } from "./components/ComponentCreatorUI";
+import type { AutoMeshOptions, AutoHitboxResult } from "@/ThreeWrapper/2.world/util/autoMeshHitbox";
 import { ComponentCreatorUI } from "./components/ComponentCreatorUI";
 import { downloadYaml, downloadZip } from "./componentExport";
 export class ComponentCreatorUIModule implements Module {
@@ -14,7 +14,6 @@ export class ComponentCreatorUIModule implements Module {
 	private preview: ComponentPreviewModule | null = null;
 	private lastWireframe = false;
 	private physicsTestActive = false;
-	private gltfSceneRef: THREE.Group | null = null;
 	constructor(_dep1: typeof ModuleKey.ui, _dep2: typeof ModuleKey.componentCreatorPreview) {}
 	async init(ctx: WorldContext): Promise<void> {
 		this.ui = ctx.getModule<UIModule>(ModuleKey.ui) ?? null;
@@ -136,14 +135,15 @@ export class ComponentCreatorUIModule implements Module {
 					this.physicsTestActive = false;
 					this.preview?.stopPhysicsTest();
 				},
-				onGenerateHitboxes: async () => {
-					this.gltfSceneRef = this.preview?.getPreviewRoot() ?? null;
-					return this.gltfSceneRef;
+				onAutoGenerateHitboxes: (state, options) => {
+					return this.preview?.autoGenerateHitboxes(state, options) ?? [];
 				},
-				onHitboxHover: (idx) => {
+				onSceneHitboxSelect: (onSelect) => {
+					if (this.preview) {
+						this.preview.onHitboxClick = (localId) => onSelect(localId);
+					}
 				},
-				onHitboxSelect: (idx) => {
-				}
+
 			})
 		);
 	}
