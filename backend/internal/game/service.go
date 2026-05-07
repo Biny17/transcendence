@@ -31,13 +31,12 @@ func ProvideAndRegister(i do.Injector) *GameService {
 
 func (gs *GameService) Register(api huma.API, m *mid.Middleware) {
 	huma.Register(api, huma.Operation{
-		OperationID: "GAME ADD",
 		Method:      http.MethodPost,
 		Path:        routes.GameAdd,
-		Summary:     "Add a game to the database",
-		// Middlewares: huma.Middlewares{m.Admin},
-		// Security: []map[string][]string{
-		// 	{"credentials": {}},
-		// },
+		Summary:     "GAME ADD",
+		Middlewares: huma.Middlewares{m.Admin},
+		Security: []map[string][]string{
+			{"apiKey": {}},
+		},
 	}, gs.GameResult)
 }
