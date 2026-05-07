@@ -138,14 +138,14 @@ export class EditorPlacementModule implements Module {
           if (!this.ctx || this.selectedComponent !== path) return
           const group = model.scene.clone()
           if (meshDef.scale) group.scale.set(meshDef.scale.x, meshDef.scale.y, meshDef.scale.z)
-          group.traverse(c => {
+          group.traverse((c: THREE.Object3D) => {
             if (c instanceof THREE.Mesh) {
               c.material = new THREE.MeshBasicMaterial({ color: 0x44aaff, transparent: true, opacity: 0.3, depthWrite: false })
             }
           })
           const wireMat = new THREE.MeshBasicMaterial({ color: 0x0088ff, transparent: true, opacity: 0.8, wireframe: true })
           const wireGroup = group.clone()
-          wireGroup.traverse(c => {
+          wireGroup.traverse((c: THREE.Object3D) => {
             if (c instanceof THREE.Mesh) c.material = wireMat
           })
           const combined = new THREE.Group()
@@ -536,7 +536,8 @@ export class EditorPlacementModule implements Module {
       if (obj.scale) loadedGroup.scale.set(obj.scale.x, obj.scale.y, obj.scale.z)
       loadedGroup.name = obj.id
       this.meshRegistry.set(obj.id, loadedGroup)
-      this.ctx.objects.add({ id: obj.id, type: OBJECT_TYPE.MAP, name: obj.id, position: obj.position, rotation: obj.rotation ?? { x: 0, y: 0, z: 0 }, pieces: [{ asset: loadedGroup, relativePosition: { x: 0, y: 0, z: 0 }, hitboxes: [] }] })
+      const rot = obj.rotation ?? { x: 0, y: 0, z: 0 }
+      this.ctx.objects.add({ id: obj.id, type: OBJECT_TYPE.MAP, name: obj.id, position: obj.position, rotation: { x: rot.x, y: rot.y, z: rot.z, w: 0 }, pieces: [{ asset: loadedGroup, relativePosition: { x: 0, y: 0, z: 0 }, hitboxes: [] }] })
       this.placed.push({
         id: obj.id,
         component: obj.component,
@@ -676,13 +677,13 @@ export class EditorPlacementModule implements Module {
     placedGroup.rotation.set(0, 0, 0)
     placedGroup.name = id
     this.meshRegistry.set(id, placedGroup)
-    this.ctx.objects.add({ id, type: OBJECT_TYPE.MAP, name: id, position: { x: pos.x, y: pos.y, z: pos.z }, rotation: { x: 0, y: 0, z: 0 }, pieces: [{ asset: placedGroup, relativePosition: { x: 0, y: 0, z: 0 }, hitboxes: [] }] })
+    this.ctx.objects.add({ id, type: OBJECT_TYPE.MAP, name: id, position: { x: pos.x, y: pos.y, z: pos.z }, rotation: { x: 0, y: 0, z: 0, w: 0 }, pieces: [{ asset: placedGroup, relativePosition: { x: 0, y: 0, z: 0 }, hitboxes: [] }] })
     const placedObj: PlacedObject = {
       id,
       component: this.selectedComponent,
       position: { x: pos.x, y: pos.y, z: pos.z },
       rotation: { x: 0, y: 0, z: 0 },
-      scale: meshDef && 'scale' in meshDef ? meshDef.scale : { x: 1, y: 1, z: 1 },
+      scale: meshDef && 'scale' in meshDef && meshDef.scale ? meshDef.scale : { x: 1, y: 1, z: 1 },
     }
     this.placed.push(placedObj)
     this._pushHistory({ type: 'place', id, placed: placedObj })
@@ -736,7 +737,7 @@ export class EditorPlacementModule implements Module {
     return group
   }
   private _setHighlight(id: string, on: boolean): void {
-    this.meshRegistry.get(id)?.traverse(c => {
+    this.meshRegistry.get(id)?.traverse((c: THREE.Object3D) => {
       if (c instanceof THREE.Mesh) {
         (c.material as THREE.MeshBasicMaterial).color.set(on ? 0xff8844 : 0xaaccff)
       }
@@ -754,10 +755,10 @@ export class EditorPlacementModule implements Module {
   private _removeGhost(): void {
     if (this.ghostGroup && this.ctx) {
       this.ctx.objects.removeRaw(this.ghostGroup)
-      this.ghostGroup.traverse(c => {
+      this.ghostGroup.traverse((c: THREE.Object3D) => {
         if (c instanceof THREE.Mesh) {
           c.geometry.dispose()
-          if (Array.isArray(c.material)) c.material.forEach(m => m.dispose())
+          if (Array.isArray(c.material)) c.material.forEach((m: THREE.Material) => m.dispose())
           else c.material.dispose()
         }
       })

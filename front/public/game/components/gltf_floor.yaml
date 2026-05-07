@@ -1,4 +1,4 @@
-# $schema: /game/components/component.schema.json
+# $schema: ./component.schema.json
 # -----------------------------------------------------------
 # Floor section using the existing GLTF model.
 # Textures are embedded in the .gltf — no textures block needed.

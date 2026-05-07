@@ -2,7 +2,9 @@ import * as THREE from "three";
 import type { Module, WorldContext } from "@/ThreeWrapper/4.module";
 import { ModuleKey } from "@/ThreeWrapper/4.module";
 import type { ComponentState, HitboxState, AnimationState, MeshPartState } from "./components/ComponentCreatorUI";
-import type { HitboxShape } from "@/ThreeWrapper/2.world/tools/ObjectManager";
+import type { HitboxShape, PieceHitbox } from "@/ThreeWrapper/2.world/tools/ObjectManager";
+import { generateAutoMeshHitboxes } from "@/ThreeWrapper/2.world/util/autoMeshHitbox";
+import type { AutoMeshOptions, AutoHitboxResult } from "@/ThreeWrapper/2.world/util/autoMeshHitbox";
 
 function buildPrimitiveGeometry(mesh: MeshPartState): THREE.BufferGeometry {
 	const { primitive, sizeX, sizeY, sizeZ } = mesh;
@@ -20,10 +22,16 @@ function buildPrimitiveGeometry(mesh: MeshPartState): THREE.BufferGeometry {
 	}
 }
 
-function buildHitboxHelper(hb: HitboxState, meshBounds?: THREE.Vector3 | null, defaultSize?: { x: number; y: number; z: number }): THREE.Object3D {
-	const color = hb.isSensor ? 0xffaa00 : 0x00ff88;
+const _HITBOX_COLOR = 0x00ff88;
+const _SENSOR_COLOR = 0xffaa00;
+const _HIGHLIGHT_COLOR = 0xff6600;
+
+function buildHitboxHelper(hb: HitboxState, meshBounds?: THREE.Vector3 | null, defaultSize?: { x: number; y: number; z: number }): { group: THREE.Object3D; material: THREE.LineBasicMaterial } {
+	const color = hb.isSensor ? _SENSOR_COLOR : _HITBOX_COLOR;
 	const group = new THREE.Group();
 	group.name = "hitbox";
+
+	let mat: THREE.LineBasicMaterial;
 
 	if (hb.shape === "box") {
 		let w = hb.sizeX,
@@ -42,12 +50,10 @@ function buildHitboxHelper(hb: HitboxState, meshBounds?: THREE.Vector3 | null, d
 		}
 		const geo = new THREE.BoxGeometry(w, h, d);
 		const edges = new THREE.EdgesGeometry(geo);
-		const mat = new THREE.LineBasicMaterial({ color });
+		mat = new THREE.LineBasicMaterial({ color });
 		const segments = new THREE.LineSegments(edges, mat);
 		group.add(segments);
-	}
-
-	if (hb.shape === "sphere") {
+	} else if (hb.shape === "sphere") {
 		let radius = hb.radius;
 		if (hb.sizeKind === "auto" || hb.sizeKind === "full") {
 			if (meshBounds) {
@@ -58,15 +64,19 @@ function buildHitboxHelper(hb: HitboxState, meshBounds?: THREE.Vector3 | null, d
 		}
 		const geo = new THREE.SphereGeometry(radius, 16, 8);
 		const edges = new THREE.EdgesGeometry(geo);
-		const mat = new THREE.LineBasicMaterial({ color });
+		mat = new THREE.LineBasicMaterial({ color });
 		const segments = new THREE.LineSegments(edges, mat);
 		group.add(segments);
-	}
-
-	if (hb.shape === "capsule") {
+	} else if (hb.shape === "capsule") {
 		const geo = new THREE.CapsuleGeometry(hb.radius, hb.height * 2, 8, 16);
 		const edges = new THREE.EdgesGeometry(geo);
-		const mat = new THREE.LineBasicMaterial({ color });
+		mat = new THREE.LineBasicMaterial({ color });
+		const segments = new THREE.LineSegments(edges, mat);
+		group.add(segments);
+	} else {
+		const geo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+		const edges = new THREE.EdgesGeometry(geo);
+		mat = new THREE.LineBasicMaterial({ color: 0xff0000 });
 		const segments = new THREE.LineSegments(edges, mat);
 		group.add(segments);
 	}
@@ -79,7 +89,45 @@ function buildHitboxHelper(hb: HitboxState, meshBounds?: THREE.Vector3 | null, d
 		);
 	}
 
-	return group;
+	return { group, material: mat };
+}
+
+function buildHitboxClickMesh(hb: HitboxState, meshBounds?: THREE.Vector3 | null): THREE.Mesh | null {
+	let geo: THREE.BufferGeometry | null = null;
+	if (hb.shape === "box") {
+		let w = hb.sizeX, h = hb.sizeY, d = hb.sizeZ;
+		if (hb.sizeKind === "full" || hb.sizeKind === "auto") {
+			if (meshBounds) {
+				w = meshBounds.x; h = meshBounds.y; d = meshBounds.z;
+			} else {
+				w = 1; h = 1; d = 1;
+			}
+		}
+		geo = new THREE.BoxGeometry(w, h, d);
+	} else if (hb.shape === "sphere") {
+		let radius = hb.radius;
+		if (hb.sizeKind === "auto" || hb.sizeKind === "full") {
+			if (meshBounds) radius = Math.max(meshBounds.x, meshBounds.y, meshBounds.z) / 2;
+			else radius = 0.5;
+		}
+		geo = new THREE.SphereGeometry(radius, 8, 6);
+	} else if (hb.shape === "capsule") {
+		geo = new THREE.CapsuleGeometry(hb.radius, hb.height * 2, 4, 8);
+	}
+	if (!geo) return null;
+	const mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
+		transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide
+	}));
+	mesh.name = hb.localId;
+	mesh.position.set(hb.offsetX, hb.offsetY, hb.offsetZ);
+	if (hb.rotationX !== undefined || hb.rotationY !== undefined || hb.rotationZ !== undefined) {
+		mesh.rotation.set(
+			THREE.MathUtils.degToRad(hb.rotationX ?? 0),
+			THREE.MathUtils.degToRad(hb.rotationY ?? 0),
+			THREE.MathUtils.degToRad(hb.rotationZ ?? 0)
+		);
+	}
+	return mesh;
 }
 
 export type HelpersConfig = {
@@ -97,11 +145,53 @@ type WaypointAnimTracker = {
 	progress: number;
 };
 
+export function hitboxStateToPieceHitbox(hb: HitboxState): PieceHitbox {
+	let shape: HitboxShape;
+	switch (hb.shape) {
+		case "box": {
+			let sx = hb.sizeX, sy = hb.sizeY, sz = hb.sizeZ;
+			if (hb.sizeKind === "full" || hb.sizeKind === "auto") {
+				sx = 1; sy = 1; sz = 1;
+			}
+			shape = { kind: "box", halfExtents: { x: sx / 2, y: sy / 2, z: sz / 2 } };
+			break;
+		}
+		case "sphere":
+			shape = { kind: "sphere", radius: hb.radius };
+			break;
+		case "capsule":
+			shape = { kind: "capsule", radius: hb.radius, height: hb.height };
+			break;
+	}
+	const hasRotation = hb.rotationX !== 0 || hb.rotationY !== 0 || hb.rotationZ !== 0;
+
+	return {
+		shape,
+		relativeOffset: {
+			x: hb.offsetX + hb.relativeOffsetX,
+			y: hb.offsetY + hb.relativeOffsetY,
+			z: hb.offsetZ + hb.relativeOffsetZ,
+		},
+		...(hasRotation ? {
+			relativeRotation: {
+				x: THREE.MathUtils.degToRad(hb.rotationX ?? 0),
+				y: THREE.MathUtils.degToRad(hb.rotationY ?? 0),
+				z: THREE.MathUtils.degToRad(hb.rotationZ ?? 0),
+			}
+		} : {}),
+		collidesWith: hb.collidesWith.length > 0 ? hb.collidesWith : undefined,
+		isSensor: hb.isSensor,
+		tag: hb.tag,
+	};
+}
+
 export class ComponentPreviewModule implements Module {
 	readonly type = ModuleKey.componentCreatorPreview;
 	private ctx: WorldContext | null = null;
 	private meshGroups = new Map<string, THREE.Group>(); // localId -> group
 	private hitboxHelpers: THREE.Object3D[] = [];
+	private hitboxMaterials = new Map<string, { mat: THREE.LineBasicMaterial; origColor: number }>();
+	private hitboxClickMeshes = new Map<string, THREE.Mesh>(); // localId → clickable mesh
 	private proportionHelpers: THREE.Object3D[] = [];
 	private textureCache = new Map<string, THREE.Texture>();
 	private gltfScenes = new Map<string, THREE.Group>(); // localId -> gltf scene
@@ -111,15 +201,28 @@ export class ComponentPreviewModule implements Module {
 	private _wireframe = false;
 	private waypointAnims = new Map<string, WaypointAnimTracker>(); // animId -> tracker
 	private gltfBounds = new Map<string, THREE.Vector3>(); // localId -> bounds
+	private pendingGltfScale = new Map<string, { x: number; y: number; z: number }>(); // localId -> pending scale
+	private pendingGltfOffset = new Map<string, { x: number; y: number; z: number }>(); // localId -> pending offset
 	private _physicsTestActive = false;
 	private _physicsTestFloorId = "__cc_floor__";
 	private _physicsTestObjectId = "__cc_drop__";
+	private _selectedHitboxId: string | null = null;
+	private raycaster = new THREE.Raycaster();
+	private mouseNdc = new THREE.Vector2();
+	private _onCanvasClick: ((e: MouseEvent) => void) | null = null;
+	onHitboxClick: ((localId: string | null) => void) | null = null;
 
 	init(ctx: WorldContext): void {
 		this.ctx = ctx;
+		this._onCanvasClick = (e: MouseEvent) => this._handleCanvasClick(e);
+		this.ctx.canvas.addEventListener("click", this._onCanvasClick);
 	}
 
 	dispose(): void {
+		if (this._onCanvasClick && this.ctx) {
+			this.ctx.canvas.removeEventListener("click", this._onCanvasClick);
+		}
+		this._onCanvasClick = null;
 		this.stopPhysicsTest();
 		this._clearScene();
 		this._clearGltf();
@@ -264,7 +367,8 @@ export class ComponentPreviewModule implements Module {
 				}
 			} else if (mesh.meshKind === "gltf") {
 				// GLTF meshes are loaded separately via loadGltfModel
-				// Just create an empty group for now
+				// Skip empty group if scene is already loaded
+				if (this.gltfScenes.has(mesh.localId)) continue;
 				const group = new THREE.Group();
 				group.name = mesh.name;
 				group.position.set(mesh.offsetX, mesh.offsetY, mesh.offsetZ);
@@ -280,17 +384,32 @@ export class ComponentPreviewModule implements Module {
 			if (firstBounds) combinedBounds = firstBounds.clone();
 		}
 
+		this.hitboxMaterials.clear();
+		this.hitboxClickMeshes.clear();
+
 		for (const hb of state.hitboxes) {
-			const helper = buildHitboxHelper(hb, combinedBounds);
+			const { group: helper, material } = buildHitboxHelper(hb, combinedBounds);
 			helper.position.set(hb.offsetX, hb.offsetY, hb.offsetZ);
 			this.ctx.objects.addRaw(helper);
 			this.hitboxHelpers.push(helper);
+			this.hitboxMaterials.set(hb.localId, { mat: material, origColor: material.color.getHex() });
+
+			const clickMesh = buildHitboxClickMesh(hb, combinedBounds);
+			if (clickMesh) {
+				this.ctx.objects.addRaw(clickMesh);
+				this.hitboxClickMeshes.set(hb.localId, clickMesh);
+			}
 		}
 
-		// Setup waypoint animations per mesh
+		if (this._selectedHitboxId) {
+			this._applyHitboxHighlight(this._selectedHitboxId);
+		}
+
+		// Setup animations per mesh
 		this.waypointAnims.clear();
 		for (const anim of state.animations) {
-			if (anim.autoPlay) {
+			if (!anim.autoPlay) continue;
+			if (anim.type === 'waypoints') {
 				const meshGroup = this.meshGroups.get(anim.targetMeshId);
 				if (meshGroup) {
 					this.waypointAnims.set(anim.targetMeshId, {
@@ -307,8 +426,132 @@ export class ComponentPreviewModule implements Module {
 						progress: 0
 					});
 				}
+			} else if (anim.type === 'clip' && anim.clipName) {
+				this.playAnimation(anim.targetMeshId, anim.clipName, anim.speed, anim.loop);
 			}
 		}
+	}
+
+	autoGenerateHitboxes(state: ComponentState, options?: AutoMeshOptions): AutoHitboxResult[] {
+		const combinedGroup = new THREE.Group();
+		combinedGroup.name = "__auto_hitbox_combined__";
+
+		const mode = options?.mode ?? "single";
+
+		for (const mesh of state.meshes) {
+			if (mesh.meshKind === "primitive") {
+				const existingGroup = this.meshGroups.get(mesh.localId);
+				if (existingGroup) {
+					const clone = existingGroup.clone(true);
+					combinedGroup.add(clone);
+				}
+			} else if (mesh.meshKind === "gltf") {
+				const scene = this.gltfScenes.get(mesh.localId);
+				if (scene) {
+					if (mode === "children" && scene.children.length > 1) {
+						for (const child of scene.children) {
+							const childClone = child.clone(true);
+							childClone.position.copy(child.position);
+							childClone.scale.copy(child.scale);
+							childClone.quaternion.copy(child.quaternion);
+							combinedGroup.add(childClone);
+						}
+					} else {
+						const clone = scene.clone(true);
+						clone.position.copy(scene.position);
+						clone.scale.copy(scene.scale);
+						clone.quaternion.copy(scene.quaternion);
+						combinedGroup.add(clone);
+					}
+				}
+			}
+		}
+
+		if (combinedGroup.children.length === 0) return [];
+
+		combinedGroup.updateMatrixWorld(true);
+
+		return generateAutoMeshHitboxes(combinedGroup, options);
+	}
+
+	getSelectedHitboxId(): string | null {
+		return this._selectedHitboxId;
+	}
+
+	setSelectedHitboxId(id: string | null): void {
+		if (this._selectedHitboxId) {
+			this._applyHitboxHighlight(this._selectedHitboxId, false);
+		}
+		this._selectedHitboxId = id;
+		if (id) {
+			this._applyHitboxHighlight(id, true);
+		}
+	}
+
+	mergeTwoHitboxes(hbA: HitboxState, hbB: HitboxState): HitboxState | null {
+		if (hbA.shape !== "box" || hbB.shape !== "box") return null;
+
+		const aMin = { x: hbA.offsetX - hbA.sizeX / 2, y: hbA.offsetY - hbA.sizeY / 2, z: hbA.offsetZ - hbA.sizeZ / 2 };
+		const aMax = { x: hbA.offsetX + hbA.sizeX / 2, y: hbA.offsetY + hbA.sizeY / 2, z: hbA.offsetZ + hbA.sizeZ / 2 };
+		const bMin = { x: hbB.offsetX - hbB.sizeX / 2, y: hbB.offsetY - hbB.sizeY / 2, z: hbB.offsetZ - hbB.sizeZ / 2 };
+		const bMax = { x: hbB.offsetX + hbB.sizeX / 2, y: hbB.offsetY + hbB.sizeY / 2, z: hbB.offsetZ + hbB.sizeZ / 2 };
+
+		const minX = Math.min(aMin.x, bMin.x), maxX = Math.max(aMax.x, bMax.x);
+		const minY = Math.min(aMin.y, bMin.y), maxY = Math.max(aMax.y, bMax.y);
+		const minZ = Math.min(aMin.z, bMin.z), maxZ = Math.max(aMax.z, bMax.z);
+
+		return {
+			...hbA,
+			localId: crypto.randomUUID(),
+			sizeX: maxX - minX,
+			sizeY: maxY - minY,
+			sizeZ: maxZ - minZ,
+			offsetX: (minX + maxX) / 2,
+			offsetY: (minY + maxY) / 2,
+			offsetZ: (minZ + maxZ) / 2,
+			rotationX: 0,
+			rotationY: 0,
+			rotationZ: 0,
+		};
+	}
+
+	private _handleCanvasClick(e: MouseEvent): void {
+		if (!this.ctx) return;
+		const rect = this.ctx.canvas.getBoundingClientRect();
+		this.mouseNdc.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+		this.mouseNdc.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+		this.raycaster.setFromCamera(this.mouseNdc, this.ctx.camera);
+
+		const meshes = Array.from(this.hitboxClickMeshes.values());
+		const hits = this.raycaster.intersectObjects(meshes, false);
+
+		if (hits.length > 0) {
+			const hitMesh = hits[0].object as THREE.Mesh;
+			const localId = hitMesh.name;
+			if (this._selectedHitboxId) {
+				this._applyHitboxHighlight(this._selectedHitboxId, false);
+			}
+			this._selectedHitboxId = localId;
+			this._applyHitboxHighlight(localId, true);
+			this.onHitboxClick?.(localId);
+		} else {
+			if (this._selectedHitboxId) {
+				this._applyHitboxHighlight(this._selectedHitboxId, false);
+			}
+			this._selectedHitboxId = null;
+			this.onHitboxClick?.(null);
+		}
+	}
+
+	private _applyHitboxHighlight(localId: string, highlight = true): void {
+		const entry = this.hitboxMaterials.get(localId);
+		if (entry) {
+			entry.mat.color.setHex(highlight ? _HIGHLIGHT_COLOR : entry.origColor);
+		}
+	}
+
+	removeGltfModel(meshLocalId: string): void {
+		this._clearGltfForMesh(meshLocalId);
 	}
 
 	async loadGltfModel(meshLocalId: string, url: string, manager?: THREE.LoadingManager): Promise<string[]> {
@@ -346,10 +589,22 @@ export class ComponentPreviewModule implements Module {
 			this.ctx.objects.addRaw(scene);
 		}
 
+		// Apply pending scale and offset if any were set before loading
+		const pendingScale = this.pendingGltfScale.get(meshLocalId);
+		if (pendingScale) {
+			scene.scale.set(pendingScale.x, pendingScale.y, pendingScale.z);
+			this.pendingGltfScale.delete(meshLocalId);
+		}
+		const pendingOffset = this.pendingGltfOffset.get(meshLocalId);
+		if (pendingOffset) {
+			scene.position.set(pendingOffset.x, pendingOffset.y, pendingOffset.z);
+			this.pendingGltfOffset.delete(meshLocalId);
+		}
+
 		return gltf.animations.map((a: any) => a.name);
 	}
 
-	playAnimation(meshLocalId: string, clipName: string): void {
+	playAnimation(meshLocalId: string, clipName: string, speed = 1, loop = true): void {
 		const mixer = this.gltfMixers.get(meshLocalId);
 		const clips = this.gltfClips.get(meshLocalId);
 		if (!mixer || !clips) return;
@@ -360,8 +615,30 @@ export class ComponentPreviewModule implements Module {
 		const clip = clips.find((c) => c.name === clipName);
 		if (!clip) return;
 		const action = mixer.clipAction(clip);
+		action.loop = loop ? THREE.LoopRepeat : THREE.LoopOnce;
+		action.setEffectiveTimeScale(speed);
 		action.play();
 		this.activeActions.set(meshLocalId, action);
+	}
+
+	startWaypointAnimation(anim: AnimationState): void {
+		if (anim.type !== 'waypoints' || anim.waypoints.length < 2) return;
+		const meshGroup = this.meshGroups.get(anim.targetMeshId);
+		if (!meshGroup) return;
+
+		this.waypointAnims.delete(anim.targetMeshId);
+
+		this.waypointAnims.set(anim.targetMeshId, {
+			waypoints: anim.waypoints.map((w) => new THREE.Vector3(w.position.x, w.position.y, w.position.z)),
+			rotations: anim.waypoints.map((w) => new THREE.Euler(
+				w.rotation?.x ?? 0, w.rotation?.y ?? 0, w.rotation?.z ?? 0
+			)),
+			speed: anim.speed || 2,
+			loop: anim.loop,
+			targetIdx: 1,
+			direction: 1,
+			progress: 0,
+		});
 	}
 
 	stopAnimation(meshLocalId?: string): void {
@@ -380,16 +657,12 @@ export class ComponentPreviewModule implements Module {
 		}
 	}
 
-	setAnimationSpeed(speed: number): void {
-		for (const mixer of this.gltfMixers.values()) {
-			mixer.timeScale = speed;
-		}
-	}
-
 	setGltfScale(meshLocalId: string, x: number, y: number, z: number): void {
 		const scene = this.gltfScenes.get(meshLocalId);
 		if (scene) {
 			scene.scale.set(x, y, z);
+		} else {
+			this.pendingGltfScale.set(meshLocalId, { x, y, z });
 		}
 	}
 
@@ -397,6 +670,8 @@ export class ComponentPreviewModule implements Module {
 		const scene = this.gltfScenes.get(meshLocalId);
 		if (scene) {
 			scene.position.set(x, y, z);
+		} else {
+			this.pendingGltfOffset.set(meshLocalId, { x, y, z });
 		}
 	}
 
@@ -438,10 +713,10 @@ export class ComponentPreviewModule implements Module {
 			model.traverse((child: THREE.Object3D) => {
 				if (child instanceof THREE.Mesh) {
 					const materials = Array.isArray(child.material) ? child.material : [child.material];
-					materials.forEach((material) => {
-						(material as THREE.Material).transparent = true;
-						(material as THREE.Material).opacity = 0.4;
-						(material as THREE.Material).depthWrite = false;
+					materials.forEach((material: THREE.Material) => {
+						material.transparent = true;
+						material.opacity = 0.4;
+						material.depthWrite = false;
 					});
 				}
 			});
@@ -468,7 +743,6 @@ export class ComponentPreviewModule implements Module {
 		if (!this.ctx) return;
 		this.stopPhysicsTest();
 
-		// Hide the regular preview meshes during drop test to avoid duplication
 		this._hidePreviewMeshes();
 
 		const floorGeo = new THREE.BoxGeometry(20, 0.2, 20);
@@ -494,7 +768,6 @@ export class ComponentPreviewModule implements Module {
 			}
 		});
 
-		// Use first mesh for physics test
 		const firstMesh = state.meshes[0];
 		if (!firstMesh) return;
 
@@ -521,23 +794,29 @@ export class ComponentPreviewModule implements Module {
 		const mesh = new THREE.Mesh(geo, material);
 		mesh.position.y = 5;
 
-		let shape: HitboxShape;
-		switch (primitive) {
-			case "box":
-				shape = { kind: "box", halfExtents: { x: sizeX / 2, y: sizeY / 2, z: sizeZ / 2 } };
-				break;
-			case "sphere":
-				shape = { kind: "sphere", radius: sizeX / 2 };
-				break;
-			case "cylinder":
-				shape = { kind: "capsule", radius: sizeX / 2, height: sizeY };
-				break;
-			case "plane":
-				shape = { kind: "box", halfExtents: { x: sizeX / 2, y: 0.01, z: sizeZ / 2 } };
-				break;
-			default:
-				shape = { kind: "box", halfExtents: { x: sizeX / 2, y: sizeY / 2, z: sizeZ / 2 } };
-		}
+		// Use custom hitboxes from state if defined, otherwise auto-derive
+		const hitboxes: PieceHitbox[] = state.hitboxes.length > 0
+			? state.hitboxes.map(hitboxStateToPieceHitbox)
+			: (() => {
+				let defaultShape: HitboxShape;
+				switch (primitive) {
+					case "box":
+						defaultShape = { kind: "box", halfExtents: { x: sizeX / 2, y: sizeY / 2, z: sizeZ / 2 } };
+						break;
+					case "sphere":
+						defaultShape = { kind: "sphere", radius: sizeX / 2 };
+						break;
+					case "cylinder":
+						defaultShape = { kind: "capsule", radius: sizeX / 2, height: sizeY };
+						break;
+					case "plane":
+						defaultShape = { kind: "box", halfExtents: { x: sizeX / 2, y: 0.01, z: sizeZ / 2 } };
+						break;
+					default:
+						defaultShape = { kind: "box", halfExtents: { x: sizeX / 2, y: sizeY / 2, z: sizeZ / 2 } };
+				}
+				return [{ shape: defaultShape, relativeOffset: { x: 0, y: 0, z: 0 } }];
+			})();
 
 		this.ctx.objects.add({
 			id: this._physicsTestObjectId,
@@ -546,7 +825,7 @@ export class ComponentPreviewModule implements Module {
 			pieces: [{
 				asset: mesh,
 				relativePosition: { x: 0, y: 0, z: 0 },
-				hitboxes: [{ shape, relativeOffset: { x: 0, y: 0, z: 0 } }]
+				hitboxes,
 			}],
 			physics: {
 				bodyType: state.bodyType,
@@ -586,6 +865,9 @@ export class ComponentPreviewModule implements Module {
 		for (const helper of this.proportionHelpers) {
 			helper.visible = false;
 		}
+		for (const clickMesh of this.hitboxClickMeshes.values()) {
+			clickMesh.visible = false;
+		}
 	}
 
 	private _restorePreviewMeshes(): void {
@@ -601,10 +883,13 @@ export class ComponentPreviewModule implements Module {
 		for (const helper of this.proportionHelpers) {
 			helper.visible = true;
 		}
+		for (const clickMesh of this.hitboxClickMeshes.values()) {
+			clickMesh.visible = true;
+		}
 	}
 
 	private _applyWireframe(root: THREE.Object3D, enabled: boolean): void {
-		root.traverse((c) => {
+		root.traverse((c: THREE.Object3D) => {
 			if (c instanceof THREE.Mesh) {
 				const mats = Array.isArray(c.material) ? c.material : [c.material];
 				for (const m of mats) {
@@ -622,11 +907,11 @@ export class ComponentPreviewModule implements Module {
 
 		for (const group of this.meshGroups.values()) {
 			this.ctx.objects.removeRaw(group);
-			group.traverse((c) => {
+			group.traverse((c: THREE.Object3D) => {
 				if (c instanceof THREE.Mesh) {
 					c.geometry.dispose();
 					if (Array.isArray(c.material)) {
-						c.material.forEach((m) => m.dispose());
+						c.material.forEach((m: THREE.Material) => m.dispose());
 					} else {
 						c.material.dispose();
 					}
@@ -637,11 +922,11 @@ export class ComponentPreviewModule implements Module {
 
 		for (const helper of this.hitboxHelpers) {
 			this.ctx.objects.removeRaw(helper);
-			helper.traverse((c) => {
+			helper.traverse((c: THREE.Object3D) => {
 				if (c instanceof THREE.LineSegments) {
 					c.geometry.dispose();
 					if (Array.isArray(c.material)) {
-						c.material.forEach((m) => m.dispose());
+						c.material.forEach((m: THREE.Material) => m.dispose());
 					} else {
 						c.material.dispose();
 					}
@@ -649,6 +934,16 @@ export class ComponentPreviewModule implements Module {
 			});
 		}
 		this.hitboxHelpers = [];
+		this.hitboxMaterials.clear();
+
+		for (const clickMesh of this.hitboxClickMeshes.values()) {
+			this.ctx.objects.removeRaw(clickMesh);
+			clickMesh.geometry.dispose();
+			const mat = clickMesh.material;
+			if (Array.isArray(mat)) mat.forEach(m => m.dispose());
+			else mat?.dispose();
+		}
+		this.hitboxClickMeshes.clear();
 
 		this.waypointAnims.clear();
 	}
@@ -659,11 +954,11 @@ export class ComponentPreviewModule implements Module {
 		const scene = this.gltfScenes.get(meshLocalId);
 		if (scene) {
 			this.ctx.objects.removeRaw(scene);
-			scene.traverse((c) => {
+			scene.traverse((c: THREE.Object3D) => {
 				if (c instanceof THREE.Mesh) {
 					c.geometry.dispose();
 					if (Array.isArray(c.material)) {
-						c.material.forEach((m) => m.dispose());
+						c.material.forEach((m: THREE.Material) => m.dispose());
 					} else {
 						c.material.dispose();
 					}
@@ -706,11 +1001,11 @@ export class ComponentPreviewModule implements Module {
 
 		for (const helper of this.proportionHelpers) {
 			this.ctx.objects.removeRaw(helper);
-			helper.traverse((c) => {
+			helper.traverse((c: THREE.Object3D) => {
 				if (c instanceof THREE.LineSegments || c instanceof THREE.Mesh) {
 					c.geometry.dispose();
 					if (Array.isArray(c.material)) {
-						c.material.forEach((m) => m.dispose());
+						c.material.forEach((m: THREE.Material) => m.dispose());
 					} else {
 						c.material.dispose();
 					}
@@ -738,18 +1033,5 @@ export class ComponentPreviewModule implements Module {
 		return null;
 	}
 
-	setHitboxHighlight(indices: number[], hoveredIdx: number | null, selectedIdx: number | null): void {
-		for (let i = 0; i < this.hitboxHelpers.length; i++) {
-			const helper = this.hitboxHelpers[i];
-			let color = 0x00ff88;
-			if (i === selectedIdx) color = 0xff3366;
-			else if (i === hoveredIdx) color = 0xffaa00;
-			helper.traverse((c) => {
-				if (c instanceof THREE.LineSegments) {
-					const mat = c.material as THREE.LineBasicMaterial;
-					mat.color.setHex(color);
-				}
-			});
-		}
-	}
+
 }

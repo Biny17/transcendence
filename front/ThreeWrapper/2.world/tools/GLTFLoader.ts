@@ -25,9 +25,9 @@ function applyTextureWithColorSwap(group: THREE.Group, textureUrl: string, confi
 	const eyeNew = config?.eyeColor ? hexToRgb(config.eyeColor) : { r: 0xff, g: 0xff, b: 0xff };
 	return new Promise((resolve) => {
 		const loader = new THREE.TextureLoader();
-		loader.load(textureUrl, (texture) => {
+		loader.load(textureUrl, (texture: THREE.Texture) => {
 			texture.colorSpace = THREE.SRGBColorSpace;
-			const img = texture.image;
+			const img = texture.image as HTMLImageElement;
 			const canvas = document.createElement("canvas");
 			canvas.width = img.width;
 			canvas.height = img.height;
@@ -58,7 +58,7 @@ function applyTextureWithColorSwap(group: THREE.Group, textureUrl: string, confi
 			ctx.putImageData(imageData, 0, 0);
 			const newTexture = new THREE.CanvasTexture(canvas);
 			newTexture.colorSpace = THREE.SRGBColorSpace;
-			group.traverse((child) => {
+			group.traverse((child: THREE.Object3D) => {
 				if (child instanceof THREE.SkinnedMesh && child.material) {
 					const original = child.material as THREE.MeshStandardMaterial;
 					child.material = new THREE.MeshStandardMaterial({
@@ -70,7 +70,7 @@ function applyTextureWithColorSwap(group: THREE.Group, textureUrl: string, confi
 				} else if (child instanceof THREE.Mesh && child.material) {
 					const mat = child.material as THREE.MeshStandardMaterial;
 					mat.map = newTexture;
-					mat.colorSpace = THREE.SRGBColorSpace;
+					(mat as unknown as Record<string, unknown>).colorSpace = THREE.SRGBColorSpace;
 					mat.needsUpdate = true;
 				}
 			});

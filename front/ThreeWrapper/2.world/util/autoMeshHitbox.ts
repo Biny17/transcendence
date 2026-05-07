@@ -1,213 +1,220 @@
 import * as THREE from "three";
-import type { Vec3 } from "@/ThreeWrapper/2.world/tools/ObjectManager";
-import type { HitboxState } from "@/ThreeWrapper/4.module/modules/editor/components/ComponentCreatorUI";
 
 export type AutoMeshOptions = {
+	mode?: "single" | "children" | "meshes";
 	minSize?: number;
-	maxCount?: number;
-	mergeDist?: number;
-	preferShape?: "box" | "sphere" | "capsule";
-	preserveMaterials?: boolean;
 };
 
-type InternalHitbox = {
-	shape: { kind: "box"; halfExtents: Vec3 } | { kind: "sphere"; radius: number } | { kind: "capsule"; radius: number; height: number };
-	relativeOffset: Vec3;
-	rotation: Vec3;
-	materialIndex?: number;
+export type AutoHitboxResult = {
+	localId: string;
+	shape: "box" | "sphere" | "capsule";
+	sizeKind: "explicit";
+	sizeX: number;
+	sizeY: number;
+	sizeZ: number;
+	radius: number;
+	height: number;
+	offsetX: number;
+	offsetY: number;
+	offsetZ: number;
+	relativeOffsetX: number;
+	relativeOffsetY: number;
+	relativeOffsetZ: number;
+	rotationX: number;
+	rotationY: number;
+	rotationZ: number;
+	collidesWith: string[];
+	isSensor: boolean;
+	tag: string;
 };
 
-function computeMeshOBB(mesh: THREE.Mesh, root: THREE.Object3D): { halfExtents: THREE.Vector3; offset: THREE.Vector3; rotation: THREE.Euler } {
-	if (!mesh.geometry.boundingBox) {
-		mesh.geometry.computeBoundingBox();
-	}
-	const box = mesh.geometry.boundingBox!;
-	const size = new THREE.Vector3().subVectors(box.max, box.min);
+let idCounter = 0;
 
-	const geomCenter = new THREE.Vector3().addVectors(box.min, box.max).multiplyScalar(0.5);
+function generateId(prefix = "auto"): string {
+	return `${prefix}_${idCounter++}_${Date.now().toString(36).slice(-4)}`;
+}
 
-	const worldCenter = geomCenter.clone().applyMatrix4(mesh.matrixWorld);
-	const rootInverse = new THREE.Matrix4().copy(root.matrixWorld).invert();
-	const localCenter = worldCenter.clone().applyMatrix4(rootInverse);
+function computeAABB(
+	target: THREE.Object3D,
+	root: THREE.Object3D,
+): { size: THREE.Vector3; center: THREE.Vector3 } {
+	root.updateMatrixWorld(true);
+	const box = new THREE.Box3().setFromObject(target);
+	const size = box.getSize(new THREE.Vector3());
+	const center = box.getCenter(new THREE.Vector3());
+	const rootPos = new THREE.Vector3();
+	root.getWorldPosition(rootPos);
+	center.sub(rootPos);
+	return { size, center };
+}
 
-	const euler = new THREE.Euler().setFromRotationMatrix(mesh.matrixWorld, "XYZ");
-
+function buildResult(center: THREE.Vector3, size: THREE.Vector3, localId: string): AutoHitboxResult {
 	return {
-		halfExtents: new THREE.Vector3(size.x / 2, size.y / 2, size.z / 2),
-		offset: localCenter,
-		rotation: euler,
+		localId,
+		shape: "box",
+		sizeKind: "explicit",
+		sizeX: size.x,
+		sizeY: size.y,
+		sizeZ: size.z,
+		radius: 0,
+		height: 0,
+		offsetX: center.x,
+		offsetY: center.y,
+		offsetZ: center.z,
+		relativeOffsetX: 0,
+		relativeOffsetY: 0,
+		relativeOffsetZ: 0,
+		rotationX: 0,
+		rotationY: 0,
+		rotationZ: 0,
+		collidesWith: [],
+		isSensor: false,
+		tag: "",
 	};
-}
-
-function shapeFromHalfExtents(half: THREE.Vector3, preferShape: AutoMeshOptions["preferShape"]): InternalHitbox["shape"] {
-	const { x, y, z } = half;
-	const max = Math.max(x, y, z);
-	const min = Math.min(x, y, z);
-	const aspect = max / (min || 0.001);
-
-	if (y > 2 * Math.max(x, z) && aspect > 3) {
-		return { kind: "capsule", radius: Math.max(x, z), height: y * 2 };
-	}
-
-	if (Math.abs(x - y) < 0.1 && Math.abs(y - z) < 0.1) {
-		const r = Math.sqrt(x * x + y * y + z * z);
-		return { kind: "sphere", radius: r };
-	}
-
-	if (preferShape === "sphere") {
-		const r = Math.max(x, y, z);
-		return { kind: "sphere", radius: r };
-	}
-	if (preferShape === "capsule") {
-		return { kind: "capsule", radius: Math.max(x, z), height: y * 2 };
-	}
-
-	return { kind: "box", halfExtents: { x, y, z } };
-}
-
-function mergeBoxes(a: InternalHitbox, b: InternalHitbox, mergeDist: number): InternalHitbox | null {
-	if (a.shape.kind !== "box" || b.shape.kind !== "box") return null;
-
-	const dist = Math.sqrt(
-		Math.pow(a.relativeOffset.x - b.relativeOffset.x, 2) +
-		Math.pow(a.relativeOffset.y - b.relativeOffset.y, 2) +
-		Math.pow(a.relativeOffset.z - b.relativeOffset.z, 2)
-	);
-	if (dist > mergeDist) return null;
-
-	const ha = a.shape.halfExtents;
-	const hb = b.shape.halfExtents;
-	const oa = a.relativeOffset;
-	const ob = b.relativeOffset;
-
-	const minX = Math.min(oa.x - ha.x, ob.x - hb.x);
-	const maxX = Math.max(oa.x + ha.x, ob.x + hb.x);
-	const minY = Math.min(oa.y - ha.y, ob.y - hb.y);
-	const maxY = Math.max(oa.y + ha.y, ob.y + hb.y);
-	const minZ = Math.min(oa.z - ha.z, ob.z - hb.z);
-	const maxZ = Math.max(oa.z + ha.z, ob.z + hb.z);
-
-	const cx = (minX + maxX) / 2;
-	const cy = (minY + maxY) / 2;
-	const cz = (minZ + maxZ) / 2;
-	const hx = (maxX - minX) / 2;
-	const hy = (maxY - minY) / 2;
-	const hz = (maxZ - minZ) / 2;
-
-	return {
-		shape: { kind: "box", halfExtents: { x: hx, y: hy, z: hz } },
-		relativeOffset: { x: cx, y: cy, z: cz },
-	};
-}
-
-function runMerging(boxes: InternalHitbox[], mergeDist: number): InternalHitbox[] {
-	if (mergeDist <= 0) return boxes;
-	let merged = true;
-	while (merged) {
-		merged = false;
-		for (let i = 0; i < boxes.length && !merged; i++) {
-			for (let j = i + 1; j < boxes.length && !merged; j++) {
-				const m = mergeBoxes(boxes[i], boxes[j], mergeDist);
-				if (m) {
-					boxes[i] = m;
-					boxes.splice(j, 1);
-					merged = true;
-				}
-			}
-		}
-	}
-	return boxes;
 }
 
 export function generateAutoMeshHitboxes(
 	root: THREE.Object3D | THREE.Group,
-	options: AutoMeshOptions = {}
-): HitboxState[] {
-	const {
-		minSize = 0.05,
-		maxCount = 30,
-		mergeDist = 0.05,
-		preferShape = "box",
-		preserveMaterials = true,
-	} = options;
+	options: AutoMeshOptions = {},
+): AutoHitboxResult[] {
+	const mode = options.mode ?? "single";
+	const minSize = options.minSize ?? 0.05;
 
-	const hitboxesByMaterial = new Map<number, InternalHitbox[]>();
-	const rootGroup = root instanceof THREE.Group ? root : root;
+	root.updateMatrixWorld(true);
 
-	root.traverse((obj) => {
-		if (!(obj instanceof THREE.Mesh)) return;
-		if (!obj.geometry) return;
+	const targets: THREE.Object3D[] = [];
 
-		const { halfExtents, offset, rotation } = computeMeshOBB(obj, rootGroup);
-
-		const maxExtent = Math.max(halfExtents.x, halfExtents.y, halfExtents.z);
-		if (maxExtent < minSize) return;
-
-		const shape = shapeFromHalfExtents(halfExtents, preferShape);
-		const hb: InternalHitbox = {
-			shape,
-			relativeOffset: { x: offset.x, y: offset.y, z: offset.z },
-			rotation: { x: rotation.x, y: rotation.y, z: rotation.z },
-			materialIndex: preserveMaterials ? obj.material instanceof THREE.Material ? rootGroup.children.indexOf(obj) : 0 : 0,
-		};
-
-		const key = preserveMaterials ? (obj.material instanceof THREE.Material ? 0 : 0) : 0;
-		if (!hitboxesByMaterial.has(key)) hitboxesByMaterial.set(key, []);
-		hitboxesByMaterial.get(key)!.push(hb);
-	});
-
-	const allMerged: InternalHitbox[] = [];
-	for (const boxes of hitboxesByMaterial.values()) {
-		const sorted = boxes.sort((a, b) => {
-			const volA = a.shape.kind === "box" ? a.shape.halfExtents.x * a.shape.halfExtents.y * a.shape.halfExtents.z : 1;
-			const volB = b.shape.kind === "box" ? b.shape.halfExtents.x * b.shape.halfExtents.y * b.shape.halfExtents.z : 1;
-			return volB - volA;
+	if (mode === "single") {
+		targets.push(root);
+	} else if (mode === "children" && root instanceof THREE.Group) {
+		for (const child of root.children) {
+			targets.push(child);
+		}
+	} else if (mode === "meshes") {
+		root.traverse((obj: THREE.Object3D) => {
+			if (obj instanceof THREE.Mesh && obj.geometry) {
+				targets.push(obj);
+			}
 		});
-		const merged = runMerging([...sorted], mergeDist);
-		allMerged.push(...merged);
+	} else if (mode === "children" && !(root instanceof THREE.Group)) {
+		targets.push(root);
 	}
 
-	const limited = allMerged.slice(0, maxCount);
+	if (targets.length === 0) return [];
 
-	return limited.map((hb, idx) => {
-		let shape: HitboxState["shape"] = "box";
-		let sizeX = 1, sizeY = 1, sizeZ = 1, radius = 0.5, height = 1;
+	return targets
+		.map((target) => {
+			const { size, center } = computeAABB(target, root);
+			const maxExtent = Math.max(size.x, size.y, size.z);
+			if (maxExtent < minSize) return null;
+			return buildResult(center, size, generateId("cc_hb"));
+		})
+		.filter((r): r is AutoHitboxResult => r !== null);
+}
 
-		if (hb.shape.kind === "box") {
-			shape = "box";
-			sizeX = hb.shape.halfExtents.x * 2;
-			sizeY = hb.shape.halfExtents.y * 2;
-			sizeZ = hb.shape.halfExtents.z * 2;
-		} else if (hb.shape.kind === "sphere") {
-			shape = "sphere";
-			radius = hb.shape.radius;
-		} else if (hb.shape.kind === "capsule") {
-			shape = "capsule";
-			radius = hb.shape.radius;
-			height = hb.shape.height;
+function getAABB(hb: { offsetX: number; offsetY: number; offsetZ: number; sizeX: number; sizeY: number; sizeZ: number }) {
+	return {
+		minX: hb.offsetX - hb.sizeX / 2,
+		minY: hb.offsetY - hb.sizeY / 2,
+		minZ: hb.offsetZ - hb.sizeZ / 2,
+		maxX: hb.offsetX + hb.sizeX / 2,
+		maxY: hb.offsetY + hb.sizeY / 2,
+		maxZ: hb.offsetZ + hb.sizeZ / 2,
+	};
+}
+
+function intervalsOverlap(aMin: number, aMax: number, bMin: number, bMax: number): boolean {
+	return aMin <= bMax && aMax >= bMin;
+}
+
+function gap(aMin: number, aMax: number, bMin: number, bMax: number): number {
+	if (intervalsOverlap(aMin, aMax, bMin, bMax)) return 0;
+	return Math.min(Math.abs(aMax - bMin), Math.abs(aMin - bMax));
+}
+
+function isContained(inner: ReturnType<typeof getAABB>, outer: ReturnType<typeof getAABB>): boolean {
+	return (
+		inner.minX >= outer.minX &&
+		inner.maxX <= outer.maxX &&
+		inner.minY >= outer.minY &&
+		inner.maxY <= outer.maxY &&
+		inner.minZ >= outer.minZ &&
+		inner.maxZ <= outer.maxZ
+	);
+}
+
+export function mergeAABBHitboxes(results: AutoHitboxResult[], mergeDist = 0.1): AutoHitboxResult[] {
+	const boxResults = results.filter((r) => r.shape === "box");
+	const nonBoxResults = results.filter((r) => r.shape !== "box");
+
+	let merged = [...boxResults];
+	let changed = true;
+
+	while (changed) {
+		changed = false;
+		for (let i = 0; i < merged.length; i++) {
+			for (let j = i + 1; j < merged.length; j++) {
+				const a = getAABB(merged[i]);
+				const b = getAABB(merged[j]);
+
+				const overlapX = intervalsOverlap(a.minX, a.maxX, b.minX, b.maxX);
+				const overlapY = intervalsOverlap(a.minY, a.maxY, b.minY, b.maxY);
+				const overlapZ = intervalsOverlap(a.minZ, a.maxZ, b.minZ, b.maxZ);
+
+				const axesOverlap = (overlapX ? 1 : 0) + (overlapY ? 1 : 0) + (overlapZ ? 1 : 0);
+
+				if (axesOverlap === 3 || (axesOverlap >= 2 && gap(a.minX, a.maxX, b.minX, b.maxX) <= mergeDist && gap(a.minY, a.maxY, b.minY, b.maxY) <= mergeDist && gap(a.minZ, a.maxZ, b.minZ, b.maxZ) <= mergeDist)) {
+					const minX = Math.min(a.minX, b.minX);
+					const maxX = Math.max(a.maxX, b.maxX);
+					const minY = Math.min(a.minY, b.minY);
+					const maxY = Math.max(a.maxY, b.maxY);
+					const minZ = Math.min(a.minZ, b.minZ);
+					const maxZ = Math.max(a.maxZ, b.maxZ);
+
+					const newHb: AutoHitboxResult = {
+						...merged[i],
+						localId: generateId("cc_hb"),
+						sizeX: maxX - minX,
+						sizeY: maxY - minY,
+						sizeZ: maxZ - minZ,
+						offsetX: (minX + maxX) / 2,
+						offsetY: (minY + maxY) / 2,
+						offsetZ: (minZ + maxZ) / 2,
+						rotationX: 0,
+						rotationY: 0,
+						rotationZ: 0,
+					};
+
+					merged = [...merged.slice(0, i), ...merged.slice(i + 1, j), ...merged.slice(j + 1), newHb];
+					changed = true;
+					break;
+				}
+			}
+			if (changed) break;
 		}
+	}
 
-		return {
-			localId: `auto_${idx}_${crypto.randomUUID().slice(0, 8)}`,
-			shape,
-			sizeKind: "explicit" as const,
-			sizeX,
-			sizeY,
-			sizeZ,
-			radius,
-			height,
-			offsetX: hb.relativeOffset.x,
-			offsetY: hb.relativeOffset.y,
-			offsetZ: hb.relativeOffset.z,
-			relativeOffsetX: hb.relativeOffset.x,
-			relativeOffsetY: hb.relativeOffset.y,
-			relativeOffsetZ: hb.relativeOffset.z,
-			rotationX: THREE.MathUtils.radToDeg(hb.rotation.x),
-			rotationY: THREE.MathUtils.radToDeg(hb.rotation.y),
-			rotationZ: THREE.MathUtils.radToDeg(hb.rotation.z),
-			collidesWith: [],
-			isSensor: false,
-			tag: "",
-		};
-	});
+	return [...merged, ...nonBoxResults];
+}
+
+export function removeContainedHitboxes(results: AutoHitboxResult[]): AutoHitboxResult[] {
+	const boxResults = results.filter((r) => r.shape === "box");
+	const nonBoxResults = results.filter((r) => r.shape !== "box");
+
+	const kept = new Set<number>();
+	for (let i = 0; i < boxResults.length; i++) {
+		let contained = false;
+		for (let j = 0; j < boxResults.length; j++) {
+			if (i === j) continue;
+			const a = getAABB(boxResults[i]);
+			const b = getAABB(boxResults[j]);
+			if (isContained(a, b) && !isContained(b, a)) {
+				contained = true;
+				break;
+			}
+		}
+		if (!contained) kept.add(i);
+	}
+
+	return [...Array.from(kept).map((i) => boxResults[i]), ...nonBoxResults];
 }

@@ -25,9 +25,12 @@ export class DemoWorld extends World {
 			new THREE.BoxGeometry(1, 1, 1),
 			new THREE.MeshPhongMaterial({ color: 0xff4444 }),
 			)*/
-		this.cube.position.set(0, 8, 0)
-		this.cube.castShadow = true
-		const cubeObj = this.ctx.objects.add({ type: 'map', name: "cube", pieces: [{ asset: this.cube, relativePosition: { x: 0, y: 0, z: 0 }, hitboxes: [{ shape: { kind: 'auto' }, relativeOffset: { x: 0, y: 0, z: 0 } }] }], physics: { bodyType: 'static' } });
+		if (this.cube) {
+			this.cube.position.set(0, 8, 0)
+			this.cube.castShadow = true
+		}
+		const cubeAsset = this.cube ?? new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshPhongMaterial())
+		const cubeObj = this.ctx.objects.add({ type: 'map', name: "cube", pieces: [{ asset: cubeAsset, relativePosition: { x: 0, y: 0, z: 0 }, hitboxes: [{ shape: { kind: 'auto' }, relativeOffset: { x: 0, y: 0, z: 0 } }] }], physics: { bodyType: 'static' } });
 		this.ctx.camera.position.set(5, 8, 12)
 		this.ctx.camera.lookAt(0, 2, 0)
 		const floor = GeometryFactory.box({width:5, depth:5})

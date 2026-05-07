@@ -189,7 +189,7 @@ useEffect(function () {
               <label className="w-24 text-right text-[15px] text-slate-200">Pseudo</label>
               <input
                 type="text"
-                value={form.username}
+                value={form.username ?? ""}
                 className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"
                 onChange={e => setForm({ ...form, username: e.target.value })}
                 placeholder={error ? error : "Your Pseudo here"}
@@ -200,7 +200,7 @@ useEffect(function () {
             <label className="w-24 text-right text-[15px] text-slate-200">Email</label>
             <input
               type="email"
-              value={form.email}
+              value={form.email ?? ""}
               className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"
               onChange={e => setForm({ ...form, email: e.target.value })}
               placeholder={error ? error : "Your Email here"}
@@ -211,7 +211,7 @@ useEffect(function () {
             <label className="w-24 text-right text-[15px] text-slate-200">Age</label>
             <input
               type="age"
-              value={form.age}
+              value={form.age ?? ""}
               className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"
               onChange={e => setForm({ ...form, age: e.target.value })}
               placeholder={error ? error : "Your Age here"}
@@ -223,7 +223,7 @@ useEffect(function () {
             <input
               id = "password"
               type="password"
-              value={form.password}
+              value={form.password ?? ""}
               className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"
               onChange={e => setForm({ ...form, password: e.target.value })}
               placeholder={error ? error : "Your Password here"}

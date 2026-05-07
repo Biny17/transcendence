@@ -1,10 +1,14 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "/schemas/component.schema.json",
+  "$id": "./component.schema.json",
   "title": "Map Component",
   "description": "Reusable 3D object definition (prefab). Referenced by map files via the 'component' field.",
   "type": "object",
-  "required": ["id", "mesh"],
+  "required": ["id"],
+  "anyOf": [
+    { "required": ["mesh"] },
+    { "required": ["meshes"] }
+  ],
   "additionalProperties": false,
   "properties": {
     "id": {
@@ -49,6 +53,23 @@
           }
         }
       ]
+    },
+    "meshes": {
+      "type": "array",
+      "description": "Multiple meshes with individual transforms",
+      "items": {
+        "type": "object",
+        "required": ["gltf"],
+        "additionalProperties": false,
+        "properties": {
+          "gltf": {
+            "type": "string",
+            "description": "Path to .gltf or .glb file"
+          },
+          "scale": { "$ref": "#/$defs/vec3" },
+          "offset": { "$ref": "#/$defs/vec3" }
+        }
+      }
     },
     "physics": {
       "type": "object",
@@ -205,7 +226,14 @@
             "waypoints": {
               "type": "array",
               "minItems": 2,
-              "items": { "$ref": "#/$defs/vec3" },
+              "items": {
+                "type": "object",
+                "required": ["position"],
+                "properties": {
+                  "position": { "$ref": "#/$defs/vec3" },
+                  "rotation": { "$ref": "#/$defs/vec3" }
+                }
+              },
               "description": "Positions RELATIVE to the object's spawn position in the map. {x:0,y:0,z:0} = stay at origin."
             },
             "speed":           { "type": "number", "minimum": 0, "description": "World units per second" },

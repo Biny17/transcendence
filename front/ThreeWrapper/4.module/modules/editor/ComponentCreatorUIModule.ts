@@ -1,12 +1,11 @@
 import { createElement } from "react";
-import * as THREE from "three";
 import type { Module, WorldContext } from "@/ThreeWrapper/4.module";
 import { ModuleKey } from "@/ThreeWrapper/4.module";
 import type { UIModule } from "@/ThreeWrapper/4.module/modules/ui/UIModule";
 import type { ComponentPreviewModule } from "./ComponentPreviewModule";
 import type { ComponentState } from "./components/ComponentCreatorUI";
 import { ComponentCreatorUI } from "./components/ComponentCreatorUI";
-import { downloadYaml, downloadZip } from "./componentExport";
+import { buildYamlString, parseYamlToState } from "./componentExport";
 export class ComponentCreatorUIModule implements Module {
 	readonly type = ModuleKey.componentCreatorUI;
 	readonly requires = [ModuleKey.ui, ModuleKey.componentCreatorPreview] as const;
@@ -14,8 +13,9 @@ export class ComponentCreatorUIModule implements Module {
 	private preview: ComponentPreviewModule | null = null;
 	private lastWireframe = false;
 	private physicsTestActive = false;
-	private gltfSceneRef: THREE.Group | null = null;
-	constructor(_dep1: typeof ModuleKey.ui, _dep2: typeof ModuleKey.componentCreatorPreview) {}
+	constructor(_dep1: typeof ModuleKey.ui, _dep2: typeof ModuleKey.componentCreatorPreview) {
+		void _dep1; void _dep2;
+	}
 	async init(ctx: WorldContext): Promise<void> {
 		this.ui = ctx.getModule<UIModule>(ModuleKey.ui) ?? null;
 		this.preview = ctx.getModule<ComponentPreviewModule>(ModuleKey.componentCreatorPreview) ?? null;
@@ -98,32 +98,56 @@ export class ComponentCreatorUIModule implements Module {
 						}
 					}
 					for (const [meshId] of gltfLoadedMeshes) {
-						if (!state.meshes.find((m) => m.localId === meshId)) {
+						const currentMesh = state.meshes.find((m) => m.localId === meshId);
+						if (!currentMesh || currentMesh.meshKind !== "gltf") {
+							this.preview?.removeGltfModel(meshId);
 							gltfLoadedMeshes.delete(meshId);
 						}
 					}
 				},
-				onExportYaml: (state: ComponentState) => {
-					downloadYaml(state);
+				onSave: async (state: ComponentState) => {
+					const yaml = buildYamlString(state);
+					const res = await fetch('/api/components', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ id: state.id, yaml }),
+					});
+					if (!res.ok) {
+						const err = await res.json();
+						throw new Error(err.error || 'Failed to save component');
+					}
 				},
-				onExportZip: (state: ComponentState) => {
-					return downloadZip(state);
+				onLoadComponentList: async () => {
+					const res = await fetch('/api/components');
+					if (!res.ok) return [];
+					return res.json();
+				},
+				onLoadComponent: async (path: string) => {
+					const res = await fetch(path);
+					if (!res.ok) return null;
+					const text = await res.text();
+					try {
+						return parseYamlToState(text);
+					} catch {
+						return null;
+					}
 				},
 				onGltfLoad: async (meshLocalId: string, url: string, manager) => {
 					gltfLoadedMeshes.set(meshLocalId, url);
 					return this.preview?.loadGltfModel(meshLocalId, url, manager) ?? [];
 				},
-				onPlayAnimation: (clipName) => {
-					const firstAnimMesh = defaultState.meshes[0]?.localId;
-					if (firstAnimMesh) {
-						this.preview?.playAnimation(firstAnimMesh, clipName);
+				onPlayAnimation: (meshLocalId, clipName, speed, loop) => {
+					this.preview?.playAnimation(meshLocalId, clipName, speed, loop);
+				},
+				onStopAnimation: (meshLocalId) => {
+					this.preview?.stopAnimation(meshLocalId);
+				},
+				onPlayAnimationItem: (anim) => {
+					if (anim.type === 'clip') {
+						this.preview?.playAnimation(anim.targetMeshId, anim.clipName, anim.speed, anim.loop);
+					} else if (anim.type === 'waypoints') {
+						this.preview?.startWaypointAnimation(anim);
 					}
-				},
-				onStopAnimation: () => {
-					this.preview?.stopAnimation();
-				},
-				onAnimSpeedChange: (speed) => {
-					this.preview?.setAnimationSpeed(speed);
 				},
 				onHelpersChange: (config) => {
 					this.preview?.setHelpers(config);
@@ -136,17 +160,17 @@ export class ComponentCreatorUIModule implements Module {
 					this.physicsTestActive = false;
 					this.preview?.stopPhysicsTest();
 				},
-				onGenerateHitboxes: async () => {
-					this.gltfSceneRef = this.preview?.getPreviewRoot() ?? null;
-					return this.gltfSceneRef;
+				onAutoGenerateHitboxes: (state, options) => {
+					return this.preview?.autoGenerateHitboxes(state, options) ?? [];
 				},
-				onHitboxHover: (idx) => {
+				onSceneHitboxSelect: (onSelect) => {
+					if (this.preview) {
+						this.preview.onHitboxClick = (localId) => onSelect(localId);
+					}
 				},
-				onHitboxSelect: (idx) => {
-				}
+
 			})
 		);
-		this.ui?.enablePointer("component-creator");
 	}
 	update(delta: number): void {
 		this.preview?.update(delta);

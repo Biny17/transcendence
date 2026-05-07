@@ -59,7 +59,6 @@ export class EditorHotbarModule implements Module {
 				onEnvChange: (env) => placement?.setEnv(env)
 			})
 		);
-		this.ui?.enablePointer("editor-hotbar");
 	}
 	dispose(): void {
 		this.ui?.hide("editor-hotbar");

@@ -145,6 +145,11 @@ export class PhysicsWorld {
       if (hb.relativeOffset) {
         colliderDesc.setTranslation(hb.relativeOffset.x, hb.relativeOffset.y, hb.relativeOffset.z)
       }
+      if (hb.relativeRotation) {
+        const euler = new THREE.Euler(hb.relativeRotation.x, hb.relativeRotation.y, hb.relativeRotation.z)
+        const quat = new THREE.Quaternion().setFromEuler(euler)
+        colliderDesc.setRotation(new RAPIER.Quaternion(quat.x, quat.y, quat.z, quat.w))
+      }
       colliders.push(this.world.createCollider(colliderDesc, body))
     }
     const bottomOffset = this.computeBottomOffset(hitboxes[0]?.shape)

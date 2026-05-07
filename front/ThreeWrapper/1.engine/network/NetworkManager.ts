@@ -85,9 +85,6 @@ export class NetworkManager {
   sendPlayerReady(): void {
     this.send(CLIENT_MSG.PLAYER_READY, {})
   }
-  sendAssetsReady(): void {
-    this.send(CLIENT_MSG.ASSETS_READY, {})
-  }
   sendPlayerInput(input: PlayerInputPayload): void {
     this.send(CLIENT_MSG.PLAYER_INPUT, input)
   }

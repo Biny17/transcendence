@@ -1,4 +1,4 @@
-# $schema: /game/components/component.schema.json
+# $schema: ./component.schema.json
 # ---
 id: camera
 mesh:

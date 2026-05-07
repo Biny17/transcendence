@@ -26,7 +26,6 @@ export class OnlineModeHandler {
       try {
         const world = await loadWorldById(payload.worldId)
         await this.load(world)
-        nm.sendAssetsReady()
       } catch (e) {
         console.error(`[Engine] Failed to load world "${payload.worldId}":`, e)
         this.pendingWorldId = null

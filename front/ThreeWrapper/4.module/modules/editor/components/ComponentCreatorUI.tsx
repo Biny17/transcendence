@@ -1,9 +1,8 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { extractGltfZip } from "../gltfVirtualFs";
-import { HitboxEditorPanel } from "./HitboxEditorPanel";
-import { useHitboxEditor } from "./useHitboxEditor";
 import type { AutoMeshOptions } from "@/ThreeWrapper/2.world/util/autoMeshHitbox";
+import { mergeAABBHitboxes, removeContainedHitboxes } from "@/ThreeWrapper/2.world/util/autoMeshHitbox";
 import * as THREE from "three";
 export type TextureSlot = {
 	file: File | null;
@@ -62,8 +61,10 @@ export type MeshPartState = {
 export type AnimationState = {
 	localId: string;
 	name: string;
-	targetMeshId: string; 
+	targetMeshId: string;
+	type: 'waypoints' | 'clip';
 	waypoints: { position: { x: number; y: number; z: number }; rotation?: { x: number; y: number; z: number } }[];
+	clipName: string;
 	speed: number;
 	loop: boolean;
 	autoPlay: boolean;
@@ -84,18 +85,18 @@ export type ComponentState = {
 type Props = {
 	onMount: (updater: (state: ComponentState) => void) => void;
 	onStateChange: (state: ComponentState) => void;
-	onExportYaml: (state: ComponentState) => void;
-	onExportZip: (state: ComponentState) => Promise<void>;
+	onSave: (state: ComponentState) => Promise<void>;
+	onLoadComponentList: () => Promise<string[]>;
+	onLoadComponent: (path: string) => Promise<ComponentState | null>;
 	onGltfLoad: (meshLocalId: string, url: string, manager?: THREE.LoadingManager) => Promise<string[]>;
-	onPlayAnimation: (clipName: string) => void;
-	onStopAnimation: () => void;
-	onAnimSpeedChange: (speed: number) => void;
+	onPlayAnimation: (meshLocalId: string, clipName: string, speed?: number, loop?: boolean) => void;
+	onStopAnimation: (meshLocalId?: string) => void;
+	onPlayAnimationItem: (anim: AnimationState) => void;
 	onHelpersChange: (config: { player: boolean; unitCube: boolean }) => void;
 	onStartPhysicsTest: (state: ComponentState) => void;
 	onStopPhysicsTest: () => void;
-	onGenerateHitboxes: () => Promise<THREE.Group | null>;
-	onHitboxHover: (idx: number | null) => void;
-	onHitboxSelect: (idx: number) => void;
+	onAutoGenerateHitboxes: (state: ComponentState, options?: AutoMeshOptions) => HitboxState[];
+	onSceneHitboxSelect?: (onSelect: (id: string | null) => void) => void;
 };
 const C = {
 	bg: "rgba(10, 10, 28, 0.88)",
@@ -152,35 +153,8 @@ function ModeBtn({ label, selected, onClick }: { label: string; selected: boolea
 		</button>
 	);
 }
-export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExportZip, onGltfLoad, onPlayAnimation, onStopAnimation, onAnimSpeedChange, onHelpersChange, onStartPhysicsTest, onStopPhysicsTest, onGenerateHitboxes, onHitboxHover, onHitboxSelect }: Props) {
-	const hitboxEditor = useHitboxEditor([]);
-	const handleGenerateHitboxes = useCallback(async (opts: AutoMeshOptions) => {
-		const scene = await onGenerateHitboxes();
-		if (scene) {
-			hitboxEditor.generate(scene, opts);
-		}
-	}, [onGenerateHitboxes, hitboxEditor]);
-	const handleHitboxHover = useCallback((idx: number | null) => {
-		hitboxEditor.setHoveredIdx(idx);
-		onHitboxHover(idx);
-	}, [onHitboxHover]);
-	const handleHitboxSelect = useCallback((idx: number) => {
-		hitboxEditor.setSelectedIdx(idx);
-		onHitboxSelect(idx);
-	}, [onHitboxSelect]);
-	const handleMergeHitboxes = useCallback(() => {
-		hitboxEditor.mergeSelected();
-	}, [hitboxEditor]);
-	const handleEditorDeleteHitbox = useCallback(() => {
-		hitboxEditor.deleteSelected();
-	}, [hitboxEditor]);
-	const handleClearHitboxSelection = useCallback(() => {
-		hitboxEditor.clearSelection();
-	}, [hitboxEditor]);
-	const handleHitboxUpdate = useCallback((idx: number, updates: Partial<HitboxState>) => {
-		hitboxEditor.updateHitbox(idx, updates);
-	}, [hitboxEditor]);
-	const [state, setState] = useState<ComponentState>({
+export function ComponentCreatorUI({ onMount, onStateChange, onSave, onLoadComponentList, onLoadComponent, onGltfLoad, onPlayAnimation, onStopAnimation, onPlayAnimationItem, onHelpersChange, onStartPhysicsTest, onStopPhysicsTest, onAutoGenerateHitboxes, onSceneHitboxSelect }: Props) {
+	const [state, _setState] = useState<ComponentState>({
 		id: "my_component",
 		meshes: [
 			{
@@ -228,18 +202,62 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 		hitboxes: [],
 		animations: []
 	});
+	const stateRef = useRef(state);
+	stateRef.current = state;
+	const histRef = useRef({ past: [] as ComponentState[], future: [] as ComponentState[] });
+	const [canUndo, setCanUndo] = useState(false);
+	const [canRedo, setCanRedo] = useState(false);
+	const [componentList, setComponentList] = useState<string[]>([]);
+	const [selectedLoadPath, setSelectedLoadPath] = useState<string>("");
+	const [loadedPath, setLoadedPath] = useState<string | null>(null);
+	const [isSaving, setIsSaving] = useState(false);
+	const [loadError, setLoadError] = useState<string | null>(null);
+	const setState = useCallback((updater: ComponentState | ((prev: ComponentState) => ComponentState)) => {
+		histRef.current.past.push(structuredClone(stateRef.current));
+		histRef.current.future = [];
+		if (histRef.current.past.length > 100) histRef.current.past.shift();
+		setCanUndo(true);
+		setCanRedo(false);
+		const next = typeof updater === "function" ? updater(stateRef.current) : updater;
+		_setState(next);
+	}, []);
+	const undo = useCallback(() => {
+		const { past, future } = histRef.current;
+		if (past.length === 0) return;
+		const prev = past.pop()!;
+		future.push(structuredClone(stateRef.current));
+		setCanUndo(past.length > 0);
+		setCanRedo(true);
+		_setState(prev);
+	}, []);
+	const redo = useCallback(() => {
+		const { past, future } = histRef.current;
+		if (future.length === 0) return;
+		const next = future.pop()!;
+		past.push(structuredClone(stateRef.current));
+		setCanUndo(true);
+		setCanRedo(future.length > 0);
+		_setState(next);
+	}, []);
 	const [expandedMeshParts, setExpandedMeshParts] = useState<Set<string>>(new Set());
 	const [expandedHitboxes, setExpandedHitboxes] = useState<Set<string>>(new Set());
 	const [expandedAnimations, setExpandedAnimations] = useState<Set<string>>(new Set());
-	const [isExporting, setIsExporting] = useState(false);
+	const [autoGenOptions, setAutoGenOptions] = useState<AutoMeshOptions>({
+		mode: "single", minSize: 0.05,
+	});
+	const [showAutoGenPanel, setShowAutoGenPanel] = useState(false);
+	const [autoGenStatus, setAutoGenStatus] = useState<string | null>(null);
+	const [autoGenReplace, setAutoGenReplace] = useState(true);
+	const [selectedHitboxId, setSelectedHitboxId] = useState<string | null>(null);
+	const [mergeMode, setMergeMode] = useState<"idle" | "select-target">("idle");
+	const [mergeSourceId, setMergeSourceId] = useState<string | null>(null);
 	const [gltfLoadMode, setGltfLoadMode] = useState<"upload" | "server">("upload");
-	const [gltfClips, setGltfClips] = useState<string[]>([]);
+	const [gltfClipsByMesh, setGltfClipsByMesh] = useState<Record<string, string[]>>({});
 	const [activeClip, setActiveClip] = useState<string | null>(null);
 	const [gltfLoading, setGltfLoading] = useState(false);
 	const [gltfError, setGltfError] = useState<string | null>(null);
 	const [gltfFileName, setGltfFileName] = useState<string | null>(null);
 	const [gltfZipFileName, setGltfZipFileName] = useState<string | null>(null);
-	const [animSpeed, setAnimSpeed] = useState(1.0);
 	const [helpers, setHelpers] = useState({ player: false, unitCube: false });
 	const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 	const gltfUploadRefs = useRef<Record<string, HTMLInputElement | null>>({});
@@ -248,8 +266,64 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 		onMount(setState);
 	}, [onMount]);
 	useEffect(() => {
+		onLoadComponentList().then(list => {
+			setComponentList(list);
+		}).catch(() => {
+			setComponentList([]);
+		});
+	}, [onLoadComponentList]);
+	useEffect(() => {
 		onStateChange(state);
 	}, [state, onStateChange]);
+	useEffect(() => {
+		const handler = (e: KeyboardEvent) => {
+			if ((e.target as HTMLElement).tagName === "INPUT") return;
+			if (e.ctrlKey && !e.shiftKey && e.key === "z") { e.preventDefault(); undo(); }
+			if (e.ctrlKey && e.shiftKey && e.key === "Z") { e.preventDefault(); redo(); }
+		};
+		window.addEventListener("keydown", handler);
+		return () => window.removeEventListener("keydown", handler);
+	}, [undo, redo]);
+	useEffect(() => {
+		onSceneHitboxSelect?.((id: string | null) => {
+			if (mergeMode === "select-target" && mergeSourceId && id && id !== mergeSourceId) {
+				const hbA = state.hitboxes.find(h => h.localId === mergeSourceId);
+				const hbB = state.hitboxes.find(h => h.localId === id);
+				if (hbA && hbB) {
+					setState(prev => {
+						const others = prev.hitboxes.filter(h => h.localId !== mergeSourceId && h.localId !== id);
+						const aMinX = hbA.offsetX - hbA.sizeX / 2, aMaxX = hbA.offsetX + hbA.sizeX / 2;
+						const aMinY = hbA.offsetY - hbA.sizeY / 2, aMaxY = hbA.offsetY + hbA.sizeY / 2;
+						const aMinZ = hbA.offsetZ - hbA.sizeZ / 2, aMaxZ = hbA.offsetZ + hbA.sizeZ / 2;
+						const bMinX = hbB.offsetX - hbB.sizeX / 2, bMaxX = hbB.offsetX + hbB.sizeX / 2;
+						const bMinY = hbB.offsetY - hbB.sizeY / 2, bMaxY = hbB.offsetY + hbB.sizeY / 2;
+						const bMinZ = hbB.offsetZ - hbB.sizeZ / 2, bMaxZ = hbB.offsetZ + hbB.sizeZ / 2;
+						const merged: HitboxState = {
+							...hbA,
+							localId: crypto.randomUUID(),
+							sizeX: Math.max(aMaxX, bMaxX) - Math.min(aMinX, bMinX),
+							sizeY: Math.max(aMaxY, bMaxY) - Math.min(aMinY, bMinY),
+							sizeZ: Math.max(aMaxZ, bMaxZ) - Math.min(aMinZ, bMinZ),
+							offsetX: (Math.min(aMinX, bMinX) + Math.max(aMaxX, bMaxX)) / 2,
+							offsetY: (Math.min(aMinY, bMinY) + Math.max(aMaxY, bMaxY)) / 2,
+							offsetZ: (Math.min(aMinZ, bMinZ) + Math.max(aMaxZ, bMaxZ)) / 2,
+						};
+						return { ...prev, hitboxes: [...others, merged] };
+					});
+				}
+				setMergeMode("idle");
+				setMergeSourceId(null);
+				setSelectedHitboxId(null);
+				return;
+			}
+			if (mergeMode === "select-target" && !id) {
+				setMergeMode("idle");
+				setMergeSourceId(null);
+				return;
+			}
+			setSelectedHitboxId(id);
+		});
+	}, [onSceneHitboxSelect, mergeMode, mergeSourceId, state.hitboxes, onAutoGenerateHitboxes]);
 	const toggleMeshPart = (localId: string) => {
 		setExpandedMeshParts((prev) => {
 			const next = new Set(prev);
@@ -276,7 +350,7 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 	};
 	useEffect(() => {
 		if (state.meshes.every((m) => m.meshKind === "primitive")) {
-			setGltfClips([]);
+			setGltfClipsByMesh({});
 			setActiveClip(null);
 			setGltfLoading(false);
 			setGltfError(null);
@@ -287,11 +361,7 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 	const handleStateChange = (updates: Partial<ComponentState>) => {
 		setState((prev) => ({ ...prev, ...updates }));
 	};
-	useEffect(() => {
-		if (hitboxEditor.hitboxes.length > 0) {
-			setState((prev) => ({ ...prev, hitboxes: hitboxEditor.hitboxes }));
-		}
-	}, [hitboxEditor.hitboxes]);
+
 	const handleAddMeshPart = () => {
 		const newMesh: MeshPartState = {
 			localId: crypto.randomUUID(),
@@ -373,14 +443,14 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 		if (!file) return;
 		setGltfLoading(true);
 		setGltfError(null);
-		setGltfClips([]);
 		setActiveClip(null);
 		try {
 			const url = URL.createObjectURL(file);
 			setGltfFileName(file.name);
 			handleMeshPartChange(meshLocalId, { gltfPreviewUrl: url, gltfPath: file.name });
 			const clips = await onGltfLoad(meshLocalId, url);
-			setGltfClips(clips);
+			setGltfClipsByMesh(prev => ({ ...prev, [meshLocalId]: clips }));
+			setState(prev => addClipAnimations(prev, meshLocalId, clips));
 		} catch (e) {
 			setGltfError((e as Error).message || "Failed to load GLTF");
 			setGltfFileName(null);
@@ -392,14 +462,14 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 		if (!file) return;
 		setGltfLoading(true);
 		setGltfError(null);
-		setGltfClips([]);
 		setActiveClip(null);
 		try {
 			const vfs = await extractGltfZip(file);
 			setGltfZipFileName(file.name);
 			handleMeshPartChange(meshLocalId, { gltfPreviewUrl: vfs.mainUrl, gltfPath: file.name });
 			const clips = await onGltfLoad(meshLocalId, vfs.mainUrl, vfs.manager);
-			setGltfClips(clips);
+			setGltfClipsByMesh(prev => ({ ...prev, [meshLocalId]: clips }));
+			setState(prev => addClipAnimations(prev, meshLocalId, clips));
 		} catch (e) {
 			setGltfError((e as Error).message || "Failed to load ZIP");
 			setGltfZipFileName(null);
@@ -408,15 +478,15 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 		}
 	};
 	const handleMeshGltfServerPath = async (meshLocalId: string) => {
-		const mesh = state.meshes.find((m) => m.localId === meshLocalId);
+		const mesh = stateRef.current.meshes.find((m) => m.localId === meshLocalId);
 		if (!mesh?.gltfPath) return;
 		setGltfLoading(true);
 		setGltfError(null);
-		setGltfClips([]);
 		setActiveClip(null);
 		try {
 			const clips = await onGltfLoad(meshLocalId, mesh.gltfPath);
-			setGltfClips(clips);
+			setGltfClipsByMesh(prev => ({ ...prev, [meshLocalId]: clips }));
+			setState(prev => addClipAnimations(prev, meshLocalId, clips));
 			setGltfFileName(null);
 			setGltfZipFileName(null);
 			handleMeshPartChange(meshLocalId, { gltfPreviewUrl: mesh.gltfPath });
@@ -476,6 +546,9 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 			relativeOffsetX: 0,
 			relativeOffsetY: 0,
 			relativeOffsetZ: 0,
+			rotationX: 0,
+			rotationY: 0,
+			rotationZ: 0,
 			collidesWith: [],
 			isSensor: false,
 			tag: ""
@@ -507,17 +580,70 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 			)
 		}));
 	};
+	const handleGlobalCollidesWith = (layer: string) => {
+		setState((prev) => ({
+			...prev,
+			hitboxes: prev.hitboxes.map((h) => ({
+				...h,
+				collidesWith: h.collidesWith.includes(layer)
+					? h.collidesWith.filter((l) => l !== layer)
+					: [...h.collidesWith, layer],
+			})),
+		}));
+	};
+	const addClipAnimations = (prev: ComponentState, meshLocalId: string, clips: string[]): ComponentState => {
+		const existingClipNames = new Set(
+			prev.animations.filter(a => a.targetMeshId === meshLocalId && a.type === 'clip').map(a => a.clipName)
+		);
+		const newClips = clips
+			.filter(c => !existingClipNames.has(c))
+			.map(clipName => ({
+				localId: crypto.randomUUID(),
+				name: clipName,
+				targetMeshId: meshLocalId,
+				type: 'clip' as const,
+				clipName,
+				waypoints: [],
+				speed: 1,
+				loop: true,
+				autoPlay: false,
+				pauseAtWaypoint: 0,
+			}));
+		if (newClips.length === 0) return prev;
+		return { ...prev, animations: [...prev.animations, ...newClips] };
+	};
 	const handleAddAnimation = () => {
 		const firstMeshId = state.meshes[0]?.localId ?? "";
 		const newAnim: AnimationState = {
 			localId: crypto.randomUUID(),
 			name: `anim_${state.animations.length + 1}`,
 			targetMeshId: firstMeshId,
+			type: 'waypoints',
 			waypoints: [{ position: { x: 0, y: 0, z: 0 } }],
+			clipName: '',
 			speed: 2,
 			loop: true,
 			autoPlay: true,
 			pauseAtWaypoint: 0
+		};
+		setState((prev) => ({ ...prev, animations: [...prev.animations, newAnim] }));
+	};
+	const handleAddClipAnimation = () => {
+		const gltfMeshIds = state.meshes.filter(m => gltfClipsByMesh[m.localId]?.length > 0);
+		if (gltfMeshIds.length === 0) return;
+		const meshLocalId = gltfMeshIds[0].localId;
+		const clips = gltfClipsByMesh[meshLocalId];
+		const newAnim: AnimationState = {
+			localId: crypto.randomUUID(),
+			name: clips[0],
+			targetMeshId: meshLocalId,
+			type: 'clip',
+			clipName: clips[0],
+			waypoints: [],
+			speed: 1,
+			loop: true,
+			autoPlay: false,
+			pauseAtWaypoint: 0,
 		};
 		setState((prev) => ({ ...prev, animations: [...prev.animations, newAnim] }));
 	};
@@ -576,12 +702,31 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 			)
 		}));
 	};
-	const handleExportZip = async () => {
-		setIsExporting(true);
+	const handleSave = async () => {
+		setIsSaving(true);
+		setLoadError(null);
 		try {
-			await onExportZip(state);
+			await onSave(state);
+			setLoadedPath(`/game/components/${state.id}.yaml`);
+		} catch (e) {
+			setLoadError((e as Error).message || 'Failed to save');
 		} finally {
-			setIsExporting(false);
+			setIsSaving(false);
+		}
+	};
+	const handleLoad = async () => {
+		if (!selectedLoadPath) return;
+		setLoadError(null);
+		try {
+			const loaded = await onLoadComponent(selectedLoadPath);
+			if (loaded) {
+				setState(loaded);
+				setLoadedPath(selectedLoadPath);
+			} else {
+				setLoadError('Failed to load component');
+			}
+		} catch (e) {
+			setLoadError((e as Error).message || 'Failed to load component');
 		}
 	};
 	useEffect(() => {
@@ -634,7 +779,8 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 				fontSize: "12px",
 				color: C.text,
 				userSelect: "none",
-				overflow: "hidden"
+				overflow: "hidden",
+				pointerEvents: "auto"
 			}}>
 			{}
 			<div
@@ -646,9 +792,34 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 					letterSpacing: "0.08em",
 					color: C.accent,
 					textTransform: "uppercase",
-					flex: "0 0 auto"
+					flex: "0 0 auto",
+					display: "flex",
+					justifyContent: "space-between",
+					alignItems: "center",
 				}}>
-				Component Creator
+				<span>Component Creator</span>
+				<span style={{ display: "flex", gap: "2px" }}>
+					<button onClick={undo} disabled={!canUndo} title="Undo (Ctrl+Z)"
+						style={{
+							fontSize: "13px", padding: "1px 5px",
+							background: "transparent",
+							border: `1px solid ${canUndo ? C.btnBorder : C.btnDisabledBorder}`,
+							borderRadius: "3px",
+							color: canUndo ? C.text : C.textDim,
+							cursor: canUndo ? "pointer" : "default",
+							fontFamily: "monospace", lineHeight: "1.2",
+						}}>↶</button>
+					<button onClick={redo} disabled={!canRedo} title="Redo (Ctrl+Shift+Z)"
+						style={{
+							fontSize: "13px", padding: "1px 5px",
+							background: "transparent",
+							border: `1px solid ${canRedo ? C.btnBorder : C.btnDisabledBorder}`,
+							borderRadius: "3px",
+							color: canRedo ? C.text : C.textDim,
+							cursor: canRedo ? "pointer" : "default",
+							fontFamily: "monospace", lineHeight: "1.2",
+						}}>↷</button>
+				</span>
 			</div>
 			{}
 			<div style={{ flex: 1, overflowY: "auto" }}>
@@ -656,6 +827,39 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 				<div style={{ borderTop: `1px solid ${C.border}`, padding: "8px 12px" }}>
 					<div style={labelStyle}>Component ID</div>
 					<input type="text" value={state.id} onChange={(e) => handleStateChange({ id: e.target.value })} style={{ width: "100%", ...inputStyle }} />
+				</div>
+				{}
+				<div style={{ borderTop: `1px solid ${C.border}`, padding: "8px 12px" }}>
+					<div style={labelStyle}>Load Component</div>
+					<div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+						<select
+							value={selectedLoadPath}
+							onChange={(e) => setSelectedLoadPath(e.target.value)}
+							style={{ flex: 1, ...inputStyle }}>
+							<option value="">-- Select component --</option>
+							{componentList.map(path => {
+								const fileName = path.split('/').pop()?.replace('.yaml', '') ?? path;
+								return <option key={path} value={path}>{fileName}</option>;
+							})}
+						</select>
+						<button
+							onClick={handleLoad}
+							disabled={!selectedLoadPath}
+							style={{
+								padding: "4px 8px",
+								background: selectedLoadPath ? C.btnBg : "transparent",
+								border: `1px solid ${selectedLoadPath ? C.btnBorder : C.btnDisabledBorder}`,
+								borderRadius: "3px",
+								color: selectedLoadPath ? C.textBright : C.textDim,
+								cursor: selectedLoadPath ? "pointer" : "default",
+								fontFamily: "monospace",
+								fontSize: "11px"
+							}}>
+							Load
+						</button>
+					</div>
+					{loadError && <div style={{ marginTop: "4px", fontSize: "10px", color: "#ff8844" }}>⚠ {loadError}</div>}
+					{loadedPath && <div style={{ marginTop: "4px", fontSize: "10px", color: C.accent }}>Loaded: {loadedPath}</div>}
 				</div>
 				{}
 				<div style={{ borderTop: `1px solid ${C.border}`, padding: "8px 12px" }}>
@@ -1085,7 +1289,6 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 												gltfPath={mesh.gltfPath}
 												onSelect={(path) => {
 													handleMeshPartChange(mesh.localId, { gltfPath: path, gltfPreviewUrl: path });
-													setTimeout(() => handleMeshGltfServerPath(mesh.localId), 0);
 												}}
 											/>
 											<div style={{ marginBottom: "6px" }}>
@@ -1232,46 +1435,225 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 				<div style={{ borderTop: `1px solid ${C.border}`, padding: "8px 12px" }}>
 					<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
 						<div style={labelStyle}>Hitboxes</div>
-						<button
-							onClick={handleAddHitbox}
-							style={{
-								background: C.btnBg,
-								border: `1px solid ${C.btnBorder}`,
-								borderRadius: "3px",
-								color: C.textBright,
-								cursor: "pointer",
-								fontFamily: "monospace",
-								fontSize: "14px",
-								padding: "2px 6px"
-							}}>
-							+
-						</button>
+						<div style={{ display: "flex", gap: "4px" }}>
+							<button
+								onClick={() => setShowAutoGenPanel(v => !v)}
+								style={{
+									background: showAutoGenPanel ? C.selectedBg : C.btnBg,
+									border: `1px solid ${C.btnBorder}`,
+									borderRadius: "3px",
+									color: C.textBright,
+									cursor: "pointer",
+									fontFamily: "monospace",
+									fontSize: "10px",
+									padding: "2px 6px"
+								}}>
+								⚡
+							</button>
+							<button
+								onClick={handleAddHitbox}
+								style={{
+									background: C.btnBg,
+									border: `1px solid ${C.btnBorder}`,
+									borderRadius: "3px",
+									color: C.textBright,
+									cursor: "pointer",
+									fontFamily: "monospace",
+									fontSize: "14px",
+									padding: "2px 6px"
+								}}>
+								+
+							</button>
+						</div>
 					</div>
-					<HitboxEditorPanel
-						hitboxes={hitboxEditor.hitboxes}
-						hoveredIdx={hitboxEditor.hoveredIdx}
-						selectedIdx={hitboxEditor.selectedIdx}
-						isSelectingSecond={hitboxEditor.isSelectingSecond}
-						onGenerate={handleGenerateHitboxes}
-						onMerge={handleMergeHitboxes}
-						onDelete={handleEditorDeleteHitbox}
-						onClearSelection={handleClearHitboxSelection}
-						onHitboxUpdate={handleHitboxUpdate}
-					/>
-					{state.hitboxes.map((hb) => (
+
+					{showAutoGenPanel && (
+						<div style={{ marginBottom: "8px", padding: "6px", background: "rgba(0,0,0,0.2)", border: `1px solid ${C.border}`, borderRadius: "3px" }}>
+							<div style={{ fontSize: "10px", color: C.accent, marginBottom: "6px", fontWeight: "bold", letterSpacing: "0.05em" }}>
+								Auto Generate Hitboxes
+							</div>
+							<div style={{ marginBottom: "6px" }}>
+								<div style={{ fontSize: "10px", color: C.textDim, marginBottom: "2px" }}>Mode</div>
+								<select value={autoGenOptions.mode ?? "single"}
+									onChange={e => setAutoGenOptions(o => ({ ...o, mode: e.target.value as any }))}
+									style={{ width: "100%", ...inputStyle }}>
+									<option value="single">Single Box</option>
+									<option value="children">Per Child</option>
+									<option value="meshes">Per Mesh</option>
+								</select>
+							</div>
+							<div style={{ marginBottom: "6px" }}>
+								<label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px" }}>
+									<input type="checkbox"
+										checked={autoGenReplace}
+										onChange={e => setAutoGenReplace(e.target.checked)}
+									/>
+									Replace existing
+								</label>
+							</div>
+							<div style={{ display: "flex", gap: "6px" }}>
+								<button
+									onClick={() => {
+										setAutoGenStatus("Generating...");
+										const newHitboxes = onAutoGenerateHitboxes(state, autoGenOptions);
+										if (newHitboxes.length > 0) {
+											setState(prev => ({
+												...prev,
+												hitboxes: autoGenReplace
+													? newHitboxes
+													: [...prev.hitboxes, ...newHitboxes],
+											}));
+											setAutoGenStatus(`Generated ${newHitboxes.length} hitbox${newHitboxes.length !== 1 ? 'es' : ''}`);
+										} else {
+											setAutoGenStatus("No hitboxes generated (mesh too small or empty)");
+										}
+									}}
+									style={{
+										flex: 1, padding: "6px 4px",
+										background: C.btnBg, border: `1px solid ${C.btnBorder}`, borderRadius: "3px",
+										color: C.textBright, cursor: "pointer", fontFamily: "monospace", fontSize: "11px"
+									}}>
+									Generate
+								</button>
+								<button
+									onClick={() => setState(prev => ({ ...prev, hitboxes: [] }))}
+									style={{
+										flex: 1, padding: "6px 4px",
+										background: "transparent", border: `1px solid ${C.btnDisabledBorder}`, borderRadius: "3px",
+										color: C.textDim, cursor: "pointer", fontFamily: "monospace", fontSize: "11px"
+									}}>
+									Clear All
+								</button>
+							</div>
+							{autoGenStatus && (
+								<div style={{ marginTop: "4px", fontSize: "10px", color: C.accent }}>{autoGenStatus}</div>
+							)}
+							<div style={{ display: "flex", gap: "6px", marginTop: "6px" }}>
+								<button
+									onClick={() => {
+										const merged = mergeAABBHitboxes(state.hitboxes as any, 0.1) as any as HitboxState[];
+										setState(prev => ({ ...prev, hitboxes: merged }));
+										setAutoGenStatus(`Merged overlapping, ${merged.length} remaining`);
+									}}
+									style={{
+										flex: 1, padding: "4px 4px",
+										background: "transparent", border: `1px solid ${C.btnDisabledBorder}`, borderRadius: "3px",
+										color: C.textBright, cursor: "pointer", fontFamily: "monospace", fontSize: "10px"
+									}}>
+									Merge Overlapping
+								</button>
+								<button
+									onClick={() => {
+										const cleaned = removeContainedHitboxes(state.hitboxes as any) as any as HitboxState[];
+										setState(prev => ({ ...prev, hitboxes: cleaned }));
+										setAutoGenStatus(`Removed contained, ${cleaned.length} remaining`);
+									}}
+									style={{
+										flex: 1, padding: "4px 4px",
+										background: "transparent", border: `1px solid ${C.btnDisabledBorder}`, borderRadius: "3px",
+										color: C.textBright, cursor: "pointer", fontFamily: "monospace", fontSize: "10px"
+									}}>
+									Remove Inside
+								</button>
+							</div>
+						</div>
+					)}
+
+					{selectedHitboxId && (
+					<div style={{
+						marginBottom: "6px", padding: "6px",
+						background: "rgba(255, 102, 0, 0.15)",
+						border: `1px solid #ff6600`,
+						borderRadius: "3px",
+						fontSize: "10px",
+					}}>
+						<div style={{ color: "#ff6600", marginBottom: "4px", fontWeight: "bold" }}>
+							{mergeMode === "select-target"
+								? "Click target hitbox in the 3D scene..."
+								: "Hitbox selected"}
+						</div>
+						<div style={{ display: "flex", gap: "6px" }}>
+							<button
+								onClick={() => {
+									setState(prev => ({
+										...prev,
+										hitboxes: prev.hitboxes.filter(h => h.localId !== selectedHitboxId),
+									}));
+									setSelectedHitboxId(null);
+								}}
+								style={{
+									padding: "4px 8px",
+									background: "rgba(255,60,60,0.3)",
+									border: "1px solid rgba(255,60,60,0.5)",
+									borderRadius: "3px",
+									color: "#ff6666",
+									cursor: "pointer", fontFamily: "monospace", fontSize: "10px"
+								}}>
+								Delete
+							</button>
+							<button
+								onClick={() => {
+									setMergeMode("select-target");
+									setMergeSourceId(selectedHitboxId);
+								}}
+								style={{
+									padding: "4px 8px",
+									background: "rgba(255,165,0,0.2)",
+									border: "1px solid rgba(255,165,0,0.4)",
+									borderRadius: "3px",
+									color: "#ffaa00",
+									cursor: "pointer", fontFamily: "monospace", fontSize: "10px"
+								}}>
+								Merge…
+							</button>
+							<button
+								onClick={() => setSelectedHitboxId(null)}
+								style={{
+									padding: "4px 8px",
+									background: "transparent",
+									border: `1px solid ${C.btnDisabledBorder}`,
+									borderRadius: "3px",
+									color: C.textDim,
+									cursor: "pointer", fontFamily: "monospace", fontSize: "10px"
+								}}>
+								Deselect
+							</button>
+						</div>
+					</div>
+				)}
+				{state.hitboxes.length > 0 && (
+					<div style={{ marginBottom: "6px", padding: "6px", background: "rgba(0,0,0,0.15)", borderRadius: "3px" }}>
+						<div style={{ fontSize: "10px", color: C.textDim, marginBottom: "2px" }}>Catch-all Collision</div>
+						<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px" }}>
+							{["player", "npc", "map", "map_decor"].map((layer) => (
+								<label key={layer} style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px" }}>
+									<input type="checkbox"
+										checked={state.hitboxes.every((h) => h.collidesWith.includes(layer))}
+										onChange={() => handleGlobalCollidesWith(layer)}
+									/>
+									{layer}
+								</label>
+							))}
+						</div>
+					</div>
+				)}
+				{state.hitboxes.map((hb) => (
 						<div
 							key={hb.localId}
 							style={{
 								marginBottom: "6px",
-								border: `1px solid ${C.border}`,
+								border: `1px solid ${selectedHitboxId === hb.localId ? "#ff6600" : C.border}`,
 								borderRadius: "3px",
 								overflow: "hidden"
 							}}>
 							<div
-								onClick={() => toggleHitbox(hb.localId)}
+								onClick={() => {
+									toggleHitbox(hb.localId);
+									setSelectedHitboxId(hb.localId);
+								}}
 								style={{
 									padding: "6px",
-									background: expandedHitboxes.has(hb.localId) ? C.selectedBg : "rgba(0,0,0,0.2)",
+									background: selectedHitboxId === hb.localId ? "rgba(255,102,0,0.15)" : (expandedHitboxes.has(hb.localId) ? C.selectedBg : "rgba(0,0,0,0.2)"),
 									cursor: "pointer",
 									display: "flex",
 									justifyContent: "space-between",
@@ -1385,6 +1767,14 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 										</div>
 									</div>
 									<div style={{ marginBottom: "6px" }}>
+										<div style={{ fontSize: "10px", color: C.textDim, marginBottom: "2px" }}>Rotation (°)</div>
+										<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "2px", width: "100%", boxSizing: "border-box", minWidth: 0 }}>
+											<input type="number" step="1" value={hb.rotationX} onChange={(e) => handleHitboxChange(hb.localId, { rotationX: parseFloat(e.target.value) || 0 })} placeholder="X" style={{ ...inputStyle, width: "100%" }} />
+											<input type="number" step="1" value={hb.rotationY} onChange={(e) => handleHitboxChange(hb.localId, { rotationY: parseFloat(e.target.value) || 0 })} placeholder="Y" style={{ ...inputStyle, width: "100%" }} />
+											<input type="number" step="1" value={hb.rotationZ} onChange={(e) => handleHitboxChange(hb.localId, { rotationZ: parseFloat(e.target.value) || 0 })} placeholder="Z" style={{ ...inputStyle, width: "100%" }} />
+										</div>
+									</div>
+									<div style={{ marginBottom: "6px" }}>
 										<div style={{ fontSize: "10px", color: C.textDim, marginBottom: "2px" }}>Collides With</div>
 										<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px" }}>
 											{["player", "npc", "map", "map_decor"].map((layer) => (
@@ -1413,9 +1803,10 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 					))}
 				</div>
 				{}
-				<div style={{ borderTop: `1px solid ${C.border}`, padding: "8px 12px" }}>
-					<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-						<div style={labelStyle}>Waypoint Animations</div>
+			<div style={{ borderTop: `1px solid ${C.border}`, padding: "8px 12px" }}>
+				<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+					<div style={labelStyle}>Animations</div>
+					<div style={{ display: "flex", gap: "4px" }}>
 						<button
 							onClick={handleAddAnimation}
 							style={{
@@ -1428,9 +1819,24 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 								fontFamily: "monospace",
 								fontSize: "11px"
 							}}>
-							+ Add
+							+ Waypoint
+						</button>
+						<button
+							onClick={handleAddClipAnimation}
+							style={{
+								background: C.btnBg,
+								border: `1px solid ${C.btnBorder}`,
+								borderRadius: "3px",
+								color: C.textBright,
+								cursor: "pointer",
+								padding: "4px 8px",
+								fontFamily: "monospace",
+								fontSize: "11px"
+							}}>
+							+ Clip
 						</button>
 					</div>
+				</div>
 					{state.animations.map((anim) => (
 						<div
 							key={anim.localId}
@@ -1456,21 +1862,38 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 								<span>
 									{expandedAnimations.has(anim.localId) ? "▼" : "▶"} {anim.name}
 								</span>
-								<button
-									onClick={(e) => {
-										e.stopPropagation();
-										handleDeleteAnimation(anim.localId);
-									}}
-									style={{
-										background: "transparent",
-										border: "none",
-										color: "#ff8844",
-										cursor: "pointer",
-										padding: "2px 4px",
-										fontSize: "12px"
-									}}>
-									×
-								</button>
+								<div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+									<button
+										onClick={(e) => {
+											e.stopPropagation();
+											onPlayAnimationItem(anim);
+										}}
+										style={{
+											background: "transparent",
+											border: "none",
+											color: C.accent,
+											cursor: "pointer",
+											padding: "2px 4px",
+											fontSize: "12px"
+										}}>
+										▶
+									</button>
+									<button
+										onClick={(e) => {
+											e.stopPropagation();
+											handleDeleteAnimation(anim.localId);
+										}}
+										style={{
+											background: "transparent",
+											border: "none",
+											color: "#ff8844",
+											cursor: "pointer",
+											padding: "2px 4px",
+											fontSize: "12px"
+										}}>
+										×
+									</button>
+								</div>
 							</div>
 							{expandedAnimations.has(anim.localId) && (
 								<div style={{ padding: "8px" }}>
@@ -1491,14 +1914,29 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 											))}
 										</select>
 									</div>
+									{anim.type === 'clip' && (
+										<div style={{ marginBottom: "6px" }}>
+											<div style={{ fontSize: "10px", color: C.textDim, marginBottom: "2px" }}>Clip</div>
+											<select
+												value={anim.clipName}
+												onChange={(e) => handleAnimationChange(anim.localId, { clipName: e.target.value })}
+												style={{ width: "100%", ...inputStyle }}>
+												{(gltfClipsByMesh[anim.targetMeshId] || []).map((clip) => (
+													<option key={clip} value={clip}>{clip}</option>
+												))}
+											</select>
+										</div>
+									)}
 									<div style={{ marginBottom: "6px" }}>
 										<div style={{ fontSize: "10px", color: C.textDim, marginBottom: "2px" }}>Speed (units/s)</div>
 										<input type="number" step="0.1" value={anim.speed} onChange={(e) => handleAnimationChange(anim.localId, { speed: parseFloat(e.target.value) || 1 })} style={{ width: "100%", ...inputStyle }} />
 									</div>
-									<div style={{ marginBottom: "6px" }}>
-										<div style={{ fontSize: "10px", color: C.textDim, marginBottom: "2px" }}>Pause at Waypoint (ms)</div>
-										<input type="number" step="10" value={anim.pauseAtWaypoint} onChange={(e) => handleAnimationChange(anim.localId, { pauseAtWaypoint: parseInt(e.target.value) || 0 })} style={{ width: "100%", ...inputStyle }} />
-									</div>
+									{anim.type === 'waypoints' && (
+										<div style={{ marginBottom: "6px" }}>
+											<div style={{ fontSize: "10px", color: C.textDim, marginBottom: "2px" }}>Pause at Waypoint (ms)</div>
+											<input type="number" step="10" value={anim.pauseAtWaypoint} onChange={(e) => handleAnimationChange(anim.localId, { pauseAtWaypoint: parseInt(e.target.value) || 0 })} style={{ width: "100%", ...inputStyle }} />
+										</div>
+									)}
 									<div style={{ display: "flex", gap: "8px", marginBottom: "6px" }}>
 										<label style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", flex: 1 }}>
 											<input type="checkbox" checked={anim.loop} onChange={(e) => handleAnimationChange(anim.localId, { loop: e.target.checked })} />
@@ -1509,150 +1947,85 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 											Auto-trigger
 										</label>
 									</div>
-									<div style={{ marginBottom: "6px" }}>
-										<div style={{ fontSize: "10px", color: C.textDim, marginBottom: "4px", display: "flex", justifyContent: "space-between" }}>
-											<span>Waypoints</span>
-											<button
-												onClick={() => handleAddWaypoint(anim.localId)}
-												style={{
-													background: C.btnBg,
-													border: `1px solid ${C.btnBorder}`,
-													borderRadius: "2px",
-													color: C.textBright,
-													cursor: "pointer",
-													padding: "2px 4px",
-													fontFamily: "monospace",
-													fontSize: "10px"
-												}}>
-												+ Waypoint
-											</button>
-										</div>
-										{anim.waypoints.map((wp, idx) => (
-											<div key={idx} style={{ display: "flex", flexDirection: "column", gap: "4px", marginBottom: "6px", padding: "6px", background: "rgba(0,0,0,0.2)", borderRadius: "3px" }}>
-												<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "10px", color: C.textDim }}>
-													<span>Waypoint {idx + 1}</span>
-													<button
-														onClick={() => handleDeleteWaypoint(anim.localId, idx)}
-														style={{
-															background: "transparent",
-															border: "none",
-															color: "#ff8844",
-															cursor: "pointer",
-															padding: "0 2px",
-															fontSize: "12px"
-														}}>
-														×
-													</button>
-												</div>
-												<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "2px", width: "100%", boxSizing: "border-box", minWidth: 0 }}>
-													<div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-														<span style={{ fontSize: "9px", color: C.textDim }}>X</span>
-														<input type="number" step="0.1" value={wp.position.x} onChange={(e) => handleWaypointChange(anim.localId, idx, "x", parseFloat(e.target.value) || 0)} placeholder="X" style={{ ...inputStyle, width: "100%", fontSize: "11px", padding: "3px 4px" }} />
-													</div>
-													<div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-														<span style={{ fontSize: "9px", color: C.textDim }}>Y</span>
-														<input type="number" step="0.1" value={wp.position.y} onChange={(e) => handleWaypointChange(anim.localId, idx, "y", parseFloat(e.target.value) || 0)} placeholder="Y" style={{ ...inputStyle, width: "100%", fontSize: "11px", padding: "3px 4px" }} />
-													</div>
-													<div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-														<span style={{ fontSize: "9px", color: C.textDim }}>Z</span>
-														<input type="number" step="0.1" value={wp.position.z} onChange={(e) => handleWaypointChange(anim.localId, idx, "z", parseFloat(e.target.value) || 0)} placeholder="Z" style={{ ...inputStyle, width: "100%", fontSize: "11px", padding: "3px 4px" }} />
-													</div>
-												</div>
-												<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "2px", width: "100%", boxSizing: "border-box", minWidth: 0 }}>
-													<div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-														<span style={{ fontSize: "9px", color: C.accent }}>Rot X</span>
-														<input type="number" step="0.1" value={wp.rotation?.x ?? 0} onChange={(e) => handleWaypointChange(anim.localId, idx, "x", parseFloat(e.target.value) || 0, "rotation")} placeholder="X" style={{ ...inputStyle, width: "100%", fontSize: "11px", padding: "3px 4px" }} />
-													</div>
-													<div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-														<span style={{ fontSize: "9px", color: C.accent }}>Rot Y</span>
-														<input type="number" step="0.1" value={wp.rotation?.y ?? 0} onChange={(e) => handleWaypointChange(anim.localId, idx, "y", parseFloat(e.target.value) || 0, "rotation")} placeholder="Y" style={{ ...inputStyle, width: "100%", fontSize: "11px", padding: "3px 4px" }} />
-													</div>
-													<div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-														<span style={{ fontSize: "9px", color: C.accent }}>Rot Z</span>
-														<input type="number" step="0.1" value={wp.rotation?.z ?? 0} onChange={(e) => handleWaypointChange(anim.localId, idx, "z", parseFloat(e.target.value) || 0, "rotation")} placeholder="Z" style={{ ...inputStyle, width: "100%", fontSize: "11px", padding: "3px 4px" }} />
-													</div>
-												</div>
+									{anim.type === 'waypoints' && (
+										<div style={{ marginBottom: "6px" }}>
+											<div style={{ fontSize: "10px", color: C.textDim, marginBottom: "4px", display: "flex", justifyContent: "space-between" }}>
+												<span>Waypoints</span>
+												<button
+													onClick={() => handleAddWaypoint(anim.localId)}
+													style={{
+														background: C.btnBg,
+														border: `1px solid ${C.btnBorder}`,
+														borderRadius: "2px",
+														color: C.textBright,
+														cursor: "pointer",
+														padding: "2px 4px",
+														fontFamily: "monospace",
+														fontSize: "10px"
+													}}>
+													+ Waypoint
+												</button>
 											</div>
-										))}
-									</div>
+											{anim.waypoints.map((wp, idx) => (
+												<div key={idx} style={{ display: "flex", flexDirection: "column", gap: "4px", marginBottom: "6px", padding: "6px", background: "rgba(0,0,0,0.2)", borderRadius: "3px" }}>
+													<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "10px", color: C.textDim }}>
+														<span>Waypoint {idx + 1}</span>
+														<button
+															onClick={() => handleDeleteWaypoint(anim.localId, idx)}
+															style={{
+																background: "transparent",
+																border: "none",
+																color: "#ff8844",
+																cursor: "pointer",
+																padding: "0 2px",
+																fontSize: "12px"
+															}}>
+															×
+														</button>
+													</div>
+													<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "2px", width: "100%", boxSizing: "border-box", minWidth: 0 }}>
+														<div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+															<span style={{ fontSize: "9px", color: C.textDim }}>X</span>
+															<input type="number" step="0.1" value={wp.position.x} onChange={(e) => handleWaypointChange(anim.localId, idx, "x", parseFloat(e.target.value) || 0)} placeholder="X" style={{ ...inputStyle, width: "100%", fontSize: "11px", padding: "3px 4px" }} />
+														</div>
+														<div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+															<span style={{ fontSize: "9px", color: C.textDim }}>Y</span>
+															<input type="number" step="0.1" value={wp.position.y} onChange={(e) => handleWaypointChange(anim.localId, idx, "y", parseFloat(e.target.value) || 0)} placeholder="Y" style={{ ...inputStyle, width: "100%", fontSize: "11px", padding: "3px 4px" }} />
+														</div>
+														<div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+															<span style={{ fontSize: "9px", color: C.textDim }}>Z</span>
+															<input type="number" step="0.1" value={wp.position.z} onChange={(e) => handleWaypointChange(anim.localId, idx, "z", parseFloat(e.target.value) || 0)} placeholder="Z" style={{ ...inputStyle, width: "100%", fontSize: "11px", padding: "3px 4px" }} />
+														</div>
+													</div>
+													<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "2px", width: "100%", boxSizing: "border-box", minWidth: 0 }}>
+														<div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+															<span style={{ fontSize: "9px", color: C.accent }}>Rot X</span>
+															<input type="number" step="0.1" value={wp.rotation?.x ?? 0} onChange={(e) => handleWaypointChange(anim.localId, idx, "x", parseFloat(e.target.value) || 0, "rotation")} placeholder="X" style={{ ...inputStyle, width: "100%", fontSize: "11px", padding: "3px 4px" }} />
+														</div>
+														<div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+															<span style={{ fontSize: "9px", color: C.accent }}>Rot Y</span>
+															<input type="number" step="0.1" value={wp.rotation?.y ?? 0} onChange={(e) => handleWaypointChange(anim.localId, idx, "y", parseFloat(e.target.value) || 0, "rotation")} placeholder="Y" style={{ ...inputStyle, width: "100%", fontSize: "11px", padding: "3px 4px" }} />
+														</div>
+														<div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+															<span style={{ fontSize: "9px", color: C.accent }}>Rot Z</span>
+															<input type="number" step="0.1" value={wp.rotation?.z ?? 0} onChange={(e) => handleWaypointChange(anim.localId, idx, "z", parseFloat(e.target.value) || 0, "rotation")} placeholder="Z" style={{ ...inputStyle, width: "100%", fontSize: "11px", padding: "3px 4px" }} />
+														</div>
+													</div>
+												</div>
+											))}
+										</div>
+									)}
 								</div>
 							)}
 						</div>
 					))}
 				</div>
 				{}
-				{gltfClips.length > 0 && (
-					<div style={{ borderTop: `1px solid ${C.border}`, padding: "8px 12px" }}>
-						<div style={labelStyle}>GLTF Clips</div>
-						<div style={{ marginBottom: "8px" }}>
-							<div style={{ fontSize: "10px", color: C.textDim, marginBottom: "4px", display: "flex", justifyContent: "space-between" }}>
-								Speed: <span>{animSpeed.toFixed(1)}×</span>
-							</div>
-							<input
-								type="range"
-								min="0.1"
-								max="5"
-								step="0.1"
-								value={animSpeed}
-								onChange={(e) => {
-									const newSpeed = parseFloat(e.target.value);
-									setAnimSpeed(newSpeed);
-									onAnimSpeedChange(newSpeed);
-								}}
-								style={{ width: "100%", cursor: "pointer" }}
-							/>
-						</div>
-						{gltfClips.map((clipName) => (
-							<div key={clipName} style={{ marginBottom: "6px", display: "flex", gap: "4px", alignItems: "center" }}>
-								<span style={{ flex: 1, fontSize: "11px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{clipName}</span>
-								<button
-									onClick={() => {
-										onPlayAnimation(clipName);
-										setActiveClip(clipName);
-									}}
-									style={{
-										flex: 0.5,
-										padding: "4px 6px",
-										background: activeClip === clipName ? C.accent : C.btnBg,
-										border: `1px solid ${C.btnBorder}`,
-										borderRadius: "3px",
-										color: C.textBright,
-										cursor: "pointer",
-										fontFamily: "monospace",
-										fontSize: "10px"
-									}}>
-									▶
-								</button>
-								<button
-									onClick={() => {
-										onStopAnimation();
-										setActiveClip(null);
-									}}
-									style={{
-										flex: 0.5,
-										padding: "4px 6px",
-										background: C.btnBg,
-										border: `1px solid ${C.btnBorder}`,
-										borderRadius: "3px",
-										color: C.textBright,
-										cursor: "pointer",
-										fontFamily: "monospace",
-										fontSize: "10px"
-									}}>
-									■
-								</button>
-							</div>
-						))}
-					</div>
-				)}
 			</div>
 			{}
 			<div style={{ flex: "0 0 auto", borderTop: `1px solid ${C.border}`, padding: "8px 12px", display: "flex", gap: "6px" }}>
-				<Btn onClick={() => onExportYaml(state)} style={{ flex: 1, padding: "7px 0" }}>
-					Export YAML
-				</Btn>
-				<Btn onClick={handleExportZip} disabled={isExporting} style={{ flex: 1, padding: "7px 0" }}>
-					{isExporting ? "Exporting..." : "Export ZIP"}
+				<Btn onClick={handleSave} disabled={isSaving} style={{ flex: 1, padding: "7px 0" }}>
+					{isSaving ? "Saving..." : "Save"}
 				</Btn>
 			</div>
 		</div>
@@ -1662,9 +2035,7 @@ function ServerModelList({ gltfPath, onSelect }: { gltfPath: string; onSelect: (
 	const [models, setModels] = useState<{ name: string; path: string }[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const [open, setOpen] = useState(false);
 	useEffect(() => {
-		if (!open) return;
 		setLoading(true);
 		setError(null);
 		fetch("/api/models")
@@ -1677,58 +2048,35 @@ function ServerModelList({ gltfPath, onSelect }: { gltfPath: string; onSelect: (
 				setError("Failed to load models");
 				setLoading(false);
 			});
-	}, [open]);
+	}, []);
 	return (
-		<div style={{ marginBottom: "6px", position: "relative" }}>
-			<div style={{ fontSize: "10px", color: C.textDim, marginBottom: "2px" }}>From Server</div>
-			<button
-				onClick={() => setOpen((v) => !v)}
-				style={{
-					width: "100%",
-					padding: "4px 6px",
-					background: C.btnBg,
-					border: `1px solid ${C.btnBorder}`,
-					borderRadius: "3px",
-					color: C.textBright,
-					cursor: "pointer",
-					fontFamily: "monospace",
-					fontSize: "10px",
-					textAlign: "left"
-				}}>
-				{loading ? "Loading..." : models.length ? `Models (${models.length}) ▼` : "No models found"}
-			</button>
-			{open && !loading && (
-				<div
-					style={{
-						position: "absolute",
-						zIndex: 100,
-						background: C.bg,
-						border: `1px solid ${C.border}`,
-						borderRadius: "3px",
-						maxHeight: "160px",
-						overflowY: "auto",
-						marginTop: "2px"
-					}}>
-					{error && <div style={{ padding: "4px 8px", fontSize: "10px", color: "#ff8844" }}>{error}</div>}
+		<div style={{ marginBottom: "6px" }}>
+			<div style={{ fontSize: "10px", color: C.textDim, marginBottom: "4px" }}>From Server</div>
+			{loading && <div style={{ fontSize: "10px", color: C.textDim, padding: "4px 0" }}>Loading...</div>}
+			{error && <div style={{ fontSize: "10px", color: "#ff8844", padding: "4px 0" }}>{error}</div>}
+			{!loading && models.length === 0 && !error && (
+				<div style={{ fontSize: "10px", color: C.textDim, padding: "4px 0" }}>No models found</div>
+			)}
+			{!loading && models.length > 0 && (
+				<div style={{ display: "flex", flexDirection: "column", gap: "2px", maxHeight: "140px", overflowY: "auto" }}>
 					{models.map((m) => (
 						<button
 							key={m.name}
-							onClick={() => {
-								onSelect(m.path);
-								setOpen(false);
-							}}
+							onClick={() => onSelect(m.path)}
 							style={{
-								display: "block",
-								width: "100%",
+								display: "flex",
+								alignItems: "center",
 								padding: "4px 8px",
-								background: m.path === gltfPath ? C.selectedBg : "transparent",
-								border: "none",
-								color: C.text,
+								background: m.path === gltfPath ? C.selectedBg : C.btnBg,
+								border: `1px solid ${m.path === gltfPath ? C.accent : C.btnBorder}`,
+								borderRadius: "3px",
+								color: m.path === gltfPath ? C.textBright : C.text,
 								cursor: "pointer",
 								fontFamily: "monospace",
 								fontSize: "10px",
 								textAlign: "left"
 							}}>
+							<span style={{ color: C.textDim, marginRight: "6px", fontSize: "9px" }}>▶</span>
 							{m.name}
 						</button>
 					))}

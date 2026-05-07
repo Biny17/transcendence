@@ -134,7 +134,7 @@ export class Engine {
 				this.renderer.shadowMap.enabled = eng.shadows;
 				if (this.active) {
 					this.active.scene.fog = eng.fog ? this.active.scene.fog : null;
-					const ambient = this.active.scene.children.find((c) => c instanceof THREE.AmbientLight) as THREE.AmbientLight | undefined;
+					const ambient = this.active.scene.children.find((c: THREE.Object3D) => c instanceof THREE.AmbientLight) as THREE.AmbientLight | undefined;
 					if (ambient) ambient.intensity = eng.ambient;
 				}
 			}
@@ -163,14 +163,14 @@ export class Engine {
 						this.frameCount = 0;
 						this.lastFpsTime = now;
 					}
-					this.active.scene.traverse((obj) => {
+					this.active.scene.traverse((obj: THREE.Object3D) => {
 						if (obj instanceof THREE.Mesh && obj.material) {
 							const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
 							for (const m of mats) m.wireframe = !!eng.wireframe;
 						}
 					});
 					if (!eng.wireframe && this._lastWireframeState) {
-						this.active.scene.traverse((obj) => {
+						this.active.scene.traverse((obj: THREE.Object3D) => {
 							if (obj instanceof THREE.Mesh && obj.material) {
 								const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
 								for (const m of mats) m.wireframe = false;

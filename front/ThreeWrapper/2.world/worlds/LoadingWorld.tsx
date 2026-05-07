@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { World } from "../WorldClass";
+import { ModuleKey } from "@/ThreeWrapper/4.module";
 import { LoadingUI } from "@/ThreeWrapper/4.module/modules/ui/LoadingUI";
 import type { UIModule } from "@/ThreeWrapper/4.module/modules/ui/UIModule";
 
@@ -14,7 +15,7 @@ export class LoadingWorld extends World {
 
 	protected override async onLoad(): Promise<void> {
 		localStorage.setItem(STORAGE_KEY, "1");
-		const uiModule = this.ctx.getModule<UIModule>("ui");
+		const uiModule = this.ctx.getModule<UIModule>(ModuleKey.ui);
 		if (uiModule) {
 			uiModule.show("loading", <LoadingUI />);
 		}
@@ -28,7 +29,7 @@ export class LoadingWorld extends World {
 	protected override onStart(): void {}
 
 	protected override onDispose(): void {
-		const uiModule = this.ctx.getModule<UIModule>("ui");
+		const uiModule = this.ctx.getModule<UIModule>(ModuleKey.ui);
 		if (uiModule) {
 			uiModule.hide("loading");
 		}

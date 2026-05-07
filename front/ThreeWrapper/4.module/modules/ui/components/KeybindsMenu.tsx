@@ -115,8 +115,8 @@ export function KeybindsMenu({ getBindings, onRebind, onClose }: KeybindsMenuPro
             })}
           </div>
           <div className="mt-6 flex shrink-0 gap-3 justify-end pr-1">
-            <Button statement="Go back" onClick={handleClose} />
-            <Button statement="Save Changes" onClick={handleClose} />
+            <Button statement="Go back" onClick={handleClose} isAdded={false} />
+            <Button statement="Save Changes" onClick={handleClose} isAdded={false} />
           </div>
         </div>
       </div>

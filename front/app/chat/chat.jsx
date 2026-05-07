@@ -86,17 +86,20 @@ useEffect(() => {
   async function loadImages() {
     const imgs = {};
     for (const message of messages) {
-      const url = await fetchImg(message.sender.id);
-      console.log(url)
-      imgs[message.sender.id] = url;
+      const senderId = message.sender_id ?? message.sender?.id;
+      if (!senderId) {
+        continue;
+      }
+      const url = await fetchImg(senderId);
+      imgs[senderId] = url;
     }
     setPlayerImgs(imgs);
   }
-   if (messages.length > 0) {
+  if (messages.length > 0) {
     loadImages();
   }
-  
 }, [messages]);
+
 
   async function fetchConversationHistory(convId){
     try 
@@ -229,12 +232,13 @@ useEffect(() => {
                 //   );
                 // }
                 const senderName = msg.sender_username ?? msg.sender?.username ?? "Unknown";
+                const senderId = msg.sender_id ?? msg.sender?.id;
                 return (
                   
                   <PrimaryMessage
                     className="mt-4"
                     key={msg.id}
-                    avatarSrc={msg.sender ? (playerImgs[msg.sender.id] || "/default-avatar.png") : "/default-avatar.png"}
+                    avatarSrc={playerImgs[senderId]}
                     avatarAlt={senderName}
                     // avatarFallback={msg.sender.username.slice(0, 2)}
                     senderName={senderName }

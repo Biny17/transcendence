@@ -28,13 +28,16 @@ function KpiCard({
   title,
   icon,
   nb
-}: KpiCardPropsType): JSX.Element {
+}: KpiCardPropsType): React.JSX.Element {
   return (
+    // @ts-expect-error -- Card from material-tailwind has excessive prop requirements
     <StyledCard>
+      {/* @ts-expect-error -- material-tailwind Card prop requirements */}
       <CardBody className="p-4">
-        <div className="flex justify-between items-center -mt-2 sm:-mt-2 md:-mt-2 lg:-mt-0">
+        <div className="flex justify-between items-center -mt-2 sm:-mt-2 md:-mt-2 lg:mt-0">
+          {/* @ts-expect-error -- material-tailwind Typography prop requirements */}
           <Typography
-            className="font-bold text-[10px] sm:text-sm md:text-sm lg:text-[18px] text-black ml-[-10px] sm:ml-0" 
+            className="font-bold text-[10px] sm:text-sm md:text-sm lg:text-[18px] text-black -ml-2.5 sm:ml-0" 
           >
             {title}
             <span className="ml-1">{icon}</span>

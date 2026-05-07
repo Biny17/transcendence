@@ -216,9 +216,15 @@ async function spawnObject(inst: MapObjectInstance, comp: ComponentDef, gltf: GL
 	for (let i = 0; i < solidHitboxes.length; i++) {
 		const hb = solidHitboxes[i];
 		const pieceIndex = Math.min(i, pieces.length - 1);
+		const hitboxRotation = hb.rotation
+			? { x: THREE.MathUtils.degToRad(hb.rotation.x), y: THREE.MathUtils.degToRad(hb.rotation.y), z: THREE.MathUtils.degToRad(hb.rotation.z) }
+			: undefined;
+		const hasRotation = hitboxRotation && (hitboxRotation.x !== 0 || hitboxRotation.y !== 0 || hitboxRotation.z !== 0);
+
 		pieces[pieceIndex].hitboxes.push({
 			shape: hitboxToShape(hb),
 			relativeOffset: hb.offset ?? { x: 0, y: 0, z: 0 },
+			...(hasRotation ? { relativeRotation: hitboxRotation } : {}),
 			collidesWith: hb.collidesWith,
 			isSensor: false,
 			tag: hb.tag
@@ -264,6 +270,9 @@ async function spawnObject(inst: MapObjectInstance, comp: ComponentDef, gltf: GL
 			if (animDef.autoPlay) {
 				const action = mixer.clipAction(clip);
 				action.loop = animDef.loop ? THREE.LoopRepeat : THREE.LoopOnce;
+				if (animDef.speed !== undefined) {
+					action.setEffectiveTimeScale(animDef.speed);
+				}
 				action.play();
 			}
 		}
