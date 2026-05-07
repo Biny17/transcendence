@@ -28,8 +28,11 @@ type Result struct {
 	GameID int `json:"game_id,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID int `json:"user_id,omitempty"`
+<<<<<<< HEAD
 	// Username holds the value of the "username" field.
 	Username string `json:"username,omitempty"`
+=======
+>>>>>>> origin/backend
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ResultQuery when eager-loading is set.
 	Edges        ResultEdges `json:"edges"`
@@ -76,8 +79,11 @@ func (*Result) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case result.FieldID, result.FieldRank, result.FieldKills, result.FieldDeath, result.FieldGameID, result.FieldUserID:
 			values[i] = new(sql.NullInt64)
+<<<<<<< HEAD
 		case result.FieldUsername:
 			values[i] = new(sql.NullString)
+=======
+>>>>>>> origin/backend
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -129,12 +135,15 @@ func (_m *Result) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UserID = int(value.Int64)
 			}
+<<<<<<< HEAD
 		case result.FieldUsername:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field username", values[i])
 			} else if value.Valid {
 				_m.Username = value.String
 			}
+=======
+>>>>>>> origin/backend
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -195,9 +204,12 @@ func (_m *Result) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
+<<<<<<< HEAD
 	builder.WriteString(", ")
 	builder.WriteString("username=")
 	builder.WriteString(_m.Username)
+=======
+>>>>>>> origin/backend
 	builder.WriteByte(')')
 	return builder.String()
 }

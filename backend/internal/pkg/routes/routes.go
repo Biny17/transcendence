@@ -5,6 +5,8 @@ const (
 	AddUser                 = "/api/users/add"
 	DeleteUser              = "/api/users/delete"
 	Login                   = "/api/auth/login"
+	FortyTwoLogin           = "/api/auth/42/login"
+	FortyTwoLoginCallback   = "/api/auth/42/callback"
 	FindUser                = "/api/users/find"
 	UpdatePwd               = "/api/update/password"
 	UpdateEmail             = "/api/update/email"
@@ -32,6 +34,9 @@ const (
 	GetMyPicture            = "/api/users/me/profile-picture"
 	GameAdd                 = "/api/game/add"
 	GetPicture              = "/api/users/{id}/picture"
+<<<<<<< HEAD
 	GetGames                = "/api/users/{id}/games"
 	GetStats                = "/api/users/{id}/stats"
+=======
+>>>>>>> origin/backend
 )

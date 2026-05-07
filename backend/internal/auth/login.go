@@ -66,10 +66,11 @@ func (auth *AuthService) VerifyPwd(
 		return nil, huma.Error500InternalServerError("internal error")
 	}
 	out.SetCookie = http.Cookie{
-		Name:   	"auth_token",
-		Value:  	jwt,
-		Expires:	time.Now().Add(pkg.TokenLifetime),
-		Path: 		"/",	
+		Name:    "auth_token",
+		Value:   jwt,
+		Expires: time.Now().Add(pkg.TokenLifetime),
+		Path:    "/",
 	}
 	return &out, nil
 }
+

@@ -2749,7 +2749,10 @@ type ResultMutation struct {
 	addkills      *int
 	death         *int
 	adddeath      *int
+<<<<<<< HEAD
 	username      *string
+=======
+>>>>>>> origin/backend
 	clearedFields map[string]struct{}
 	game          *int
 	clearedgame   bool
@@ -3098,6 +3101,7 @@ func (m *ResultMutation) ResetUserID() {
 	m.user = nil
 }
 
+<<<<<<< HEAD
 // SetUsername sets the "username" field.
 func (m *ResultMutation) SetUsername(s string) {
 	m.username = &s
@@ -3134,6 +3138,8 @@ func (m *ResultMutation) ResetUsername() {
 	m.username = nil
 }
 
+=======
+>>>>>>> origin/backend
 // ClearGame clears the "game" edge to the Game entity.
 func (m *ResultMutation) ClearGame() {
 	m.clearedgame = true
@@ -3222,7 +3228,11 @@ func (m *ResultMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ResultMutation) Fields() []string {
+<<<<<<< HEAD
 	fields := make([]string, 0, 6)
+=======
+	fields := make([]string, 0, 5)
+>>>>>>> origin/backend
 	if m.rank != nil {
 		fields = append(fields, result.FieldRank)
 	}
@@ -3238,9 +3248,12 @@ func (m *ResultMutation) Fields() []string {
 	if m.user != nil {
 		fields = append(fields, result.FieldUserID)
 	}
+<<<<<<< HEAD
 	if m.username != nil {
 		fields = append(fields, result.FieldUsername)
 	}
+=======
+>>>>>>> origin/backend
 	return fields
 }
 
@@ -3259,8 +3272,11 @@ func (m *ResultMutation) Field(name string) (ent.Value, bool) {
 		return m.GameID()
 	case result.FieldUserID:
 		return m.UserID()
+<<<<<<< HEAD
 	case result.FieldUsername:
 		return m.Username()
+=======
+>>>>>>> origin/backend
 	}
 	return nil, false
 }
@@ -3280,8 +3296,11 @@ func (m *ResultMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldGameID(ctx)
 	case result.FieldUserID:
 		return m.OldUserID(ctx)
+<<<<<<< HEAD
 	case result.FieldUsername:
 		return m.OldUsername(ctx)
+=======
+>>>>>>> origin/backend
 	}
 	return nil, fmt.Errorf("unknown Result field %s", name)
 }
@@ -3326,6 +3345,7 @@ func (m *ResultMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUserID(v)
 		return nil
+<<<<<<< HEAD
 	case result.FieldUsername:
 		v, ok := value.(string)
 		if !ok {
@@ -3333,6 +3353,8 @@ func (m *ResultMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUsername(v)
 		return nil
+=======
+>>>>>>> origin/backend
 	}
 	return fmt.Errorf("unknown Result field %s", name)
 }
@@ -3436,9 +3458,12 @@ func (m *ResultMutation) ResetField(name string) error {
 	case result.FieldUserID:
 		m.ResetUserID()
 		return nil
+<<<<<<< HEAD
 	case result.FieldUsername:
 		m.ResetUsername()
 		return nil
+=======
+>>>>>>> origin/backend
 	}
 	return fmt.Errorf("unknown Result field %s", name)
 }

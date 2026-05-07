@@ -19,7 +19,10 @@ func (Result) Fields() []ent.Field {
 		field.Int("death"),
 		field.Int("game_id"),
 		field.Int("user_id"),
+<<<<<<< HEAD
 		field.String("username"),
+=======
+>>>>>>> origin/backend
 	}
 }
 

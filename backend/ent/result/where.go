@@ -79,11 +79,14 @@ func UserID(v int) predicate.Result {
 	return predicate.Result(sql.FieldEQ(FieldUserID, v))
 }
 
+<<<<<<< HEAD
 // Username applies equality check predicate on the "username" field. It's identical to UsernameEQ.
 func Username(v string) predicate.Result {
 	return predicate.Result(sql.FieldEQ(FieldUsername, v))
 }
 
+=======
+>>>>>>> origin/backend
 // RankEQ applies the EQ predicate on the "rank" field.
 func RankEQ(v int) predicate.Result {
 	return predicate.Result(sql.FieldEQ(FieldRank, v))
@@ -244,6 +247,7 @@ func UserIDNotIn(vs ...int) predicate.Result {
 	return predicate.Result(sql.FieldNotIn(FieldUserID, vs...))
 }
 
+<<<<<<< HEAD
 // UsernameEQ applies the EQ predicate on the "username" field.
 func UsernameEQ(v string) predicate.Result {
 	return predicate.Result(sql.FieldEQ(FieldUsername, v))
@@ -309,6 +313,8 @@ func UsernameContainsFold(v string) predicate.Result {
 	return predicate.Result(sql.FieldContainsFold(FieldUsername, v))
 }
 
+=======
+>>>>>>> origin/backend
 // HasGame applies the HasEdge predicate on the "game" edge.
 func HasGame() predicate.Result {
 	return predicate.Result(func(s *sql.Selector) {
