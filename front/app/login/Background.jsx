@@ -274,8 +274,9 @@ useEffect(function() {
           <Button
             statement={
               <span className="flex items-center gap-2">
-                <img src="https://docs.material-tailwind.com/icons/google.svg" alt="google" className="w-5 h-5" />
-                Continue with 42
+                {/* <img src="https://upload.wikimedia.org/wikipedia/commons/8/8d/42_Logo.svg" alt="google" className="w-5 h-5" /> */}
+                Continue with
+                <img src="42.svg" alt="google" className="w-5 h-5" />
               </span>
             }
             onClick={() => {/* handle Google sign-in */}}
