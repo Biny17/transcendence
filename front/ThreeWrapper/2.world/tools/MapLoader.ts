@@ -270,6 +270,9 @@ async function spawnObject(inst: MapObjectInstance, comp: ComponentDef, gltf: GL
 			if (animDef.autoPlay) {
 				const action = mixer.clipAction(clip);
 				action.loop = animDef.loop ? THREE.LoopRepeat : THREE.LoopOnce;
+				if (animDef.speed !== undefined) {
+					action.setEffectiveTimeScale(animDef.speed);
+				}
 				action.play();
 			}
 		}

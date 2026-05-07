@@ -7,7 +7,7 @@ import type {
   HitboxDef,
   Vec3,
   PhysicsDef,
-  WaypointAnimDef,
+  AnimationDef,
 } from '@/ThreeWrapper/2.world/tools'
 import type { ComponentState, HitboxState, AnimationState, MeshPartState } from './components/ComponentCreatorUI'
 function buildComponentDef(state: ComponentState): ComponentDef {
@@ -65,22 +65,32 @@ function buildTexturesPBR(meshPart: MeshPartState): TexturePBR | undefined {
   }
   return hasAny ? result : undefined
 }
-function buildAnimations(animations: AnimationState[], meshes: MeshPartState[]): Record<string, WaypointAnimDef> {
-  const result: Record<string, WaypointAnimDef> = {}
+function buildAnimations(animations: AnimationState[], meshes: MeshPartState[]): Record<string, AnimationDef> {
+  const result: Record<string, AnimationDef> = {}
   for (const anim of animations) {
     const meshIndex = meshes.findIndex(m => m.localId === anim.targetMeshId)
     const targetMesh = meshIndex >= 0 ? meshIndex : undefined
-    result[anim.name] = {
-      kind: 'waypoints',
-      ...(targetMesh !== undefined && { targetMesh }),
-      waypoints: anim.waypoints.map(wp => ({
-        position: wp.position,
-        ...(wp.rotation && { rotation: wp.rotation }),
-      })),
-      speed: anim.speed,
-      loop: anim.loop,
-      autoPlay: anim.autoPlay,
-      ...(anim.pauseAtWaypoint > 0 && { pauseAtWaypoint: anim.pauseAtWaypoint }),
+    if (anim.type === 'waypoints') {
+      result[anim.name] = {
+        kind: 'waypoints',
+        ...(targetMesh !== undefined && { targetMesh }),
+        waypoints: anim.waypoints.map(wp => ({
+          position: wp.position,
+          ...(wp.rotation && { rotation: wp.rotation }),
+        })),
+        speed: anim.speed,
+        loop: anim.loop,
+        autoPlay: anim.autoPlay,
+        ...(anim.pauseAtWaypoint > 0 && { pauseAtWaypoint: anim.pauseAtWaypoint }),
+      }
+    } else if (anim.type === 'clip') {
+      result[anim.clipName] = {
+        kind: 'clip',
+        ...(targetMesh !== undefined && { targetMesh }),
+        autoPlay: anim.autoPlay,
+        loop: anim.loop,
+        speed: anim.speed,
+      }
     }
   }
   return result

@@ -69,6 +69,7 @@ export type ClipAnimDef = {
   targetMesh?: number 
   autoPlay?: boolean
   loop?: boolean
+  speed?: number
 }
 export type AnimationDef = WaypointAnimDef | ClipAnimDef
 export type ComponentDef = {

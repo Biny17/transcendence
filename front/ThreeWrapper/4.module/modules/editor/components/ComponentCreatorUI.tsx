@@ -61,8 +61,10 @@ export type MeshPartState = {
 export type AnimationState = {
 	localId: string;
 	name: string;
-	targetMeshId: string; 
+	targetMeshId: string;
+	type: 'waypoints' | 'clip';
 	waypoints: { position: { x: number; y: number; z: number }; rotation?: { x: number; y: number; z: number } }[];
+	clipName: string;
 	speed: number;
 	loop: boolean;
 	autoPlay: boolean;
@@ -86,9 +88,9 @@ type Props = {
 	onExportYaml: (state: ComponentState) => void;
 	onExportZip: (state: ComponentState) => Promise<void>;
 	onGltfLoad: (meshLocalId: string, url: string, manager?: THREE.LoadingManager) => Promise<string[]>;
-	onPlayAnimation: (clipName: string) => void;
-	onStopAnimation: () => void;
-	onAnimSpeedChange: (speed: number) => void;
+	onPlayAnimation: (meshLocalId: string, clipName: string, speed?: number, loop?: boolean) => void;
+	onStopAnimation: (meshLocalId?: string) => void;
+	onPlayAnimationItem: (anim: AnimationState) => void;
 	onHelpersChange: (config: { player: boolean; unitCube: boolean }) => void;
 	onStartPhysicsTest: (state: ComponentState) => void;
 	onStopPhysicsTest: () => void;
@@ -150,7 +152,7 @@ function ModeBtn({ label, selected, onClick }: { label: string; selected: boolea
 		</button>
 	);
 }
-export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExportZip, onGltfLoad, onPlayAnimation, onStopAnimation, onAnimSpeedChange, onHelpersChange, onStartPhysicsTest, onStopPhysicsTest, onAutoGenerateHitboxes, onSceneHitboxSelect }: Props) {
+export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExportZip, onGltfLoad, onPlayAnimation, onStopAnimation, onPlayAnimationItem, onHelpersChange, onStartPhysicsTest, onStopPhysicsTest, onAutoGenerateHitboxes, onSceneHitboxSelect }: Props) {
 	const [state, _setState] = useState<ComponentState>({
 		id: "my_component",
 		meshes: [
@@ -245,13 +247,12 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 	const [mergeMode, setMergeMode] = useState<"idle" | "select-target">("idle");
 	const [mergeSourceId, setMergeSourceId] = useState<string | null>(null);
 	const [gltfLoadMode, setGltfLoadMode] = useState<"upload" | "server">("upload");
-	const [gltfClips, setGltfClips] = useState<string[]>([]);
+	const [gltfClipsByMesh, setGltfClipsByMesh] = useState<Record<string, string[]>>({});
 	const [activeClip, setActiveClip] = useState<string | null>(null);
 	const [gltfLoading, setGltfLoading] = useState(false);
 	const [gltfError, setGltfError] = useState<string | null>(null);
 	const [gltfFileName, setGltfFileName] = useState<string | null>(null);
 	const [gltfZipFileName, setGltfZipFileName] = useState<string | null>(null);
-	const [animSpeed, setAnimSpeed] = useState(1.0);
 	const [helpers, setHelpers] = useState({ player: false, unitCube: false });
 	const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 	const gltfUploadRefs = useRef<Record<string, HTMLInputElement | null>>({});
@@ -337,7 +338,7 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 	};
 	useEffect(() => {
 		if (state.meshes.every((m) => m.meshKind === "primitive")) {
-			setGltfClips([]);
+			setGltfClipsByMesh({});
 			setActiveClip(null);
 			setGltfLoading(false);
 			setGltfError(null);
@@ -430,14 +431,14 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 		if (!file) return;
 		setGltfLoading(true);
 		setGltfError(null);
-		setGltfClips([]);
 		setActiveClip(null);
 		try {
 			const url = URL.createObjectURL(file);
 			setGltfFileName(file.name);
 			handleMeshPartChange(meshLocalId, { gltfPreviewUrl: url, gltfPath: file.name });
 			const clips = await onGltfLoad(meshLocalId, url);
-			setGltfClips(clips);
+			setGltfClipsByMesh(prev => ({ ...prev, [meshLocalId]: clips }));
+			setState(prev => addClipAnimations(prev, meshLocalId, clips));
 		} catch (e) {
 			setGltfError((e as Error).message || "Failed to load GLTF");
 			setGltfFileName(null);
@@ -449,14 +450,14 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 		if (!file) return;
 		setGltfLoading(true);
 		setGltfError(null);
-		setGltfClips([]);
 		setActiveClip(null);
 		try {
 			const vfs = await extractGltfZip(file);
 			setGltfZipFileName(file.name);
 			handleMeshPartChange(meshLocalId, { gltfPreviewUrl: vfs.mainUrl, gltfPath: file.name });
 			const clips = await onGltfLoad(meshLocalId, vfs.mainUrl, vfs.manager);
-			setGltfClips(clips);
+			setGltfClipsByMesh(prev => ({ ...prev, [meshLocalId]: clips }));
+			setState(prev => addClipAnimations(prev, meshLocalId, clips));
 		} catch (e) {
 			setGltfError((e as Error).message || "Failed to load ZIP");
 			setGltfZipFileName(null);
@@ -465,15 +466,15 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 		}
 	};
 	const handleMeshGltfServerPath = async (meshLocalId: string) => {
-		const mesh = state.meshes.find((m) => m.localId === meshLocalId);
+		const mesh = stateRef.current.meshes.find((m) => m.localId === meshLocalId);
 		if (!mesh?.gltfPath) return;
 		setGltfLoading(true);
 		setGltfError(null);
-		setGltfClips([]);
 		setActiveClip(null);
 		try {
 			const clips = await onGltfLoad(meshLocalId, mesh.gltfPath);
-			setGltfClips(clips);
+			setGltfClipsByMesh(prev => ({ ...prev, [meshLocalId]: clips }));
+			setState(prev => addClipAnimations(prev, meshLocalId, clips));
 			setGltfFileName(null);
 			setGltfZipFileName(null);
 			handleMeshPartChange(meshLocalId, { gltfPreviewUrl: mesh.gltfPath });
@@ -578,17 +579,59 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 			})),
 		}));
 	};
+	const addClipAnimations = (prev: ComponentState, meshLocalId: string, clips: string[]): ComponentState => {
+		const existingClipNames = new Set(
+			prev.animations.filter(a => a.targetMeshId === meshLocalId && a.type === 'clip').map(a => a.clipName)
+		);
+		const newClips = clips
+			.filter(c => !existingClipNames.has(c))
+			.map(clipName => ({
+				localId: crypto.randomUUID(),
+				name: clipName,
+				targetMeshId: meshLocalId,
+				type: 'clip' as const,
+				clipName,
+				waypoints: [],
+				speed: 1,
+				loop: true,
+				autoPlay: false,
+				pauseAtWaypoint: 0,
+			}));
+		if (newClips.length === 0) return prev;
+		return { ...prev, animations: [...prev.animations, ...newClips] };
+	};
 	const handleAddAnimation = () => {
 		const firstMeshId = state.meshes[0]?.localId ?? "";
 		const newAnim: AnimationState = {
 			localId: crypto.randomUUID(),
 			name: `anim_${state.animations.length + 1}`,
 			targetMeshId: firstMeshId,
+			type: 'waypoints',
 			waypoints: [{ position: { x: 0, y: 0, z: 0 } }],
+			clipName: '',
 			speed: 2,
 			loop: true,
 			autoPlay: true,
 			pauseAtWaypoint: 0
+		};
+		setState((prev) => ({ ...prev, animations: [...prev.animations, newAnim] }));
+	};
+	const handleAddClipAnimation = () => {
+		const gltfMeshIds = state.meshes.filter(m => gltfClipsByMesh[m.localId]?.length > 0);
+		if (gltfMeshIds.length === 0) return;
+		const meshLocalId = gltfMeshIds[0].localId;
+		const clips = gltfClipsByMesh[meshLocalId];
+		const newAnim: AnimationState = {
+			localId: crypto.randomUUID(),
+			name: clips[0],
+			targetMeshId: meshLocalId,
+			type: 'clip',
+			clipName: clips[0],
+			waypoints: [],
+			speed: 1,
+			loop: true,
+			autoPlay: false,
+			pauseAtWaypoint: 0,
 		};
 		setState((prev) => ({ ...prev, animations: [...prev.animations, newAnim] }));
 	};
@@ -1182,7 +1225,6 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 												gltfPath={mesh.gltfPath}
 												onSelect={(path) => {
 													handleMeshPartChange(mesh.localId, { gltfPath: path, gltfPreviewUrl: path });
-													setTimeout(() => handleMeshGltfServerPath(mesh.localId), 0);
 												}}
 											/>
 											<div style={{ marginBottom: "6px" }}>
@@ -1697,9 +1739,10 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 					))}
 				</div>
 				{}
-				<div style={{ borderTop: `1px solid ${C.border}`, padding: "8px 12px" }}>
-					<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-						<div style={labelStyle}>Waypoint Animations</div>
+			<div style={{ borderTop: `1px solid ${C.border}`, padding: "8px 12px" }}>
+				<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+					<div style={labelStyle}>Animations</div>
+					<div style={{ display: "flex", gap: "4px" }}>
 						<button
 							onClick={handleAddAnimation}
 							style={{
@@ -1712,9 +1755,24 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 								fontFamily: "monospace",
 								fontSize: "11px"
 							}}>
-							+ Add
+							+ Waypoint
+						</button>
+						<button
+							onClick={handleAddClipAnimation}
+							style={{
+								background: C.btnBg,
+								border: `1px solid ${C.btnBorder}`,
+								borderRadius: "3px",
+								color: C.textBright,
+								cursor: "pointer",
+								padding: "4px 8px",
+								fontFamily: "monospace",
+								fontSize: "11px"
+							}}>
+							+ Clip
 						</button>
 					</div>
+				</div>
 					{state.animations.map((anim) => (
 						<div
 							key={anim.localId}
@@ -1740,21 +1798,38 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 								<span>
 									{expandedAnimations.has(anim.localId) ? "▼" : "▶"} {anim.name}
 								</span>
-								<button
-									onClick={(e) => {
-										e.stopPropagation();
-										handleDeleteAnimation(anim.localId);
-									}}
-									style={{
-										background: "transparent",
-										border: "none",
-										color: "#ff8844",
-										cursor: "pointer",
-										padding: "2px 4px",
-										fontSize: "12px"
-									}}>
-									×
-								</button>
+								<div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+									<button
+										onClick={(e) => {
+											e.stopPropagation();
+											onPlayAnimationItem(anim);
+										}}
+										style={{
+											background: "transparent",
+											border: "none",
+											color: C.accent,
+											cursor: "pointer",
+											padding: "2px 4px",
+											fontSize: "12px"
+										}}>
+										▶
+									</button>
+									<button
+										onClick={(e) => {
+											e.stopPropagation();
+											handleDeleteAnimation(anim.localId);
+										}}
+										style={{
+											background: "transparent",
+											border: "none",
+											color: "#ff8844",
+											cursor: "pointer",
+											padding: "2px 4px",
+											fontSize: "12px"
+										}}>
+										×
+									</button>
+								</div>
 							</div>
 							{expandedAnimations.has(anim.localId) && (
 								<div style={{ padding: "8px" }}>
@@ -1775,14 +1850,29 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 											))}
 										</select>
 									</div>
+									{anim.type === 'clip' && (
+										<div style={{ marginBottom: "6px" }}>
+											<div style={{ fontSize: "10px", color: C.textDim, marginBottom: "2px" }}>Clip</div>
+											<select
+												value={anim.clipName}
+												onChange={(e) => handleAnimationChange(anim.localId, { clipName: e.target.value })}
+												style={{ width: "100%", ...inputStyle }}>
+												{(gltfClipsByMesh[anim.targetMeshId] || []).map((clip) => (
+													<option key={clip} value={clip}>{clip}</option>
+												))}
+											</select>
+										</div>
+									)}
 									<div style={{ marginBottom: "6px" }}>
 										<div style={{ fontSize: "10px", color: C.textDim, marginBottom: "2px" }}>Speed (units/s)</div>
 										<input type="number" step="0.1" value={anim.speed} onChange={(e) => handleAnimationChange(anim.localId, { speed: parseFloat(e.target.value) || 1 })} style={{ width: "100%", ...inputStyle }} />
 									</div>
-									<div style={{ marginBottom: "6px" }}>
-										<div style={{ fontSize: "10px", color: C.textDim, marginBottom: "2px" }}>Pause at Waypoint (ms)</div>
-										<input type="number" step="10" value={anim.pauseAtWaypoint} onChange={(e) => handleAnimationChange(anim.localId, { pauseAtWaypoint: parseInt(e.target.value) || 0 })} style={{ width: "100%", ...inputStyle }} />
-									</div>
+									{anim.type === 'waypoints' && (
+										<div style={{ marginBottom: "6px" }}>
+											<div style={{ fontSize: "10px", color: C.textDim, marginBottom: "2px" }}>Pause at Waypoint (ms)</div>
+											<input type="number" step="10" value={anim.pauseAtWaypoint} onChange={(e) => handleAnimationChange(anim.localId, { pauseAtWaypoint: parseInt(e.target.value) || 0 })} style={{ width: "100%", ...inputStyle }} />
+										</div>
+									)}
 									<div style={{ display: "flex", gap: "8px", marginBottom: "6px" }}>
 										<label style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", flex: 1 }}>
 											<input type="checkbox" checked={anim.loop} onChange={(e) => handleAnimationChange(anim.localId, { loop: e.target.checked })} />
@@ -1793,142 +1883,80 @@ export function ComponentCreatorUI({ onMount, onStateChange, onExportYaml, onExp
 											Auto-trigger
 										</label>
 									</div>
-									<div style={{ marginBottom: "6px" }}>
-										<div style={{ fontSize: "10px", color: C.textDim, marginBottom: "4px", display: "flex", justifyContent: "space-between" }}>
-											<span>Waypoints</span>
-											<button
-												onClick={() => handleAddWaypoint(anim.localId)}
-												style={{
-													background: C.btnBg,
-													border: `1px solid ${C.btnBorder}`,
-													borderRadius: "2px",
-													color: C.textBright,
-													cursor: "pointer",
-													padding: "2px 4px",
-													fontFamily: "monospace",
-													fontSize: "10px"
-												}}>
-												+ Waypoint
-											</button>
-										</div>
-										{anim.waypoints.map((wp, idx) => (
-											<div key={idx} style={{ display: "flex", flexDirection: "column", gap: "4px", marginBottom: "6px", padding: "6px", background: "rgba(0,0,0,0.2)", borderRadius: "3px" }}>
-												<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "10px", color: C.textDim }}>
-													<span>Waypoint {idx + 1}</span>
-													<button
-														onClick={() => handleDeleteWaypoint(anim.localId, idx)}
-														style={{
-															background: "transparent",
-															border: "none",
-															color: "#ff8844",
-															cursor: "pointer",
-															padding: "0 2px",
-															fontSize: "12px"
-														}}>
-														×
-													</button>
-												</div>
-												<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "2px", width: "100%", boxSizing: "border-box", minWidth: 0 }}>
-													<div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-														<span style={{ fontSize: "9px", color: C.textDim }}>X</span>
-														<input type="number" step="0.1" value={wp.position.x} onChange={(e) => handleWaypointChange(anim.localId, idx, "x", parseFloat(e.target.value) || 0)} placeholder="X" style={{ ...inputStyle, width: "100%", fontSize: "11px", padding: "3px 4px" }} />
-													</div>
-													<div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-														<span style={{ fontSize: "9px", color: C.textDim }}>Y</span>
-														<input type="number" step="0.1" value={wp.position.y} onChange={(e) => handleWaypointChange(anim.localId, idx, "y", parseFloat(e.target.value) || 0)} placeholder="Y" style={{ ...inputStyle, width: "100%", fontSize: "11px", padding: "3px 4px" }} />
-													</div>
-													<div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-														<span style={{ fontSize: "9px", color: C.textDim }}>Z</span>
-														<input type="number" step="0.1" value={wp.position.z} onChange={(e) => handleWaypointChange(anim.localId, idx, "z", parseFloat(e.target.value) || 0)} placeholder="Z" style={{ ...inputStyle, width: "100%", fontSize: "11px", padding: "3px 4px" }} />
-													</div>
-												</div>
-												<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "2px", width: "100%", boxSizing: "border-box", minWidth: 0 }}>
-													<div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-														<span style={{ fontSize: "9px", color: C.accent }}>Rot X</span>
-														<input type="number" step="0.1" value={wp.rotation?.x ?? 0} onChange={(e) => handleWaypointChange(anim.localId, idx, "x", parseFloat(e.target.value) || 0, "rotation")} placeholder="X" style={{ ...inputStyle, width: "100%", fontSize: "11px", padding: "3px 4px" }} />
-													</div>
-													<div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-														<span style={{ fontSize: "9px", color: C.accent }}>Rot Y</span>
-														<input type="number" step="0.1" value={wp.rotation?.y ?? 0} onChange={(e) => handleWaypointChange(anim.localId, idx, "y", parseFloat(e.target.value) || 0, "rotation")} placeholder="Y" style={{ ...inputStyle, width: "100%", fontSize: "11px", padding: "3px 4px" }} />
-													</div>
-													<div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-														<span style={{ fontSize: "9px", color: C.accent }}>Rot Z</span>
-														<input type="number" step="0.1" value={wp.rotation?.z ?? 0} onChange={(e) => handleWaypointChange(anim.localId, idx, "z", parseFloat(e.target.value) || 0, "rotation")} placeholder="Z" style={{ ...inputStyle, width: "100%", fontSize: "11px", padding: "3px 4px" }} />
-													</div>
-												</div>
+									{anim.type === 'waypoints' && (
+										<div style={{ marginBottom: "6px" }}>
+											<div style={{ fontSize: "10px", color: C.textDim, marginBottom: "4px", display: "flex", justifyContent: "space-between" }}>
+												<span>Waypoints</span>
+												<button
+													onClick={() => handleAddWaypoint(anim.localId)}
+													style={{
+														background: C.btnBg,
+														border: `1px solid ${C.btnBorder}`,
+														borderRadius: "2px",
+														color: C.textBright,
+														cursor: "pointer",
+														padding: "2px 4px",
+														fontFamily: "monospace",
+														fontSize: "10px"
+													}}>
+													+ Waypoint
+												</button>
 											</div>
-										))}
-									</div>
+											{anim.waypoints.map((wp, idx) => (
+												<div key={idx} style={{ display: "flex", flexDirection: "column", gap: "4px", marginBottom: "6px", padding: "6px", background: "rgba(0,0,0,0.2)", borderRadius: "3px" }}>
+													<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "10px", color: C.textDim }}>
+														<span>Waypoint {idx + 1}</span>
+														<button
+															onClick={() => handleDeleteWaypoint(anim.localId, idx)}
+															style={{
+																background: "transparent",
+																border: "none",
+																color: "#ff8844",
+																cursor: "pointer",
+																padding: "0 2px",
+																fontSize: "12px"
+															}}>
+															×
+														</button>
+													</div>
+													<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "2px", width: "100%", boxSizing: "border-box", minWidth: 0 }}>
+														<div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+															<span style={{ fontSize: "9px", color: C.textDim }}>X</span>
+															<input type="number" step="0.1" value={wp.position.x} onChange={(e) => handleWaypointChange(anim.localId, idx, "x", parseFloat(e.target.value) || 0)} placeholder="X" style={{ ...inputStyle, width: "100%", fontSize: "11px", padding: "3px 4px" }} />
+														</div>
+														<div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+															<span style={{ fontSize: "9px", color: C.textDim }}>Y</span>
+															<input type="number" step="0.1" value={wp.position.y} onChange={(e) => handleWaypointChange(anim.localId, idx, "y", parseFloat(e.target.value) || 0)} placeholder="Y" style={{ ...inputStyle, width: "100%", fontSize: "11px", padding: "3px 4px" }} />
+														</div>
+														<div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+															<span style={{ fontSize: "9px", color: C.textDim }}>Z</span>
+															<input type="number" step="0.1" value={wp.position.z} onChange={(e) => handleWaypointChange(anim.localId, idx, "z", parseFloat(e.target.value) || 0)} placeholder="Z" style={{ ...inputStyle, width: "100%", fontSize: "11px", padding: "3px 4px" }} />
+														</div>
+													</div>
+													<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "2px", width: "100%", boxSizing: "border-box", minWidth: 0 }}>
+														<div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+															<span style={{ fontSize: "9px", color: C.accent }}>Rot X</span>
+															<input type="number" step="0.1" value={wp.rotation?.x ?? 0} onChange={(e) => handleWaypointChange(anim.localId, idx, "x", parseFloat(e.target.value) || 0, "rotation")} placeholder="X" style={{ ...inputStyle, width: "100%", fontSize: "11px", padding: "3px 4px" }} />
+														</div>
+														<div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+															<span style={{ fontSize: "9px", color: C.accent }}>Rot Y</span>
+															<input type="number" step="0.1" value={wp.rotation?.y ?? 0} onChange={(e) => handleWaypointChange(anim.localId, idx, "y", parseFloat(e.target.value) || 0, "rotation")} placeholder="Y" style={{ ...inputStyle, width: "100%", fontSize: "11px", padding: "3px 4px" }} />
+														</div>
+														<div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+															<span style={{ fontSize: "9px", color: C.accent }}>Rot Z</span>
+															<input type="number" step="0.1" value={wp.rotation?.z ?? 0} onChange={(e) => handleWaypointChange(anim.localId, idx, "z", parseFloat(e.target.value) || 0, "rotation")} placeholder="Z" style={{ ...inputStyle, width: "100%", fontSize: "11px", padding: "3px 4px" }} />
+														</div>
+													</div>
+												</div>
+											))}
+										</div>
+									)}
 								</div>
 							)}
 						</div>
 					))}
 				</div>
 				{}
-				{gltfClips.length > 0 && (
-					<div style={{ borderTop: `1px solid ${C.border}`, padding: "8px 12px" }}>
-						<div style={labelStyle}>GLTF Clips</div>
-						<div style={{ marginBottom: "8px" }}>
-							<div style={{ fontSize: "10px", color: C.textDim, marginBottom: "4px", display: "flex", justifyContent: "space-between" }}>
-								Speed: <span>{animSpeed.toFixed(1)}×</span>
-							</div>
-							<input
-								type="range"
-								min="0.1"
-								max="5"
-								step="0.1"
-								value={animSpeed}
-								onChange={(e) => {
-									const newSpeed = parseFloat(e.target.value);
-									setAnimSpeed(newSpeed);
-									onAnimSpeedChange(newSpeed);
-								}}
-								style={{ width: "100%", cursor: "pointer" }}
-							/>
-						</div>
-						{gltfClips.map((clipName) => (
-							<div key={clipName} style={{ marginBottom: "6px", display: "flex", gap: "4px", alignItems: "center" }}>
-								<span style={{ flex: 1, fontSize: "11px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{clipName}</span>
-								<button
-									onClick={() => {
-										onPlayAnimation(clipName);
-										setActiveClip(clipName);
-									}}
-									style={{
-										flex: 0.5,
-										padding: "4px 6px",
-										background: activeClip === clipName ? C.accent : C.btnBg,
-										border: `1px solid ${C.btnBorder}`,
-										borderRadius: "3px",
-										color: C.textBright,
-										cursor: "pointer",
-										fontFamily: "monospace",
-										fontSize: "10px"
-									}}>
-									▶
-								</button>
-								<button
-									onClick={() => {
-										onStopAnimation();
-										setActiveClip(null);
-									}}
-									style={{
-										flex: 0.5,
-										padding: "4px 6px",
-										background: C.btnBg,
-										border: `1px solid ${C.btnBorder}`,
-										borderRadius: "3px",
-										color: C.textBright,
-										cursor: "pointer",
-										fontFamily: "monospace",
-										fontSize: "10px"
-									}}>
-									■
-								</button>
-							</div>
-						))}
-					</div>
-				)}
 			</div>
 			{}
 			<div style={{ flex: "0 0 auto", borderTop: `1px solid ${C.border}`, padding: "8px 12px", display: "flex", gap: "6px" }}>
@@ -1946,9 +1974,7 @@ function ServerModelList({ gltfPath, onSelect }: { gltfPath: string; onSelect: (
 	const [models, setModels] = useState<{ name: string; path: string }[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const [open, setOpen] = useState(false);
 	useEffect(() => {
-		if (!open) return;
 		setLoading(true);
 		setError(null);
 		fetch("/api/models")
@@ -1961,58 +1987,35 @@ function ServerModelList({ gltfPath, onSelect }: { gltfPath: string; onSelect: (
 				setError("Failed to load models");
 				setLoading(false);
 			});
-	}, [open]);
+	}, []);
 	return (
-		<div style={{ marginBottom: "6px", position: "relative" }}>
-			<div style={{ fontSize: "10px", color: C.textDim, marginBottom: "2px" }}>From Server</div>
-			<button
-				onClick={() => setOpen((v) => !v)}
-				style={{
-					width: "100%",
-					padding: "4px 6px",
-					background: C.btnBg,
-					border: `1px solid ${C.btnBorder}`,
-					borderRadius: "3px",
-					color: C.textBright,
-					cursor: "pointer",
-					fontFamily: "monospace",
-					fontSize: "10px",
-					textAlign: "left"
-				}}>
-				{loading ? "Loading..." : models.length ? `Models (${models.length}) ▼` : "No models found"}
-			</button>
-			{open && !loading && (
-				<div
-					style={{
-						position: "absolute",
-						zIndex: 100,
-						background: C.bg,
-						border: `1px solid ${C.border}`,
-						borderRadius: "3px",
-						maxHeight: "160px",
-						overflowY: "auto",
-						marginTop: "2px"
-					}}>
-					{error && <div style={{ padding: "4px 8px", fontSize: "10px", color: "#ff8844" }}>{error}</div>}
+		<div style={{ marginBottom: "6px" }}>
+			<div style={{ fontSize: "10px", color: C.textDim, marginBottom: "4px" }}>From Server</div>
+			{loading && <div style={{ fontSize: "10px", color: C.textDim, padding: "4px 0" }}>Loading...</div>}
+			{error && <div style={{ fontSize: "10px", color: "#ff8844", padding: "4px 0" }}>{error}</div>}
+			{!loading && models.length === 0 && !error && (
+				<div style={{ fontSize: "10px", color: C.textDim, padding: "4px 0" }}>No models found</div>
+			)}
+			{!loading && models.length > 0 && (
+				<div style={{ display: "flex", flexDirection: "column", gap: "2px", maxHeight: "140px", overflowY: "auto" }}>
 					{models.map((m) => (
 						<button
 							key={m.name}
-							onClick={() => {
-								onSelect(m.path);
-								setOpen(false);
-							}}
+							onClick={() => onSelect(m.path)}
 							style={{
-								display: "block",
-								width: "100%",
+								display: "flex",
+								alignItems: "center",
 								padding: "4px 8px",
-								background: m.path === gltfPath ? C.selectedBg : "transparent",
-								border: "none",
-								color: C.text,
+								background: m.path === gltfPath ? C.selectedBg : C.btnBg,
+								border: `1px solid ${m.path === gltfPath ? C.accent : C.btnBorder}`,
+								borderRadius: "3px",
+								color: m.path === gltfPath ? C.textBright : C.text,
 								cursor: "pointer",
 								fontFamily: "monospace",
 								fontSize: "10px",
 								textAlign: "left"
 							}}>
+							<span style={{ color: C.textDim, marginRight: "6px", fontSize: "9px" }}>▶</span>
 							{m.name}
 						</button>
 					))}

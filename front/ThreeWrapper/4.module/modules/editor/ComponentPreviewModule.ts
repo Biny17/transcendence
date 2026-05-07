@@ -402,10 +402,11 @@ export class ComponentPreviewModule implements Module {
 			this._applyHitboxHighlight(this._selectedHitboxId);
 		}
 
-		// Setup waypoint animations per mesh
+		// Setup animations per mesh
 		this.waypointAnims.clear();
 		for (const anim of state.animations) {
-			if (anim.autoPlay) {
+			if (!anim.autoPlay) continue;
+			if (anim.type === 'waypoints') {
 				const meshGroup = this.meshGroups.get(anim.targetMeshId);
 				if (meshGroup) {
 					this.waypointAnims.set(anim.targetMeshId, {
@@ -422,6 +423,8 @@ export class ComponentPreviewModule implements Module {
 						progress: 0
 					});
 				}
+			} else if (anim.type === 'clip' && anim.clipName) {
+				this.playAnimation(anim.targetMeshId, anim.clipName, anim.speed, anim.loop);
 			}
 		}
 	}
@@ -582,7 +585,7 @@ export class ComponentPreviewModule implements Module {
 		return gltf.animations.map((a: any) => a.name);
 	}
 
-	playAnimation(meshLocalId: string, clipName: string): void {
+	playAnimation(meshLocalId: string, clipName: string, speed = 1, loop = true): void {
 		const mixer = this.gltfMixers.get(meshLocalId);
 		const clips = this.gltfClips.get(meshLocalId);
 		if (!mixer || !clips) return;
@@ -593,8 +596,30 @@ export class ComponentPreviewModule implements Module {
 		const clip = clips.find((c) => c.name === clipName);
 		if (!clip) return;
 		const action = mixer.clipAction(clip);
+		action.loop = loop ? THREE.LoopRepeat : THREE.LoopOnce;
+		action.setEffectiveTimeScale(speed);
 		action.play();
 		this.activeActions.set(meshLocalId, action);
+	}
+
+	startWaypointAnimation(anim: AnimationState): void {
+		if (anim.type !== 'waypoints' || anim.waypoints.length < 2) return;
+		const meshGroup = this.meshGroups.get(anim.targetMeshId);
+		if (!meshGroup) return;
+
+		this.waypointAnims.delete(anim.targetMeshId);
+
+		this.waypointAnims.set(anim.targetMeshId, {
+			waypoints: anim.waypoints.map((w) => new THREE.Vector3(w.position.x, w.position.y, w.position.z)),
+			rotations: anim.waypoints.map((w) => new THREE.Euler(
+				w.rotation?.x ?? 0, w.rotation?.y ?? 0, w.rotation?.z ?? 0
+			)),
+			speed: anim.speed || 2,
+			loop: anim.loop,
+			targetIdx: 1,
+			direction: 1,
+			progress: 0,
+		});
 	}
 
 	stopAnimation(meshLocalId?: string): void {
@@ -610,12 +635,6 @@ export class ComponentPreviewModule implements Module {
 				action.stop();
 			}
 			this.activeActions.clear();
-		}
-	}
-
-	setAnimationSpeed(speed: number): void {
-		for (const mixer of this.gltfMixers.values()) {
-			mixer.timeScale = speed;
 		}
 	}
 

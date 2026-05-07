@@ -112,17 +112,18 @@ export class ComponentCreatorUIModule implements Module {
 					gltfLoadedMeshes.set(meshLocalId, url);
 					return this.preview?.loadGltfModel(meshLocalId, url, manager) ?? [];
 				},
-				onPlayAnimation: (clipName) => {
-					const firstAnimMesh = defaultState.meshes[0]?.localId;
-					if (firstAnimMesh) {
-						this.preview?.playAnimation(firstAnimMesh, clipName);
+				onPlayAnimation: (meshLocalId, clipName, speed, loop) => {
+					this.preview?.playAnimation(meshLocalId, clipName, speed, loop);
+				},
+				onStopAnimation: (meshLocalId) => {
+					this.preview?.stopAnimation(meshLocalId);
+				},
+				onPlayAnimationItem: (anim) => {
+					if (anim.type === 'clip') {
+						this.preview?.playAnimation(anim.targetMeshId, anim.clipName, anim.speed, anim.loop);
+					} else if (anim.type === 'waypoints') {
+						this.preview?.startWaypointAnimation(anim);
 					}
-				},
-				onStopAnimation: () => {
-					this.preview?.stopAnimation();
-				},
-				onAnimSpeedChange: (speed) => {
-					this.preview?.setAnimationSpeed(speed);
 				},
 				onHelpersChange: (config) => {
 					this.preview?.setHelpers(config);
