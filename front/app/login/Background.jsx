@@ -9,102 +9,82 @@ import Mascot from "@/public/mascot.json";
 import MascotCartoon from "@/public/mascot-cartoon.json";
 import Celeb from "@/public/celebrations.json";
 import { useRouter } from 'next/navigation';
+import api, { API_BASE } from "@/lib/api";
 
+export function Background({ signInOpen, setSignInOpen }) {
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [isSignIn, setIsSignIn] = useState(false);
+  const [Submit, setSubmit] = useState(false);
+  const [isSignUpMode, setisSignUpMode] = useState(false);
+  const [form, setForm] = useState({ age: "", email: "", password: "", username: "" });
+  const [Profile, setProfile] = useState([]);
+  const [error, setError] = useState("");
+  const router = useRouter();
 
-export function Background({ signInOpen,setSignInOpen }) {
-
-const [isSignUp, setIsSignUp] = useState(false);
-const [isSignIn, setIsSignIn] = useState(false);
-const [Submit, setSubmit] = useState(false);
-const[isSignUpMode, setisSignUpMode] = useState(false);
-const [form, setForm] = useState({ age: "", email: "", password: "", username: "" });
-const [Profile, setProfile] = useState([])
-const [error, setError] = useState("");
-const router = useRouter();
-
-async function fetchVerified() {
-	const url =  'http://localhost:8080/api/users/find?email=' + form.email;
-	const options = {method: 'GET', headers: {Accept: 'application/json, application/problem+json'}};
+  async function fetchVerified() {
     try {
-      const response = await fetch(url, options);
-	  const data = await response.json();
-	  console.log(data)
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.title);
+      const data = await api.get(`/api/users/find?email=${form.email}`);
+      if (data && data.length > 0) {
+        setProfile(data[0]);
       }
-    if (response.status === 200 ) 
-      setProfile(data[0]);
-	setIsSignIn(true);
-    } 
-  catch (error) {
+      setIsSignIn(true);
+    } catch (error) {
       console.log(error);
       setError("Invalid credentials");
-      setForm({ email: "", password: ""});
+      setForm({ email: "", password: "" });
     }
-}
-
-async function handle42Login(){
-   window.location.href = "http://localhost:8080/api/auth/42/login";
-}
-
-const handleSubmit = () => {
-  if (!form.email || !form.password) { setError("Remplissez tous les champs !"); return; }
-  if (isSignUpMode && !form.age) { setError("Remplissez tous les champs !"); return; }
-  if (isSignUpMode && !form.username) { setError("Choisissez un pseudo !"); return; }
-  else if (isSignUpMode) { setIsSignUp(true); setSubmit(!Submit); return; }
-  else { fetchVerified(); return; }
-};
-
-useEffect(function() {
-  if (!isSignUp && !isSignIn) {
-    return;
   }
-  async function fetchData() {
-    const url = isSignUp ? 'http://localhost:8080/api/users/add' : 'http://localhost:8080/api/auth/login';
-  let payload;
-  if (isSignUp)
-    payload = { ...form, age: Number(form.age), verified: false };
-  else
-    payload = {email: form.email,password: form.password};
-    const options = {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/problem+json' },
-      body: JSON.stringify(payload)
-    };
-    try {
-      const response = await fetch(url, options);
-      setIsSignIn(false);
-      setIsSignUp(false);
-      setSubmit(false);
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.title);
+
+  function handle42Login() {
+    window.location.href = `${API_BASE}/api/auth/42/login`;
+  }
+
+  const handleSubmit = () => {
+    if (!form.email || !form.password) { setError("Remplissez tous les champs !"); return; }
+    if (isSignUpMode && !form.age) { setError("Remplissez tous les champs !"); return; }
+    if (isSignUpMode && !form.username) { setError("Choisissez un pseudo !"); return; }
+    else if (isSignUpMode) { setIsSignUp(true); setSubmit(!Submit); return; }
+    else { fetchVerified(); return; }
+  };
+
+  useEffect(() => {
+    if (!isSignUp && !isSignIn) return;
+
+    async function fetchData() {
+      try {
+        if (isSignUp) {
+          await api.post('/api/users/add', {
+            ...form,
+            age: Number(form.age),
+            verified: false,
+          });
+        } else {
+          await api.post('/api/auth/login', {
+            email: form.email,
+            password: form.password,
+          });
+        }
+        setIsSignIn(false);
+        setIsSignUp(false);
+        setSubmit(false);
+
+        if (isSignUpMode) {
+          setisSignUpMode(false);
+          setForm({ email: "", password: "", age: "", username: "" });
+        } else if (Profile.verified) {
+          router.push("/home");
+        } else {
+          setError("Mail not verified");
+          setForm({ email: "", password: "", age: "", username: "" });
+        }
+      } catch (error) {
+        console.log(error);
+        setError("Invalid credentials");
+        setForm({ email: "", password: "", age: "", username: "" });
       }
-      if (isSignUpMode && (response.status === 200 || response.status === 201)) 
-	    {
-        setisSignUpMode(false);
-        setForm({ email: "", password: "", age: "", username: "" });
-	    }
-      else if (Profile.verified && (response.status === 200 || response.status === 201))
-        router.push("/home");
-      else
-     {
-        setError("Mail not verified");
-        setForm({ email: "", password: "", age: "", username: "" });
-     }
-
-    } 
-	catch (error) 
-	{
-      console.log(error);
-      setError("Invalid credentials");
-      setForm({ email: "", password: "", age: "", username: "" });
-  }
-}
-  fetchData();
-}, [isSignUp, isSignIn, Submit])
+    }
+    fetchData();
+  }, [isSignUp, isSignIn, Submit])
 
   const mascotRef = useRef(null);
   const mascotRef2 = useRef(null);

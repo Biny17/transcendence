@@ -6,6 +6,7 @@ import type { LoadWorldPlayer } from "shared/state";
 import type { World } from "@/ThreeWrapper/2.world/WorldClass";
 import { Logger } from "./Logger";
 import { NetworkManager } from "./communication/NetworkManager";
+import { api } from "@/lib/api";
 import type { Engine } from "../Engine";
 type MessageHandler<T = unknown> = (payload: T) => void;
 const RECONNECT_ATTEMPTS = 3;
@@ -200,13 +201,27 @@ export class ServerHandler {
 		this.logger.info(`Reconnecting... (attempt ${this.reconnectCount}/${RECONNECT_ATTEMPTS})`);
 		this.reconnectTimer = setTimeout(() => this.connect(), RECONNECT_INTERVAL_MS);
 	}
+	private getCookie(name: string): string | undefined {
+		return document.cookie.split('; ').find(row => row.startsWith(name + '='))?.split('=')[1];
+	}
 	private registerInternalHandlers(): void {
-		this.on(SERVER_MSG.CONNECTED, (p: ConnectedPayload) => {
+		this.on(SERVER_MSG.CONNECTED, async (p: ConnectedPayload) => {
 			this.playerId = p.playerId;
 			this.logger.info(`Assigned playerId: ${p.playerId}`);
-			const urlParams = new URLSearchParams(window.location.search);
-			const username = urlParams.get("username") ?? p.playerId;
-			this.send.join({ username });
+			const token = this.getCookie('auth_token');
+			if (!token) {
+				this.send.join({ username: p.playerId });
+				return;
+			}
+			try {
+				const payload = token.split('.')[1];
+				const decoded = JSON.parse(atob(payload));
+				const data: Array<{ username: string }> | undefined = await api.get('/api/users/' + decoded.sub);
+				const username = data?.[0]?.username ?? p.playerId;
+				this.send.join({ username });
+			} catch {
+				this.send.join({ username: p.playerId });
+			}
 		});
 		this.on(SERVER_MSG.LOAD_WORLD, async (p) => {
 			this.logger.debug("Loading world: " + p.worldId);
