@@ -39,13 +39,13 @@ lights:
 objects:
   # ── Ground ───────────────────────────────────────────────────────────────────
   - id: floor
-    component: /game/components/stone_floor.yaml
+    component: /game/components/element_stone_floor.yaml
     type: map
     position: { x: 0, y: -0.25, z: 0 }
 
   # ── Static raised platform in the centre ─────────────────────────────────────
   - id: center_platform
-    component: /game/components/stone_floor.yaml
+    component: /game/components/element_stone_floor.yaml
     type: map
     position: { x: 0, y: 2, z: 0 }
     scale: { x: 0.4, y: 1, z: 0.4 }    # 8×0.5×8 world units after scale

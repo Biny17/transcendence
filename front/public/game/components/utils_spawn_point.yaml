@@ -1,0 +1,15 @@
+# $schema: ./component.schema.json
+# ---
+id: spawn_point
+meshes: []
+physics:
+  bodyType: static
+  restitution: 0.1
+hitboxes:
+  - shape: box
+    size:
+      x: 1.5
+      'y': 2
+      z: 1.5
+    isSensor: true
+    tag: spawn_zone

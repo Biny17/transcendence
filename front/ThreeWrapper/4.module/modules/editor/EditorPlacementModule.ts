@@ -44,7 +44,11 @@ export class EditorPlacementModule implements Module {
   private selectedComponent: string | null = null
   private mouseDownPos: { x: number; y: number } | null = null
   private readonly dragThreshold = 5
-  readonly gridSize = 1
+  private _gridSize = 1
+  get gridSize(): number { return this._gridSize }
+  private _gridHelper: THREE.GridHelper | null = null
+  private _showGrid = true
+  get showGrid(): boolean { return this._showGrid }
   private placementY = 0
   private _waypointAnim: { waypoints: THREE.Vector3[]; rotations: THREE.Euler[]; speed: number; loop: boolean; targetIdx: number; direction: number; progress: number } | null = null
   private _waypointOrigPos: THREE.Vector3 | null = null
@@ -99,6 +103,9 @@ export class EditorPlacementModule implements Module {
     this.placementPlane.rotation.x = -Math.PI / 2
     this.placementPlane.name = '__editor_placement_plane__'
     ctx.objects.addRaw(this.placementPlane)
+    this._gridHelper = new THREE.GridHelper(40, 40, 0x44aaff, 0x224466)
+    this._gridHelper.position.y = this.placementY
+    ctx.objects.addRaw(this._gridHelper)
     ctx.canvas.addEventListener('pointermove', this._onPointerMove)
     ctx.canvas.addEventListener('pointerdown', this._onPointerDown)
     ctx.canvas.addEventListener('pointerup', this._onPointerUp)
@@ -116,6 +123,7 @@ export class EditorPlacementModule implements Module {
       const scene = this.ctx.scene as any as THREE.Scene
       for (const l of this._envLights) scene.remove(l)
       if (this.placementPlane) this.ctx.objects.removeRaw(this.placementPlane)
+      if (this._gridHelper) this.ctx.objects.removeRaw(this._gridHelper)
       for (const id of this.meshRegistry.keys()) {
         if (this.ctx.objects.getById(id)) this.ctx.objects.remove(id)
       }
@@ -123,6 +131,7 @@ export class EditorPlacementModule implements Module {
     window.removeEventListener('keydown', this._onKeyDown)
     this._removeGhost()
     this.meshRegistry.clear()
+    this._gridHelper = null
     this._envLights = []
     this.ctx = null
   }
@@ -171,6 +180,7 @@ export class EditorPlacementModule implements Module {
   setPlacementY(y: number): void {
     this.placementY = y
     if (this.placementPlane) this.placementPlane.position.y = y
+    if (this._gridHelper) this._gridHelper.position.y = y
     this.onStateChange?.()
   }
   update(delta: number): void {
@@ -399,6 +409,29 @@ export class EditorPlacementModule implements Module {
     this._applyEnv()
     this.onStateChange?.()
   }
+  setGridSize(n: number): void {
+    this._gridSize = Math.max(0.125, n)
+    this._rebuildGrid()
+    this.onStateChange?.()
+  }
+  setShowGrid(on: boolean): void {
+    this._showGrid = on
+    if (this._gridHelper) this._gridHelper.visible = on
+    this.onStateChange?.()
+  }
+  private _rebuildGrid(): void {
+    if (!this.ctx) return
+    if (this._gridHelper) {
+      this.ctx.objects.removeRaw(this._gridHelper)
+      this._gridHelper = null
+    }
+    const divs = Math.max(4, Math.round(40 / this._gridSize))
+    this._gridHelper = new THREE.GridHelper(40, divs, 0x44aaff, 0x224466)
+    this._gridHelper.position.y = this.placementY
+    this._gridHelper.visible = this._showGrid
+    this.ctx.objects.addRaw(this._gridHelper)
+  }
+
   private async _applyEnv(): Promise<void> {
     if (!this.ctx) return
     const scene = this.ctx.scene as any as THREE.Scene
@@ -569,8 +602,8 @@ export class EditorPlacementModule implements Module {
       const hits = this.raycaster.intersectObject(this.placementPlane!)
       if (hits.length > 0) {
         const p = hits[0].point
-        const sx = Math.round(p.x / this.gridSize) * this.gridSize
-        const sz = Math.round(p.z / this.gridSize) * this.gridSize
+        const sx = Math.round(p.x / this._gridSize) * this._gridSize
+        const sz = Math.round(p.z / this._gridSize) * this._gridSize
         obj.position = { x: sx, y: this.placementY, z: sz }
         mesh.position.set(sx, this.placementY, sz)
       }
@@ -600,9 +633,9 @@ export class EditorPlacementModule implements Module {
     if (hits.length > 0) {
       const p = hits[0].point
       this.ghostGroup.position.set(
-        Math.round(p.x / this.gridSize) * this.gridSize,
+        Math.round(p.x / this._gridSize) * this._gridSize,
         this.placementY,
-        Math.round(p.z / this.gridSize) * this.gridSize,
+        Math.round(p.z / this._gridSize) * this._gridSize,
       )
       this.ghostGroup.visible = true
     } else {
@@ -726,12 +759,14 @@ export class EditorPlacementModule implements Module {
     } else if (e.ctrlKey && (e.key === 'y' || e.shiftKey)) {
       e.preventDefault()
       this.redo()
+    } else if (e.ctrlKey && e.key === 's') {
+      e.preventDefault()
     }
   }
   private _makeSolidMesh(geo: THREE.BufferGeometry, name: string): THREE.Group {
     const group = new THREE.Group()
     group.name = name
-    const mat = new THREE.MeshBasicMaterial({ color: 0xaaccff, transparent: true, opacity: 0.85 })
+    const mat = new THREE.MeshStandardMaterial({ color: 0xaaccff, roughness: 0.5, metalness: 0.1 })
     const mesh = new THREE.Mesh(geo, mat)
     group.add(mesh)
     return group
@@ -739,7 +774,7 @@ export class EditorPlacementModule implements Module {
   private _setHighlight(id: string, on: boolean): void {
     this.meshRegistry.get(id)?.traverse((c: THREE.Object3D) => {
       if (c instanceof THREE.Mesh) {
-        (c.material as THREE.MeshBasicMaterial).color.set(on ? 0xff8844 : 0xaaccff)
+        (c.material as THREE.MeshStandardMaterial).color.set(on ? 0xff8844 : 0xaaccff)
       }
     })
   }

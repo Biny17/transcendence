@@ -29,7 +29,9 @@ export class EditorHotbarModule implements Module {
 					playingAnimationName: placement.playingAnimationName,
 					isPlayingAll: placement.isPlayingAll,
 					hasAnyAnimations: placement.hasAnyAnimations,
-					env: placement.env
+					env: placement.env,
+					gridSize: placement.gridSize,
+					showGrid: placement.showGrid,
 				});
 			};
 		}
@@ -39,19 +41,41 @@ export class EditorHotbarModule implements Module {
 				components,
 				onSelect: (path: string) => placement?.selectComponent(path),
 				onDeselect: () => placement?.selectComponent(null),
-				onExport: () => placement?.downloadYaml(),
 				onUndo: () => placement?.undo(),
 				onRedo: () => placement?.redo(),
 				onDelete: () => placement?.deleteSelected(),
 				onHeightChange: (y: number) => placement?.setPlacementY(y),
-				onLoadMap: (text: string) => {
-					placement?.loadMap(text);
+				onSaveMap: async (name: string) => {
+					if (!placement) return
+					const yaml = placement.exportYaml()
+					const res = await fetch('/api/maps', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ id: name, yaml }),
+					})
+					if (!res.ok) {
+						const err = await res.json()
+						throw new Error(err.error || 'Failed to save map')
+					}
+				},
+				onLoadMapList: async () => {
+					const res = await fetch('/api/maps')
+					if (!res.ok) return []
+					return res.json()
+				},
+				onLoadSavedMap: async (filePath: string) => {
+					const res = await fetch(filePath)
+					if (!res.ok) throw new Error('Failed to load map')
+					const text = await res.text()
+					placement?.loadMap(text)
 				},
 				onMount: (updater) => {
 					this.updateUI = updater;
-					updater({ canUndo: false, canRedo: false, placedCount: 0, placementY: 0, selectedRotation: null, selectedAnimations: [], playingAnimationName: null, isPlayingAll: false, hasAnyAnimations: false, env: { sky: null, fog: null, lights: [], clouds: false } });
+					updater({ canUndo: false, canRedo: false, placedCount: 0, placementY: 0, selectedRotation: null, selectedAnimations: [], playingAnimationName: null, isPlayingAll: false, hasAnyAnimations: false, env: { sky: null, fog: null, lights: [], clouds: false }, gridSize: 1, showGrid: true });
 				},
 				onRotationChange: (rot) => placement?.setSelectedRotation(rot.x, rot.y, rot.z),
+				onGridSizeChange: (n) => placement?.setGridSize(n),
+				onToggleGrid: () => placement?.setShowGrid(!placement?.showGrid),
 				onPlayAnimation: (name) => placement?.playAnimation(name),
 				onStopAnimation: () => placement?.stopAnimation(),
 				onPlayAll: () => placement?.playAllAnimations(),

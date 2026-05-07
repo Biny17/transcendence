@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 export type EditorUIState = {
   canUndo: boolean
   canRedo: boolean
@@ -11,24 +11,29 @@ export type EditorUIState = {
   isPlayingAll: boolean
   hasAnyAnimations: boolean
   env: { sky: any; fog: any; lights: any[]; clouds: boolean }
+  gridSize: number
+  showGrid: boolean
 }
 type Props = {
   components: string[]
   onSelect: (path: string) => void
   onDeselect: () => void
-  onExport: () => void
   onUndo: () => void
   onRedo: () => void
   onDelete: () => void
   onHeightChange: (y: number) => void
-  onLoadMap: (yamlText: string) => void
   onMount: (updater: (state: EditorUIState) => void) => void
   onRotationChange: (rot: { x: number; y: number; z: number }) => void
+  onGridSizeChange: (n: number) => void
+  onToggleGrid: () => void
   onPlayAnimation: (name: string) => void
   onStopAnimation: () => void
   onPlayAll: () => void
   onStopAll: () => void
   onEnvChange: (env: { sky: any; fog: any; lights: any[]; clouds: boolean }) => void
+  onSaveMap: (name: string) => Promise<void>
+  onLoadMapList: () => Promise<string[]>
+  onLoadSavedMap: (path: string) => Promise<void>
 }
 const C = {
   bg: 'rgba(10, 10, 28, 0.88)',
@@ -77,23 +82,37 @@ function Btn({
   )
 }
 export function EditorUI({
-  components, onSelect, onDeselect, onExport,
-  onUndo, onRedo, onDelete, onHeightChange, onLoadMap, onMount,
-  onRotationChange, onPlayAnimation, onStopAnimation,
+  components, onSelect, onDeselect,
+  onUndo, onRedo, onDelete, onHeightChange, onMount,
+  onRotationChange, onGridSizeChange, onToggleGrid,
+  onPlayAnimation, onStopAnimation,
   onPlayAll, onStopAll, onEnvChange,
+  onSaveMap, onLoadMapList, onLoadSavedMap,
 }: Props) {
   const [selected, setSelected] = useState<string | null>(null)
   const [envOpen, setEnvOpen] = useState(false)
+  const [searchFilter, setSearchFilter] = useState('')
+  const [showShortcuts, setShowShortcuts] = useState(false)
   const [state, setState] = useState<EditorUIState>({
     canUndo: false, canRedo: false, placedCount: 0, placementY: 0,
     selectedRotation: null, selectedAnimations: [], playingAnimationName: null,
     isPlayingAll: false, hasAnyAnimations: false,
     env: { sky: null, fog: null, lights: [], clouds: false },
+    gridSize: 1, showGrid: true,
   })
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [mapName, setMapName] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [saveSuccess, setSaveSuccess] = useState(false)
+  const [savedMaps, setSavedMaps] = useState<string[]>([])
+  const [selectedMapPath, setSelectedMapPath] = useState('')
+  const [loadError, setLoadError] = useState<string | null>(null)
   useEffect(() => {
     onMount(setState)
   }, [])
+  useEffect(() => {
+    onLoadMapList().then(setSavedMaps).catch(() => setSavedMaps([]))
+  }, [onLoadMapList])
   function handleComponentClick(path: string) {
     if (selected === path) {
       setSelected(null)
@@ -107,16 +126,30 @@ export function EditorUI({
     const v = parseFloat(raw)
     if (!isNaN(v)) onHeightChange(v)
   }
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = ev => {
-      const text = ev.target?.result
-      if (typeof text === 'string') onLoadMap(text)
+  async function handleSaveMap() {
+    if (!mapName) return
+    setIsSaving(true)
+    setSaveError(null)
+    setSaveSuccess(false)
+    try {
+      await onSaveMap(mapName)
+      setSaveSuccess(true)
+      setMapName('')
+      onLoadMapList().then(setSavedMaps).catch(() => {})
+    } catch (e) {
+      setSaveError((e as Error).message)
+    } finally {
+      setIsSaving(false)
     }
-    reader.readAsText(file)
-    e.target.value = ''
+  }
+  async function handleLoadSavedMap() {
+    if (!selectedMapPath) return
+    setLoadError(null)
+    try {
+      await onLoadSavedMap(selectedMapPath)
+    } catch (e) {
+      setLoadError((e as Error).message)
+    }
   }
   const sectionBorder: React.CSSProperties = {
     borderTop: `1px solid ${C.border}`,
@@ -167,11 +200,53 @@ export function EditorUI({
       userSelect: 'none',
     }}>
       {}
-      <div style={{ padding: '10px 12px 8px', borderBottom: `1px solid ${C.border}`, fontWeight: 700, fontSize: '11px', letterSpacing: '0.08em', color: C.accent, textTransform: 'uppercase' }}>
-        Map Editor
+      <div style={{ padding: '10px 12px 8px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ fontWeight: 700, fontSize: '11px', letterSpacing: '0.08em', color: C.accent, textTransform: 'uppercase' }}>Map Editor</span>
+        <button
+          onClick={() => setShowShortcuts(v => !v)}
+          style={{
+            background: showShortcuts ? C.selectedBg : 'transparent',
+            border: `1px solid ${C.btnBorder}`,
+            borderRadius: '3px', color: C.textBright, cursor: 'pointer',
+            fontFamily: 'monospace', fontSize: '12px', lineHeight: 1, padding: '1px 6px',
+          }}
+          title="Keyboard shortcuts"
+        >?</button>
       </div>
+      {showShortcuts && (
+        <div style={{ padding: '8px 12px', borderBottom: `1px solid ${C.border}`, fontSize: '10px', color: C.textDim }}>
+          <div style={{ marginBottom: '4px', color: C.textBright, fontWeight: 600 }}>Shortcuts</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '2px 8px' }}>
+            <span style={{ color: C.text }}>Click component</span><span>Select for placement</span>
+            <span style={{ color: C.text }}>Click 3D object</span><span>Select</span>
+            <span style={{ color: C.text }}>Drag</span><span>Move selected</span>
+            <span style={{ color: C.text }}>Right-click drag</span><span>Rotate Y</span>
+            <span style={{ color: C.text }}>Shift + drag</span><span>Snap rotate 45°</span>
+            <span style={{ color: C.text }}>Delete / ⌫</span><span>Delete selected</span>
+            <span style={{ color: C.text }}>Ctrl+Z</span><span>Undo</span>
+            <span style={{ color: C.text }}>Ctrl+Y / Ctrl+Shift+Z</span><span>Redo</span>
+          </div>
+        </div>
+      )}
       {}
-      {}
+      <div style={{ ...sectionBorder }}>
+        <div style={{ fontSize: '10px', color: C.textDim, marginBottom: '5px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Load Saved Map</div>
+        <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+          <select
+            value={selectedMapPath}
+            onChange={(e) => setSelectedMapPath(e.target.value)}
+            style={{ flex: 1, ...inputStyle, fontSize: '11px' }}
+          >
+            <option value="">-- Select map --</option>
+            {savedMaps.map(path => {
+              const name = path.split('/').pop()?.replace('.yaml', '') ?? path
+              return <option key={path} value={path}>{name}</option>
+            })}
+          </select>
+          <Btn onClick={handleLoadSavedMap} disabled={!selectedMapPath}>Load</Btn>
+        </div>
+        {loadError && <div style={{ marginTop: '4px', fontSize: '10px', color: '#ff8844' }}>⚠ {loadError}</div>}
+      </div>
       <div style={{ borderBottom: `1px solid ${C.border}` }}>
         <div
           onClick={() => setEnvOpen(v => !v)}
@@ -363,9 +438,20 @@ export function EditorUI({
         {selected && <span style={{ color: C.textBright, display: 'block' }}>▸ {componentName(selected)}</span>}
       </div>
       {}
-      <div style={{ flex: '0 0 auto', maxHeight: '240px', overflowY: 'auto', borderBottom: `1px solid ${C.border}`, padding: '6px 0' }}>
+      <div style={{ flex: '0 0 auto', flex: 1, minHeight: '120px', overflowY: 'auto', borderBottom: `1px solid ${C.border}`, padding: '6px 0' }}>
         <div style={{ padding: '2px 12px 4px', fontSize: '10px', color: C.textDim, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Components</div>
-        {components.map(path => {
+        <div style={{ padding: '0 12px 6px' }}>
+          <input
+            type="text"
+            value={searchFilter}
+            onChange={e => setSearchFilter(e.target.value)}
+            placeholder="Filter..."
+            style={{ ...inputStyle, width: '100%', fontSize: '10px' }}
+          />
+        </div>
+        {components
+          .filter(path => !searchFilter || componentName(path).toLowerCase().includes(searchFilter.toLowerCase()))
+          .map(path => {
           const isSel = selected === path
           return (
             <div
@@ -418,6 +504,32 @@ export function EditorUI({
             onClick={() => onHeightChange(Math.round((state.placementY + 0.5) * 10) / 10)}
             style={{ width: '24px', height: '24px', background: C.btnBg, border: `1px solid ${C.btnBorder}`, borderRadius: '3px', color: C.textBright, cursor: 'pointer', fontFamily: 'monospace', fontSize: '14px', lineHeight: 1, padding: 0 }}
           >+</button>
+        </div>
+      </div>
+      {}
+      <div style={sectionBorder}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+          <div style={{ fontSize: '10px', color: C.textDim, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Grid</div>
+          <div style={{ flex: 1 }} />
+          <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '10px', cursor: 'pointer', color: C.textDim }}>
+            <input type="checkbox" checked={state.showGrid} onChange={onToggleGrid} style={{ margin: 0 }} />
+            Show
+          </label>
+        </div>
+        <div style={{ display: 'flex', gap: '4px' }}>
+          <select
+            value={state.gridSize}
+            onChange={e => onGridSizeChange(parseFloat(e.target.value))}
+            style={{ flex: 1, ...inputStyle, fontSize: '10px' }}
+          >
+            <option value="0.125">0.125</option>
+            <option value="0.25">0.25</option>
+            <option value="0.5">0.5</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="4">4</option>
+            <option value="8">8</option>
+          </select>
         </div>
       </div>
       {}
@@ -482,27 +594,26 @@ export function EditorUI({
         <div style={rowStyle}>
           <Btn onClick={onUndo} disabled={!state.canUndo}>⟲ Undo</Btn>
           <Btn onClick={onRedo} disabled={!state.canRedo}>⟳ Redo</Btn>
+          <Btn onClick={onDelete}>Delete</Btn>
         </div>
       </div>
       {}
       <div style={{ ...sectionBorder }}>
-        <div style={rowStyle}>
-          <Btn onClick={() => fileInputRef.current?.click()}>Load Map</Btn>
-          <Btn onClick={onDelete}>Delete</Btn>
+        <div style={{ fontSize: '10px', color: C.textDim, marginBottom: '5px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Save Map</div>
+        <div style={{ display: 'flex', gap: '4px' }}>
+          <input
+            type="text"
+            value={mapName}
+            onChange={(e) => setMapName(e.target.value)}
+            placeholder="map name"
+            style={{ flex: 1, ...inputStyle }}
+          />
+          <Btn onClick={handleSaveMap} disabled={!mapName || isSaving}>
+            {isSaving ? '...' : 'Save'}
+          </Btn>
         </div>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".yaml,.yml"
-          style={{ display: 'none' }}
-          onChange={handleFileChange}
-        />
-      </div>
-      {}
-      <div style={{ ...sectionBorder, marginTop: 'auto' }}>
-        <Btn onClick={onExport} style={{ width: '100%', flex: 'none', padding: '7px 0' }}>
-          Export YAML
-        </Btn>
+        {saveError && <div style={{ marginTop: '4px', fontSize: '10px', color: '#ff8844' }}>⚠ {saveError}</div>}
+        {saveSuccess && <div style={{ marginTop: '4px', fontSize: '10px', color: C.accent }}>✓ Saved</div>}
       </div>
     </div>
   )

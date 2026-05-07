@@ -1,4 +1,4 @@
-id: gta
+id: city1
 sky:
         preset: day
 #        cubemap:
@@ -42,8 +42,8 @@ lights:
           groundColor: 6702114
           intensity: 0.35
 objects:
-        - id: floor_start
-          component: /game/components/city2.yaml
+        - id: map
+          component: /game/components/map_city2.yaml
           type: map
           position:
                   x: 0
