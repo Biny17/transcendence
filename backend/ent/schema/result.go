@@ -19,6 +19,7 @@ func (Result) Fields() []ent.Field {
 		field.Int("death"),
 		field.Int("game_id"),
 		field.Int("user_id"),
+		field.String("username"),
 	}
 }
 

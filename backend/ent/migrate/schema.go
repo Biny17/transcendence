@@ -131,6 +131,7 @@ var (
 		{Name: "rank", Type: field.TypeInt},
 		{Name: "kills", Type: field.TypeInt},
 		{Name: "death", Type: field.TypeInt},
+		{Name: "username", Type: field.TypeString},
 		{Name: "game_id", Type: field.TypeInt},
 		{Name: "user_id", Type: field.TypeInt},
 	}
@@ -142,13 +143,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "results_games_results",
-				Columns:    []*schema.Column{ResultsColumns[4]},
+				Columns:    []*schema.Column{ResultsColumns[5]},
 				RefColumns: []*schema.Column{GamesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "results_users_results",
-				Columns:    []*schema.Column{ResultsColumns[5]},
+				Columns:    []*schema.Column{ResultsColumns[6]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},

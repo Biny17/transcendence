@@ -1,4 +1,4 @@
-package game
+package gameserv
 
 import (
 	"backend/ent"
@@ -31,13 +31,23 @@ func ProvideAndRegister(i do.Injector) *GameService {
 
 func (gs *GameService) Register(api huma.API, m *mid.Middleware) {
 	huma.Register(api, huma.Operation{
-		OperationID: "GAME ADD",
+		OperationID: "GAME-ADD",
 		Method:      http.MethodPost,
 		Path:        routes.GameAdd,
 		Summary:     "Add a game to the database",
-		// Middlewares: huma.Middlewares{m.Admin},
-		// Security: []map[string][]string{
-		// 	{"credentials": {}},
-		// },
+		Middlewares: huma.Middlewares{m.Admin},
+		Security: []map[string][]string{
+			{"apiKey": {}},
+		},
 	}, gs.GameResult)
+	huma.Register(api, huma.Operation{
+		Summary: "GAME HISTORY USERID",
+		Method:  http.MethodGet,
+		Path:    routes.GetGames,
+	}, gs.GetUserGames)
+	huma.Register(api, huma.Operation{
+		Summary: "STATS USER",
+		Method:  http.MethodGet,
+		Path:    routes.GetStats,
+	}, gs.GetPlayerStats)
 }

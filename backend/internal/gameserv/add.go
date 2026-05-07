@@ -1,4 +1,4 @@
-package game
+package gameserv
 
 import (
 	"backend/ent"
@@ -78,7 +78,6 @@ func (gs *GameService) GameResult(
 			})
 		}
 	}
-	log.Println("here")
 	return out, nil
 }
 
@@ -93,6 +92,7 @@ func (gs *GameService) makeResult(ctx context.Context, pl *Player, gameId int) (
 		SetDeath(pl.Death).
 		SetGameID(gameId).
 		SetUserID(user_id).
+		SetUsername(pl.Username).
 		Save(ctx)
 	if err != nil {
 		return nil, err
