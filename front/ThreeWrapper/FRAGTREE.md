@@ -208,7 +208,8 @@ ThreeWrapper                                    # Three.js engine wrapper for ga
     │   ├── SpectatorModule                     # Spectator mode
     │   ├── CheckpointModule                    # Checkpoint system
     │   ├── CountdownModule                     # Countdown timer
-    │   └── EndLineModule                       # End line / finish line
+    │   ├── EndLineModule                       # End line / finish line
+    │   └── WinZoneModule                       # Win zone / crown trigger
     ├── input
     │   ├── InputModule                         # Raw input handling
     │   └── PlayerControlModule                 # Player movement controls
@@ -321,7 +322,7 @@ movingPlatform, respawn, lagCompensation, pingDisplay,
 audio, stats, physicsDebug, inspector,
 fpv, tpv, freecam, editorOrbitCamera, editorPlacement, editorHotbar,
 componentCreatorPreview, componentCreatorUI,
-playerAnimation, ragdoll, endlineModule,
+playerAnimation, ragdoll, endlineModule, winZoneModule,
 characterOrbitCamera, characterCustomizerPreview, characterCustomizerUI,
 debugControl
 ```

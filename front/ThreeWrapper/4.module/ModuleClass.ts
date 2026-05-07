@@ -37,6 +37,7 @@ export enum ModuleKey {
 	playerAnimation = "player_animation",
 	ragdoll = "ragdoll",
 	endlineModule = "endline",
+	winZoneModule = "win_zone",
 	characterOrbitCamera = "character_orbit_camera",
 	characterCustomizerPreview = "character_customizer_preview",
 	characterCustomizerUI = "character_customizer_ui",

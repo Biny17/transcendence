@@ -6,7 +6,10 @@ import type { EditorPlacementModule } from "./EditorPlacementModule";
 import type { EditorTestModeModule } from "./EditorTestModeModule";
 import type { EditorUIState } from "./components/EditorUI";
 import { EditorUI } from "./components/EditorUI";
-const COMPONENT_PATHS: string[] = []
+async function fetchComponents(): Promise<string[]> {
+	const res = await fetch('/api/components')
+	return res.ok ? res.json() : []
+}
 export class EditorHotbarModule implements Module {
 	readonly type = ModuleKey.editorHotbar;
 	readonly requires = [ModuleKey.ui, ModuleKey.editorPlacement] as const;
@@ -16,8 +19,7 @@ export class EditorHotbarModule implements Module {
 	async init(ctx: WorldContext): Promise<void> {
 		this.ui = ctx.getModule<UIModule>(ModuleKey.ui) ?? null;
 		const placement = ctx.getModule<EditorPlacementModule>(ModuleKey.editorPlacement) ?? null;
-		const res = await fetch('/api/components')
-		const components: string[] = res.ok ? await res.json() : COMPONENT_PATHS;
+		const components: string[] = await fetchComponents();
 		if (placement) {
 			placement.onStateChange = () => {
 				this.updateUI?.({
@@ -82,10 +84,11 @@ export class EditorHotbarModule implements Module {
 				onPlayAll: () => placement?.playAllAnimations(),
 				onStopAll: () => placement?.stopAllAnimations(),
 				onEnvChange: (env) => placement?.setEnv(env),
-				onTestMode: () => {
-					const testMode = ctx.getModule<EditorTestModeModule>(ModuleKey.editorTestMode)
-					testMode?.enterTestMode()
-				}
+			onTestMode: () => {
+				const testMode = ctx.getModule<EditorTestModeModule>(ModuleKey.editorTestMode)
+				testMode?.enterTestMode()
+			},
+			onRefreshComponents: fetchComponents,
 			})
 		);
 	}

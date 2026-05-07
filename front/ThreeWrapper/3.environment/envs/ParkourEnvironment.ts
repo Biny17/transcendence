@@ -16,7 +16,8 @@ import {
 	FPVModule,
 	AntiFallModule,
 	PlayerSyncModule,
-	LagCompensationModule
+	LagCompensationModule,
+	WinZoneModule
 } from "@/ThreeWrapper/4.module";
 import { Environment } from "../EnvironmentClass";
 export class ParkourEnvironement extends Environment {
@@ -37,5 +38,6 @@ export class ParkourEnvironement extends Environment {
 		this.addModule(new TriggerZoneModule());
 		this.addModule(new TPVModule({}, ModuleKey.input));
 		this.addModule(new EndlineModule({}, ModuleKey.triggerZone));
+		this.addModule(new WinZoneModule({}, ModuleKey.triggerZone));
 	}
 }

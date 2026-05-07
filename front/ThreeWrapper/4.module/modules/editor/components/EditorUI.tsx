@@ -35,6 +35,7 @@ type Props = {
   onLoadMapList: () => Promise<string[]>
   onLoadSavedMap: (path: string) => Promise<void>
   onTestMode: () => void
+  onRefreshComponents: () => Promise<string[]>
 }
 const C = {
   bg: 'rgba(10, 10, 28, 0.88)',
@@ -88,8 +89,9 @@ export function EditorUI({
   onRotationChange, onGridSizeChange, onToggleGrid,
   onPlayAnimation, onStopAnimation,
   onPlayAll, onStopAll, onEnvChange,
-  onSaveMap, onLoadMapList, onLoadSavedMap, onTestMode,
+  onSaveMap, onLoadMapList,   onLoadSavedMap, onTestMode, onRefreshComponents,
 }: Props) {
+  const [items, setItems] = useState(components)
   const [selected, setSelected] = useState<string | null>(null)
   const [envOpen, setEnvOpen] = useState(false)
   const [searchFilter, setSearchFilter] = useState('')
@@ -445,7 +447,29 @@ export function EditorUI({
       </div>
       {}
       <div style={{ flex: 1, minHeight: '120px', overflowY: 'auto', borderBottom: `1px solid ${C.border}`, padding: '6px 0' }}>
-        <div style={{ padding: '2px 12px 4px', fontSize: '10px', color: C.textDim, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Components</div>
+        <div style={{ padding: '2px 12px 4px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: '10px', color: C.textDim, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Components</span>
+          <button
+            onClick={async () => {
+              try {
+                const fresh = await onRefreshComponents()
+                setItems(fresh)
+              } catch {}
+            }}
+            style={{
+              background: 'transparent',
+              border: `1px solid ${C.btnBorder}`,
+              borderRadius: '3px',
+              color: C.textBright,
+              cursor: 'pointer',
+              fontFamily: 'monospace',
+              fontSize: '10px',
+              lineHeight: 1,
+              padding: '2px 6px',
+            }}
+            title="Refresh component list"
+          >↻</button>
+        </div>
         <div style={{ padding: '0 12px 6px' }}>
           <input
             type="text"
@@ -455,7 +479,7 @@ export function EditorUI({
             style={{ ...inputStyle, width: '100%', fontSize: '10px' }}
           />
         </div>
-        {components
+        {items
           .filter(path => !searchFilter || componentName(path).toLowerCase().includes(searchFilter.toLowerCase()))
           .map(path => {
           const isSel = selected === path

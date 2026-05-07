@@ -63,6 +63,8 @@ export { RagdollModule } from "./modules/gameplay/RagdollModule";
 export type { RagdollModuleOptions } from "./modules/gameplay/RagdollModule";
 export { EndlineModule } from "./modules/gameplay/EndLineModule";
 export type { EndLineModuleOptions } from "./modules/gameplay/EndLineModule";
+export { WinZoneModule } from "./modules/gameplay/WinZoneModule";
+export type { WinZoneModuleOptions } from "./modules/gameplay/WinZoneModule";
 export { CharacterOrbitCameraModule } from "./modules/editor/CharacterOrbitCameraModule";
 export { CharacterCustomizerModule } from "./modules/editor/CharacterCustomizerModule";
 export type { AccessoryConfig } from "./modules/editor/CharacterCustomizerModule";
