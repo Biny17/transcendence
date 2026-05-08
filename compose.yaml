@@ -18,12 +18,9 @@ services:
       - GMAIL_PASSWORD=${GMAIL_PASSWORD}
       - ORIGINS=${ORIGINS}
       - KEYPATH=${KEYPATH}
-<<<<<<< HEAD
-=======
       - FORTYTWO_CLIENT_ID=${FORTYTWO_CLIENT_ID}
       - FORTYTWO_CLIENT_SECRET=${FORTYTWO_CLIENT_SECRET}
       - FORTYTWO_REDIRECT_URI=${FORTYTWO_REDIRECT_URI}
->>>>>>> origin/backend
       - CREDENTIAL=${CREDENTIAL}
     volumes:
       - ./backend:/app
