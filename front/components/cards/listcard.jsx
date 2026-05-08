@@ -78,14 +78,23 @@ function getCookie(name) {
 }
 
 useEffect(() => {
-  const token = getCookie('auth_token');
-  if (!token) return;
+  let intervalId;
 
-  const payload = token.split('.')[1];
-  const decoded = JSON.parse(atob(payload));
-  fetchUserById(decoded.sub);
-  fetchData();
-}, [OptionsOpen]);
+  const poll = () => {
+    const token = getCookie('auth_token');
+    if (!token) return;
+
+    const payload = token.split('.')[1];
+    const decoded = JSON.parse(atob(payload));
+    fetchUserById(decoded.sub);
+    fetchData();
+  };
+
+  poll();
+  intervalId = setInterval(poll, 5000);
+
+  return () => clearInterval(intervalId);
+}, []);
 
 players.sort((a, b) => b.win - a.win);
   return (
