@@ -34,7 +34,7 @@ func (gs *GameService) Register(api huma.API, m *mid.Middleware) {
 		OperationID: "GAME-ADD",
 		Method:      http.MethodPost,
 		Path:        routes.GameAdd,
-		Summary:     "Add a game to the database",
+		Summary:     "GAME ADD",
 		Middlewares: huma.Middlewares{m.Admin},
 		Security: []map[string][]string{
 			{"apiKey": {}},
@@ -50,4 +50,14 @@ func (gs *GameService) Register(api huma.API, m *mid.Middleware) {
 		Path:    routes.GetStats,
 		Summary: "STATS USER",
 	}, gs.GetPlayerStats)
+	huma.Register(api, huma.Operation{
+		Method:  http.MethodGet,
+		Path:    routes.ListGames,
+		Summary: "GAME LIST",
+	}, gs.ListLastGames)
+	huma.Register(api, huma.Operation{
+		Method:  http.MethodGet,
+		Path:    routes.ListResults,
+		Summary: "RESULT LIST",
+	}, gs.ListLastResults)
 }

@@ -7,7 +7,7 @@ import (
 
 type PlayerStat struct {
 	TotalGames   int     `json:"games_played"`
-	TotalKills   int     `json:"total_killes"`
+	TotalKills   int     `json:"total_kills"`
 	TotalDeath   int     `json:"total_deaths"`
 	KillPerDeath float64 `json:"avg_kill_per_death"`
 	KillPerGame  float64 `json:"avg_kill_per_game"`

@@ -12,11 +12,6 @@ func extractKey(auth_h string, prefix string) (string, error) {
 	if !strings.HasPrefix(auth_h, prefix) {
 		return "", fmt.Errorf(`Missing "Authorization: Basic <key>" header`)
 	}
-	// fmt.Println(auth_h[len(prefix):])
-	// secret, err := base64.StdEncoding.DecodeString(auth_h[len(prefix):])
-	// if err == nil {
-	// 	return string(secret), nil
-	// }
 	return auth_h[len(prefix):], nil
 }
 

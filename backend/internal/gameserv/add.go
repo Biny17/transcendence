@@ -2,6 +2,7 @@ package gameserv
 
 import (
 	"backend/ent"
+	"backend/internal/pkg/myhuma"
 	"context"
 	"log"
 
@@ -45,21 +46,24 @@ func (gs *GameService) GameResult(
 	*GameOut,
 	error,
 ) {
-	log.Println("func GameResult")
-	log.Println("loby type: ", input.Body.LobbyType)
+	tx, err := gs.Client.Tx(ctx)
+	if err != nil {
+		return nil, huma.Error500InternalServerError("Try again later")
+	}
 	out := &GameOut{}
-	new_game, err := gs.Client.Game.
+	new_game, err := tx.Game.
 		Create().
 		SetType(input.Body.LobbyType).
 		SetNbPlayer(input.Body.TotalPlayer).
 		Save(ctx)
 	if err != nil {
 		log.Println(err)
+		log.Println(tx.Rollback())
 		return nil, huma.Error500InternalServerError("Try again later")
 	}
 	out.Body.GameId = new_game.ID
 	for _, player := range input.Body.Players {
-		res, err := gs.makeResult(ctx, &player, new_game.ID)
+		res, err := gs.makeResult(ctx, &player, new_game.ID, tx)
 		if err != nil {
 			if ent.IsNotFound(err) {
 				out.Body.Results = append(out.Body.Results, UserResult{
@@ -68,25 +72,31 @@ func (gs *GameService) GameResult(
 					Found:    false,
 				})
 			} else {
+				log.Println(tx.Rollback())
 				return nil, huma.Error500InternalServerError("Try again later")
 			}
 		} else {
 			out.Body.Results = append(out.Body.Results, UserResult{
 				UserName: player.Username,
-				UserId:   res.ID,
+				UserId:   res.UserID,
 				Found:    true,
 			})
 		}
 	}
+	err = tx.Commit()
+	if err != nil {
+		log.Println(err)
+		return nil, myhuma.EntErrToHumaErr(err)
+	}
 	return out, nil
 }
 
-func (gs *GameService) makeResult(ctx context.Context, pl *Player, gameId int) (*ent.Result, error) {
-	user_id, err := gs.Client.User.Query().Where(user.UsernameEQ(pl.Username)).OnlyID(ctx)
+func (gs *GameService) makeResult(ctx context.Context, pl *Player, gameId int, tx *ent.Tx) (*ent.Result, error) {
+	user_id, err := tx.User.Query().Where(user.UsernameEQ(pl.Username)).OnlyID(ctx)
 	if err != nil {
 		return nil, err
 	}
-	res, err := gs.Client.Result.Create().
+	res, err := tx.Result.Create().
 		SetKills(pl.Kill).
 		SetRank(pl.Rank).
 		SetDeath(pl.Death).

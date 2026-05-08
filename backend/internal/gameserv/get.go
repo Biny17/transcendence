@@ -6,6 +6,8 @@ import (
 	"backend/internal/pkg/myhuma"
 	"context"
 	"time"
+
+	"entgo.io/ent/dialect/sql"
 )
 
 type Games struct {
@@ -14,12 +16,20 @@ type Games struct {
 	}
 }
 
+type PlayerResult struct {
+	UserId   int    `json:"user_id"`
+	Username string `json:"username"`
+	Kill     int    `json:"kill"`
+	Death    int    `json:"death"`
+	Rank     int    `json:"rank"`
+}
+
 type GameInfo struct {
-	GameId      int       `json:"gameID"`
-	LobbyType   string    `json:"lobbyType"`
-	TimeStamp   time.Time `json:"timestamp"`
-	TotalPlayer int       `json:"totalPlayer"`
-	Players     []Player  `json:"players"`
+	GameId      int            `json:"gameID"`
+	LobbyType   string         `json:"lobbyType"`
+	TimeStamp   time.Time      `json:"timestamp"`
+	TotalPlayer int            `json:"totalPlayer"`
+	Players     []PlayerResult `json:"players"`
 }
 
 type UserIdPath struct {
@@ -62,14 +72,15 @@ func (gs *GameService) GetUserGames(
 	return games, nil
 }
 
-func (gs *GameService) GetPlayersFromGameId(ctx context.Context, gameid int) ([]Player, error) {
-	ret := []Player{}
-	idk, err := gs.Client.Result.Query().Where(result.GameIDEQ(gameid)).All(ctx)
+func (gs *GameService) GetPlayersFromGameId(ctx context.Context, gameid int) ([]PlayerResult, error) {
+	ret := []PlayerResult{}
+	idk, err := gs.Client.Result.Query().Where(result.GameIDEQ(gameid)).Order(result.ByID(sql.OrderAsc())).All(ctx)
 	if err != nil {
 		return ret, myhuma.EntErrToHumaErr(err)
 	}
 	for _, v := range idk {
-		ret = append(ret, Player{
+		ret = append(ret, PlayerResult{
+			UserId:   v.UserID,
 			Username: v.Username,
 			Kill:     v.Kills,
 			Death:    v.Death,
