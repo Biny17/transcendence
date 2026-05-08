@@ -28,6 +28,7 @@ export function Background({ signInOpen, setSignInOpen }) {
         setProfile(data[0]);
       }
       setIsSignIn(true);
+      setSubmit(!Submit)
     } catch (error) {
       console.log(error);
       setError("Invalid credentials");
@@ -49,7 +50,6 @@ export function Background({ signInOpen, setSignInOpen }) {
 
   useEffect(() => {
     if (!isSignUp && !isSignIn) return;
-
     async function fetchData() {
       try {
         if (isSignUp) {
@@ -67,7 +67,6 @@ export function Background({ signInOpen, setSignInOpen }) {
         setIsSignIn(false);
         setIsSignUp(false);
         setSubmit(false);
-
         if (isSignUpMode) {
           setisSignUpMode(false);
           setForm({ email: "", password: "", age: "", username: "" });
