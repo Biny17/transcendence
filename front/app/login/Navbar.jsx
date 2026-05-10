@@ -31,7 +31,7 @@ async function fetchVerified() {
   catch (error) {
       console.log(error);
       setError("Invalid credentials");
-      setForm({ email: "", password: ""});
+      setForm({ email: "", password: "", age: "", username: "" });
     }
 }
 
