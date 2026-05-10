@@ -43,6 +43,7 @@ type PhysicsEntry = {
 }
 export class PhysicsWorld {
   private world: RAPIER.World | null = null
+  private integrationParameters: RAPIER.IntegrationParameters | null = null
   private scene: THREE.Scene
   private config: Required<PhysicsWorldConfig>
   private entries: Map<string, PhysicsEntry> = new Map()
@@ -60,6 +61,8 @@ export class PhysicsWorld {
   async init(): Promise<void> {
     await RAPIER.init()
     this.world = new RAPIER.World(this.config.gravity)
+    this.integrationParameters = this.world.integrationParameters
+    this.integrationParameters.dt = 1/60
   }
   setDebugEnabled(enabled: boolean): void {
     this.config.debug = enabled
@@ -92,9 +95,17 @@ export class PhysicsWorld {
   step(delta: number, allObjects: ManagedObject[]): void {
     if (this._disposed || this._stepping || !this.world) return
     this._stepping = true
-    this.world.timestep = delta
-    this.world.step()
-    this._stepping = false
+    let stepped = false
+    try {
+      this.integrationParameters!.dt = delta
+      this.world.step()
+      stepped = true
+    } catch (e) {
+      console.warn('[PhysicsWorld] step() failed', e)
+    } finally {
+      this._stepping = false
+    }
+    if (!stepped) return
     for (const [pieceId, entry] of this.entries) {
       if (!entry.sync) continue
       const t = entry.body.translation()
@@ -113,8 +124,8 @@ export class PhysicsWorld {
     sync: SyncCallback,
     objectType?: string,
   ): void {
-    if (!this.world) {
-      console.warn('[PhysicsWorld] registerPiece() called before init()')
+    if (this._disposed || !this.world) {
+      console.warn('[PhysicsWorld] registerPiece() called after dispose or before init()')
       return
     }
     if (this.entries.has(pieceId)) return
@@ -161,7 +172,7 @@ export class PhysicsWorld {
     }
   }
   unregister(id: string): void {
-    if (!this.world) return
+    if (this._disposed || !this.world) return
     for (const [pieceId, entry] of this.entries) {
       if (!pieceId.startsWith(id + '_') && pieceId !== id) continue
       for (const col of entry.colliders) {
@@ -173,6 +184,7 @@ export class PhysicsWorld {
     }
   }
   setVelocity(id: string, v: Vec3): void {
+    if (this._disposed) return
     for (const [pieceId, entry] of this.entries) {
       if (pieceId.startsWith(id + '_') || pieceId === id) {
         try {
@@ -184,6 +196,7 @@ export class PhysicsWorld {
     }
   }
   getVelocity(id: string): Vec3 {
+    if (this._disposed) return { x: 0, y: 0, z: 0 }
     for (const [pieceId, entry] of this.entries) {
       if (pieceId.startsWith(id + '_') || pieceId === id) {
         try {
@@ -197,6 +210,7 @@ export class PhysicsWorld {
     return { x: 0, y: 0, z: 0 }
   }
   applyImpulse(id: string, impulse: Vec3): void {
+    if (this._disposed) return
     for (const [pieceId, entry] of this.entries) {
       if (pieceId.startsWith(id + '_') || pieceId === id) {
         try {
@@ -208,6 +222,7 @@ export class PhysicsWorld {
     }
   }
   setPosition(id: string, pos: Vec3): void {
+    if (this._disposed) return
     for (const [pieceId, entry] of this.entries) {
       if (pieceId.startsWith(id + '_') || pieceId === id) {
         try {
@@ -219,6 +234,7 @@ export class PhysicsWorld {
     }
   }
   setRotation(id: string, rot: Quat): void {
+    if (this._disposed) return
     const quat = new THREE.Quaternion(rot.x, rot.y, rot.z, rot.w)
     for (const [pieceId, entry] of this.entries) {
       if (pieceId.startsWith(id + '_') || pieceId === id) {
@@ -231,6 +247,7 @@ export class PhysicsWorld {
     }
   }
   isGrounded(id: string, threshold = 0.15): boolean {
+    if (this._disposed || !this.world) return false
     for (const [pieceId, entry] of this.entries) {
       if (pieceId.startsWith(id + '_') || pieceId === id) {
         if (!this.world) return false
@@ -270,9 +287,10 @@ export class PhysicsWorld {
     return false
   }
   isColliding(idA: string, idB: string): boolean {
+    if (this._disposed || !this.world) return false
     const entriesA = [...this.entries.entries()].filter(([k]) => k.startsWith(idA + '_') || k === idA)
     const entriesB = [...this.entries.entries()].filter(([k]) => k.startsWith(idB + '_') || k === idB)
-    if (!entriesA.length || !entriesB.length || !this.world) return false
+    if (!entriesA.length || !entriesB.length) return false
     for (const [, ea] of entriesA) {
       for (const [, eb] of entriesB) {
         for (const ca of ea.colliders) {
@@ -305,6 +323,7 @@ export class PhysicsWorld {
     return Array.from(this.zones.get(zoneId)?.inside ?? [])
   }
   getMass(id: string): number {
+    if (this._disposed) return 0
     for (const [pieceId, entry] of this.entries) {
       if (pieceId.startsWith(id + '_') || pieceId === id) {
         return entry.body.mass()
@@ -313,6 +332,7 @@ export class PhysicsWorld {
     return 1
   }
   setGravityScale(id: string, scale: number): void {
+    if (this._disposed) return
     for (const [pieceId, entry] of this.entries) {
       if (pieceId.startsWith(id + '_') || pieceId === id) {
         entry.body.setGravityScale(scale, true)
@@ -320,6 +340,7 @@ export class PhysicsWorld {
     }
   }
   setBodyEnabled(id: string, enabled: boolean): void {
+    if (this._disposed) return
     for (const [pieceId, entry] of this.entries) {
       if (pieceId.startsWith(id + '_') || pieceId === id) {
         entry.body.setEnabled(enabled)
@@ -334,16 +355,15 @@ export class PhysicsWorld {
       disposeMesh(mesh)
     }
     this.debugMeshes.clear()
-    for (const [, entry] of this.entries) {
-      for (const col of entry.colliders) {
-        this.world?.removeCollider(col, false)
-      }
-      this.world?.removeRigidBody(entry.body)
-    }
     this.entries.clear()
     this.zones.clear()
-    this.world?.free()
+    try {
+      this.world?.free()
+    } catch (e) {
+      console.warn('[PhysicsWorld] world.free() failed', e)
+    }
     this.world = null
+    this.integrationParameters = null
   }
   private computeBottomOffset(shape: HitboxShape | undefined): number {
     if (!shape) return 0.5
