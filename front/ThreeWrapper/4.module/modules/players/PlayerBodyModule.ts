@@ -43,11 +43,14 @@ export class PlayerBodyModule implements Module {
 		};
 	}
 	async createBody(playerId: string): Promise<void> {
-		if (!this.ctx) return;
+		const ctx = this.ctx;
+		if (!ctx) return;
 		const physicsDesc: PhysicsDescriptor = this.physics!;
 		const spawnPos = this.spawnPosition;
-		const mesh = await this.ctx.gltf.load("player_character_" + playerId, this.modelUrl, this.textureUrl);
-		this.ctx.objects.addPiece(
+		const mesh = await ctx.gltf.load("player_character_" + playerId, this.modelUrl, this.textureUrl);
+		if (!this.ctx) return;
+		const c = this.ctx;
+		c.objects.addPiece(
 			playerId,
 			{
 				asset: mesh,
@@ -57,13 +60,13 @@ export class PlayerBodyModule implements Module {
 			physicsDesc,
 			false
 		);
-		const obj = this.ctx.objects.getById(playerId, OBJECT_TYPE.PLAYER);
+		const obj = c.objects.getById(playerId, OBJECT_TYPE.PLAYER);
 		if (obj) obj.extraData.spawnpoint = { x: spawnPos.x, y: spawnPos.y + 1, z: spawnPos.z };
-		this.ctx.objects.setPosition(playerId, { x: spawnPos.x, y: spawnPos.y + 1, z: spawnPos.z });
+		c.objects.setPosition(playerId, { x: spawnPos.x, y: spawnPos.y + 1, z: spawnPos.z });
 		if (mesh.animations.length > 0) {
-			this.ctx.objects.playAnimation(playerId, mesh.animations[1].name);
+			c.objects.playAnimation(playerId, mesh.animations[1].name);
 		}
-		this.ctx.logger.log("INFO", "PlayerBodyModule", `Attached character to player ${playerId}`);
+		c.logger.log("INFO", "PlayerBodyModule", `Attached character to player ${playerId}`);
 	}
 	async init(ctx: WorldContext): Promise<void> {
 		this.ctx = ctx;

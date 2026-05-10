@@ -51,6 +51,7 @@ export class PhysicsWorld {
   private debugMeshes: Map<string, THREE.Object3D> = new Map()
   private _stepping = false
   private _disposed = false
+  private _stepWarned = false
   constructor(scene: THREE.Scene, config: PhysicsWorldConfig = {}) {
     this.scene = scene
     this.config = {
@@ -94,14 +95,24 @@ export class PhysicsWorld {
   }
   step(delta: number, allObjects: ManagedObject[]): void {
     if (this._disposed || this._stepping || !this.world) return
+    if (this.entries.size === 0) {
+      this.updateZones(allObjects)
+      return
+    }
     this._stepping = true
     let stepped = false
     try {
-      this.integrationParameters!.dt = delta
+      const clamped = Math.min(Math.max(delta, 0.001), 0.1)
+      if (this.integrationParameters) {
+        this.integrationParameters.dt = clamped
+      }
       this.world.step()
       stepped = true
     } catch (e) {
-      console.warn('[PhysicsWorld] step() failed', e)
+      if (!this._stepWarned) {
+        console.warn('[PhysicsWorld] step() failed', e)
+        this._stepWarned = true
+      }
     } finally {
       this._stepping = false
     }
