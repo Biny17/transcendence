@@ -35,9 +35,8 @@ export function Background({ signInOpen, setSignInOpen }) {
       }
       setIsSignIn(true);
     } catch (error) {
-      console.log(error);
-      setError("Invalid credentials");
-      showNotification("Invalid credentials");
+      setError(error instanceof Error ? error.message : "Invalid credentials");
+      showNotification(error instanceof Error ? error.message : "Invalid credentials");
       setForm({ email: "", password: "", age: "", username: "" });
     }
   }
@@ -86,9 +85,8 @@ export function Background({ signInOpen, setSignInOpen }) {
           setForm({ email: "", password: "", age: "", username: "" });
         }
       } catch (error) {
-        console.log(error);
-        setError("Invalid credentials");
-        showNotification("Invalid credentials");
+        setError(error instanceof Error ? error.message : "Invalid credentials");
+        showNotification(error instanceof Error ? error.message : "Invalid credentials");
         setForm({ email: "", password: "", age: "", username: "" });
       }
     }

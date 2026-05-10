@@ -29,8 +29,7 @@ async function fetchVerified() {
 	  setIsSignIn(true);
     } 
   catch (error) {
-      console.log(error);
-      setError("Invalid credentials");
+      setError(error instanceof Error ? error.message : "Invalid credentials");
       setForm({ email: "", password: "", age: "", username: "" });
     }
 }
@@ -74,8 +73,7 @@ useEffect(function() {
     } 
 	catch (error) 
 	{
-      console.log(error);
-      setError("Invalid credentials");
+      setError(error instanceof Error ? error.message : "Invalid credentials");
       setForm({ email: "", password: "", age: "", username: "" });
   }
 }
