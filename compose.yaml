@@ -67,6 +67,7 @@ services:
                         - FORTYTWO_CLIENT_SECRET=${FORTYTWO_CLIENT_SECRET}
                         - FORTYTWO_REDIRECT_URI=${FORTYTWO_REDIRECT_URI}
                         - CREDENTIAL=${CREDENTIAL}
+                        - FRONTEND_URL=http://${FRONT_HOST}
                 volumes:
                         - ./backend:/app
                         - ./secret:/app/secret
