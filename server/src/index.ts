@@ -225,18 +225,30 @@ const server = Bun.serve<{ playerId: string }>({
 					break;
 				}
 			}
-		},
-		close(ws) {
-			const playerId = ws.data.playerId;
-			const username = usernames.get(playerId);
-			console.log(`[Server] ${username ?? playerId} disconnected`);
-			broadcast(JSON.stringify(createMessage(SERVER_MSG.PLAYER_DISCONNECT, { playerId, reason: "client_disconnect" })));
-			removePlayer(playerId);
-			if (sequencer.isInLobbyWait()) {
-				sequencer.removePlayer(playerId);
-				usernames.delete(playerId);
-			}
+		if (sockets.size === 0) {
+			tick = 0;
+			sequencer.reset();
+			sequencer.start();
+			console.log("[Server] All clients disconnected - sequence reset, waiting in lobby");
 		}
+	},
+	close(ws) {
+		const playerId = ws.data.playerId;
+		const username = usernames.get(playerId);
+		console.log(`[Server] ${username ?? playerId} disconnected`);
+		broadcast(JSON.stringify(createMessage(SERVER_MSG.PLAYER_DISCONNECT, { playerId, reason: "client_disconnect" })));
+		removePlayer(playerId);
+		if (sequencer.isInLobbyWait()) {
+			sequencer.removePlayer(playerId);
+			usernames.delete(playerId);
+		}
+		if (sockets.size === 0) {
+			tick = 0;
+			sequencer.reset();
+			sequencer.start();
+			console.log("[Server] Last client disconnected - sequence reset, waiting in lobby");
+		}
+	}
 	}
 });
 console.log(`[Server] Running on ws://localhost:${PORT}`);

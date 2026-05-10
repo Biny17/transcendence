@@ -12,7 +12,7 @@ phases:
           worldId: Lobby
           waitFor: PLAYER_READY
           quorum: 100%
-          timeout: 120
+          timeout: 0  # infinite (wait forever for players)
 
         - type: game
           sendGameResult: true # when game condition is filled end game and broadcast result to all clients

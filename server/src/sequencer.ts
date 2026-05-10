@@ -298,10 +298,13 @@ export class Sequencer {
 	private startWaitPhase(phase: WaitPhase): void {
 		this.waitCollected.clear();
 		if (this.waitTimer) clearTimeout(this.waitTimer);
-		this.waitTimer = setTimeout(() => {
-			console.log(`[Sequencer] Wait phase for "${phase.worldId}" timed out - starting game`);
-			this.finishWaitPhase();
-		}, phase.timeout * 1000);
+		this.waitTimer = null;
+		if (phase.timeout > 0) {
+			this.waitTimer = setTimeout(() => {
+				console.log(`[Sequencer] Wait phase for "${phase.worldId}" timed out - starting game`);
+				this.finishWaitPhase();
+			}, phase.timeout * 1000);
+		}
 		if (this.lives.size > 0) {
 			const players = [...this.lives.entries()].map(([id, lives]) => ({
 				id,
