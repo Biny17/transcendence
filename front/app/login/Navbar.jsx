@@ -75,6 +75,8 @@ useEffect(function() {
 	{
       setError(error instanceof Error ? error.message : "Invalid credentials");
       setForm({ email: "", password: "", age: "", username: "" });
+      setIsSignUp(false);
+      setIsSignIn(false);
   }
 }
   fetchData();

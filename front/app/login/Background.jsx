@@ -88,6 +88,9 @@ export function Background({ signInOpen, setSignInOpen }) {
         setError(error instanceof Error ? error.message : "Invalid credentials");
         showNotification(error instanceof Error ? error.message : "Invalid credentials");
         setForm({ email: "", password: "", age: "", username: "" });
+        setIsSignUp(false);
+        setIsSignIn(false);
+        setSubmit(false);
       }
     }
     fetchData();
