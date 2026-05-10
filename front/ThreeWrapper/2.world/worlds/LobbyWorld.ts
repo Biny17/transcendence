@@ -33,8 +33,8 @@ export class LobbyWorld extends World {
 		this.ctx.objects.addSimple({ type: OBJECT_TYPE.MAP, asset: ambient });
 		const floor = GeometryFactory.cylinder({
 			height: 0.1,
-			radiusTop: 5,
-			radiusBottom: 5,
+			radiusTop: 30,
+			radiusBottom: 30,
 			material: {
 				color: 0x1a1a2e,
 				metalness: 0.8,
