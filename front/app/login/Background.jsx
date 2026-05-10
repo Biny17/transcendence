@@ -19,7 +19,13 @@ export function Background({ signInOpen, setSignInOpen }) {
   const [form, setForm] = useState({ age: "", email: "", password: "", username: "" });
   const [Profile, setProfile] = useState([]);
   const [error, setError] = useState("");
+  const [notification, setNotification] = useState("");
   const router = useRouter();
+
+  function showNotification(msg) {
+    setNotification(msg);
+    setTimeout(() => setNotification(""), 6000);
+  }
 
   async function fetchVerified() {
     try {
@@ -31,6 +37,7 @@ export function Background({ signInOpen, setSignInOpen }) {
     } catch (error) {
       console.log(error);
       setError("Invalid credentials");
+      showNotification("Invalid credentials");
       setForm({ email: "", password: "" });
     }
   }
@@ -40,9 +47,9 @@ export function Background({ signInOpen, setSignInOpen }) {
   }
 
   const handleSubmit = () => {
-    if (!form.email || !form.password) { setError("Remplissez tous les champs !"); return; }
-    if (isSignUpMode && !form.age) { setError("Remplissez tous les champs !"); return; }
-    if (isSignUpMode && !form.username) { setError("Choisissez un pseudo !"); return; }
+    if (!form.email || !form.password) { setError("Remplissez tous les champs !"); showNotification("Remplissez tous les champs !"); return; }
+    if (isSignUpMode && !form.age) { setError("Remplissez tous les champs !"); showNotification("Remplissez tous les champs !"); return; }
+    if (isSignUpMode && !form.username) { setError("Choisissez un pseudo !"); showNotification("Choisissez un pseudo !"); return; }
     else if (isSignUpMode) { setIsSignUp(true); setSubmit(!Submit); return; }
     else { fetchVerified(); return; }
   };
@@ -75,11 +82,13 @@ export function Background({ signInOpen, setSignInOpen }) {
           router.push("/home");
         } else {
           setError("Mail not verified");
+          showNotification("Mail not verified");
           setForm({ email: "", password: "", age: "", username: "" });
         }
       } catch (error) {
         console.log(error);
         setError("Invalid credentials");
+        showNotification("Invalid credentials");
         setForm({ email: "", password: "", age: "", username: "" });
       }
     }
@@ -136,10 +145,27 @@ export function Background({ signInOpen, setSignInOpen }) {
     anim5.destroy();
   };
 }, []);
+
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  const err = params.get("error");
+  if (err === "need_reconnect") {
+    showNotification("Session expirée — veuillez vous reconnecter");
+  }
+}, []);
  
     
   return (
 	<>
+    {notification && (
+      <div style={{
+        position: "fixed", top: 0, left: 0, right: 0, zIndex: 9999,
+        background: "#ef4444", color: "#fff", textAlign: "center",
+        padding: "14px 20px", fontSize: "16px", fontWeight: 600
+      }}>
+        {notification}
+      </div>
+    )}
     <div className="background">
 		 <div ref={celebRef} className="absolute inset-0 z-10 pointer-events-none"/>
 	      <div className="blob blob-1"></div>

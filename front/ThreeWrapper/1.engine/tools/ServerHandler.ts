@@ -202,24 +202,28 @@ export class ServerHandler {
 		this.reconnectTimer = setTimeout(() => this.connect(), RECONNECT_INTERVAL_MS);
 	}
 	private getCookie(name: string): string | undefined {
-		return document.cookie.split('; ').find(row => row.startsWith(name + '='))?.split('=')[1];
+		return document.cookie
+			.split("; ")
+			.find((row) => row.startsWith(name + "="))
+			?.split("=")[1];
 	}
 	private registerInternalHandlers(): void {
 		this.on(SERVER_MSG.CONNECTED, async (p: ConnectedPayload) => {
 			this.playerId = p.playerId;
 			this.logger.info(`Assigned playerId: ${p.playerId}`);
-			const token = this.getCookie('auth_token');
+			const token = this.getCookie("auth_token");
 			if (!token) {
-				this.send.join({ username: p.playerId });
+				window.location.href = "/login?error=need_reconnect";
 				return;
 			}
 			try {
-				const payload = token.split('.')[1];
+				const payload = token.split(".")[1];
 				const decoded = JSON.parse(atob(payload));
-				const data: Array<{ username: string }> | undefined = await api.get('/api/users/' + decoded.sub);
+				const data: Array<{ username: string }> | undefined = await api.get("/api/users/" + decoded.sub);
 				const username = data?.[0]?.username ?? p.playerId;
 				this.send.join({ username });
-			} catch {
+			} catch (e) {
+				console.log("fail:", e);
 				this.send.join({ username: p.playerId });
 			}
 		});
