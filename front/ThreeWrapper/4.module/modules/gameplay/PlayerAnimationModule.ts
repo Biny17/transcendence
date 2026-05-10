@@ -3,6 +3,7 @@ import type { Module, WorldContext } from "@/ThreeWrapper/4.module";
 import { ModuleKey } from "@/ThreeWrapper/4.module";
 import type { ManagedObject } from "@/ThreeWrapper/2.world/tools/ObjectManager";
 import { OBJECT_TYPE } from "@/ThreeWrapper/2.world/tools/ObjectManager";
+import type { LagCompensationModule } from "@/ThreeWrapper/4.module/modules/online/LagCompensationModule";
 
 export type PlayerAnimationModuleOptions = {
 	walkSpeedThreshold?: number;
@@ -24,6 +25,7 @@ export class PlayerAnimationModule implements Module {
 
 	private ctx: WorldContext | null = null;
 	private playerStates = new Map<string, PlayerAnimState>();
+	private lagComp: LagCompensationModule | null = null;
 	private walkSpeedThreshold = 0.5;
 	private fallTimeThreshold = 0.5;
 	private fadeInDuration = 0.2;
@@ -44,73 +46,98 @@ export class PlayerAnimationModule implements Module {
 
 	init(ctx: WorldContext): void {
 		this.ctx = ctx;
+		this.lagComp = ctx.getModule<LagCompensationModule>(ModuleKey.lagCompensation) ?? null;
 	}
 
 	update(delta: number): void {
 		if (!this.ctx) return;
 
 		const players = this.ctx.objects.getByType(OBJECT_TYPE.PLAYER);
-		const input = this.ctx.getModule(ModuleKey.input) as any;
 
 		for (const player of players) {
 			if (player.pieces.length === 0) continue;
-			if (player.id !== this.ctx?.selfWorldPlayer?.id) continue;
 
-			let state = this.playerStates.get(player.id);
-			if (!state) {
-				state = {
-					id: player.id,
-					state: "idle",
-					timeInAir: 0,
-					isRagdoll: false
-				};
-				this.playerStates.set(player.id, state);
-				this.ctx.objects.playAnimation(player.id, this.animIdle, {
-					loop: THREE.LoopRepeat
-				});
+			if (player.id === this.ctx?.selfWorldPlayer?.id) {
+				this.updateLocalPlayer(delta, player);
+			} else if (this.lagComp) {
+				this.updateRemotePlayer(delta, player);
 			}
+		}
+	}
 
-			// Update time in air
-			const isGrounded = this.ctx.objects.isGrounded(player.id);
-			if (isGrounded) {
-				state.timeInAir = 0;
-			} else {
-				state.timeInAir += delta;
-			}
+	private ensureState(playerId: string): PlayerAnimState | null {
+		let state = this.playerStates.get(playerId);
+		if (state) return state;
+		if (!this.ctx) return null;
+		state = {
+			id: playerId,
+			state: "idle",
+			timeInAir: 0,
+			isRagdoll: false
+		};
+		this.playerStates.set(playerId, state);
+		this.ctx.objects.playAnimation(playerId, this.animIdle, {
+			loop: THREE.LoopRepeat
+		});
+		return state;
+	}
 
-			// Skip animation updates if in ragdoll mode
-			if (state.isRagdoll) continue;
+	private updateLocalPlayer(delta: number, player: ManagedObject): void {
+		if (!this.ctx) return;
+		const state = this.ensureState(player.id);
+		if (!state) return;
 
-			// Get velocity
-			const velocity = this.ctx.objects.getVelocity(player.id);
-			const horizontalSpeed = Math.sqrt(velocity.x ** 2 + velocity.z ** 2);
+		const isGrounded = this.ctx.objects.isGrounded(player.id);
+		if (isGrounded) {
+			state.timeInAir = 0;
+		} else {
+			state.timeInAir += delta;
+		}
 
-			// Determine new state
-			const prevState = state.state;
-			let newState: typeof state.state = "idle";
+		if (state.isRagdoll) return;
 
-			if (!isGrounded) {
-				// Airborne - determine if jumping or falling
-				if (state.timeInAir < this.fallTimeThreshold) {
-					// Just jumped
-					newState = "jumping";
-				} else {
-					// Been in air long enough to be falling
-					newState = "falling";
-				}
-			} else if (horizontalSpeed > this.walkSpeedThreshold) {
-				// Moving on ground
-				newState = "walking";
-			} else {
-				// Idle
-				newState = "idle";
-			}
+		const velocity = this.ctx.objects.getVelocity(player.id);
+		const horizontalSpeed = Math.sqrt(velocity.x ** 2 + velocity.z ** 2);
 
-			// Handle state transitions
-			if (newState !== prevState) {
-				this.transitionAnimation(player, prevState, newState);
-				state.state = newState;
-			}
+		const prevState = state.state;
+		let newState: typeof state.state = "idle";
+
+		if (!isGrounded) {
+			newState = state.timeInAir < this.fallTimeThreshold ? "jumping" : "falling";
+		} else if (horizontalSpeed > this.walkSpeedThreshold) {
+			newState = "walking";
+		}
+
+		if (newState !== prevState) {
+			this.transitionAnimation(player, prevState, newState);
+			state.state = newState;
+		}
+	}
+
+	private updateRemotePlayer(delta: number, player: ManagedObject): void {
+		if (!this.lagComp) return;
+		const state = this.ensureState(player.id);
+		if (!state) return;
+
+		const data = this.lagComp.getRemotePlayerData(player.id);
+		if (!data) return;
+
+		if (state.isRagdoll) return;
+
+		state.timeInAir = data.isGrounded ? 0 : state.timeInAir + delta;
+
+		const prevState = state.state;
+		let newState: typeof state.state = "idle";
+
+		if (!data.isGrounded) {
+			newState = state.timeInAir < this.fallTimeThreshold ? "jumping" : "falling";
+		} else if (data.horizontalSpeed > this.walkSpeedThreshold) {
+			newState = "walking";
+		}
+
+		if (newState !== prevState) {
+			this.transitionAnimation(player, prevState, newState);
+			state.state = newState;
 		}
 	}
 
@@ -141,7 +168,6 @@ export class PlayerAnimationModule implements Module {
 
 		state.isRagdoll = enabled;
 		if (enabled) {
-			// Stop all animations when entering ragdoll
 			this.ctx?.objects.stopAnimation(playerId, this.animWalk, {
 				fadeOut: this.fadeOutDuration
 			});
@@ -155,7 +181,6 @@ export class PlayerAnimationModule implements Module {
 				fadeOut: this.fadeOutDuration
 			});
 		} else {
-			// Resume idle when exiting ragdoll
 			state.state = "idle";
 			this.ctx?.objects.playAnimation(playerId, this.animIdle, {
 				loop: THREE.LoopRepeat,
@@ -170,6 +195,7 @@ export class PlayerAnimationModule implements Module {
 
 	dispose(): void {
 		this.playerStates.clear();
+		this.lagComp = null;
 		this.ctx = null;
 	}
 }

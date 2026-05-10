@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { SERVER_MSG } from "shared/protocol";
-import type { WorldStatePayload, PlayerJoinPayload, PlayerDisconnectPayload } from "shared/protocol";
+import type { PlayerJoinPayload, PlayerDisconnectPayload } from "shared/protocol";
 import type { Quat } from "shared/math";
 import type { Module, WorldContext } from "../../ModuleClass";
 import { ModuleKey } from "../../ModuleClass";
@@ -23,9 +23,6 @@ export class PlayerSyncModule implements Module {
 			ctx.server?.on(SERVER_MSG.PLAYER_DISCONNECT, (payload: PlayerDisconnectPayload) => {
 				console.log("[PlayerSync] PLAYER_DISCONNECT received:", payload);
 				this.handlePlayerDisconnect(payload);
-			}) ?? (() => {}),
-			ctx.server?.on(SERVER_MSG.WORLD_STATE, (payload: WorldStatePayload) => {
-				this.syncPlayers(payload);
 			}) ?? (() => {})
 		);
 	}
@@ -55,18 +52,6 @@ export class PlayerSyncModule implements Module {
 		console.log("[PlayerSync] PLAYER_DISCONNECT: removing player:", payload.playerId);
 		this.ctx.objects.remove(payload.playerId);
 		this.playerMeshes.delete(payload.playerId);
-	}
-	private syncPlayers(state: WorldStatePayload): void {
-		if (!this.ctx) return;
-		if (!state) {
-			console.log("[PlayerSync] state is falsy, returning");
-			return;
-		}
-		for (const playerState of state.players) {
-			if (playerState.id === this.ctx.selfWorldPlayer?.id) continue;
-			this.ctx.objects.setPosition(playerState.id, playerState.pos);
-			this.ctx.objects.setRotation(playerState.id, playerState.rot);
-		}
 	}
 	update(_delta: number): void {}
 	dispose(): void {
