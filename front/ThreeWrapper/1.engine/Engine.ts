@@ -5,7 +5,7 @@ import type { World, EngineContext } from "@/ThreeWrapper/2.world/WorldClass";
 import { KeymapHandler, Logger, ServerHandler, Self } from "./tools";
 import { DEFAULT_KEYBINDS } from "./tools/KeymapHandler";
 import type { LoadWorldPlayer } from "shared/state";
-import { SERVER_MSG } from "shared/protocol";
+import { SERVER_MSG, type PhaseChangedPayload } from "shared/protocol";
 import { networkLogger } from "@/ThreeWrapper/4.module/modules/debug/NetworkLogger";
 import { DebugControlModule } from "@/ThreeWrapper/4.module";
 import { UIModule } from "@/ThreeWrapper/4.module/modules/ui/UIModule";
@@ -59,6 +59,21 @@ export class Engine {
 			this.server.on(SERVER_MSG.CONNECTED, (p) => {
 				this.selfServerClient.id = p.playerId;
 				this.logger.for("Engine").info("Received playerId from server", { playerId: p.playerId });
+			});
+			this.server.on(SERVER_MSG.PHASE_CHANGED, (p: PhaseChangedPayload) => {
+				if (p.phaseId === "game" && p.phaseType === "end" && p.data?.rankings) {
+					const selfId = this.selfServerClient.id;
+					if (!selfId) return;
+					const myEntry = p.data.rankings.find((r) => r.playerId === selfId);
+					if (!myEntry) return;
+					if (myEntry.rank === 1) {
+						this.logger.for("Engine").info("Player won — redirecting to /wining");
+						window.location.href = "/wining";
+					} else {
+						this.logger.for("Engine").info("Player lost — redirecting to /lose");
+						window.location.href = "/lose";
+					}
+				}
 			});
 			networkLogger.attach(this.server);
 			(window as any).__networkMgr = this.server.networkManager;
