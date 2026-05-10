@@ -42,7 +42,8 @@ export enum ModuleKey {
 	characterCustomizerPreview = "character_customizer_preview",
 	characterCustomizerUI = "character_customizer_ui",
 	debugControl = "debug_control",
-	editorTestMode = "editor_test_mode"
+	editorTestMode = "editor_test_mode",
+	spectatorFly = "spectator_fly"
 }
 export type WorldContext = {
 	renderer: THREE.WebGLRenderer;

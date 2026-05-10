@@ -75,6 +75,7 @@ export class PlayerBodyModule implements Module {
 		const players = ctx.objects.getByType(OBJECT_TYPE.PLAYER);
 		console.log("[PlayerBody] Players found:", players.length);
 		for (const player of players) {
+			if (player.extraData.serverData.isSpectator) continue;
 			await this.createBody(player.id);
 		}
 	}

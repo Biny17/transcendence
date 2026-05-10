@@ -177,7 +177,8 @@ ThreeWrapper                                    # Three.js engine wrapper for ga
     ├── camera
     │   ├── FPVModule                           # First-person view: camera at target + eyeHeight, mouse look + WASD
     │   ├── TPVModule                           # Third-person view camera controller
-    │   └── FreecamModule                       # Free-flying camera (no physics)
+    │   ├── FreecamModule                       # Free-flying camera (no physics)
+    │   └── SpectatorFlyModule                  # Free-fly camera for spectators (no body, no server)
     ├── debug
     │   ├── StatsModule                         # FPS / draw-call / geometry overlay (DOM, configurable corner)
     │   ├── PhysicsDebugModule                  # Render Rapier physics collider wireframes
@@ -310,8 +311,8 @@ Tools (use ctx.X — never instantiate directly)
 > Modules are initialised in **insertion order** (the order `addModule` was called).
 > If module B requires module A, A must be added first — typically handled by the Environment's constructor:
 > `this.addModule(new BModule(ModuleKey.A))`
+# ModuleKey (enum — 45 entries)
 
-# ModuleKey (enum — 44 entries)
 > Canonical identifier for each built-in module type. Used for `requires` and `getModule<T>()`.
 
 ```
@@ -324,7 +325,7 @@ fpv, tpv, freecam, editorOrbitCamera, editorPlacement, editorHotbar,
 componentCreatorPreview, componentCreatorUI,
 playerAnimation, ragdoll, endlineModule, winZoneModule,
 characterOrbitCamera, characterCustomizerPreview, characterCustomizerUI,
-debugControl
+debugControl, spectatorFly
 ```
 
 # EngineContext (type)

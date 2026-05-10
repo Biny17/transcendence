@@ -99,6 +99,7 @@ export class Sequencer {
 	}
 	getLoadWorldId(): string {
 		if (this.isInLobbyWait()) return "Lobby";
+		if (this.currentGame) return this.currentGame.modeId;
 		const phase = this.frame?.phases[this.frame.index] as any;
 		return phase?.worldId ?? "Lobby";
 	}
