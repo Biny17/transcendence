@@ -63,8 +63,11 @@ const server = Bun.serve<{ playerId: string }>({
 						console.log(`[Server] BRANCH: lobby_wait - adding new player`);
 						usernames.set(playerId, username);
 						sequencer.addPlayer(playerId);
+						const newPlayerData = { id: playerId, name: username, lives: sequencer.getLives(playerId), isSpectator: sequencer.getLives(playerId) <= 0 };
+						broadcastExcept(playerId, JSON.stringify(createMessage(SERVER_MSG.PLAYER_JOIN, newPlayerData)));
 						const loadWorldId = "Lobby";
-						broadcast(
+						sendTo(
+							playerId,
 							JSON.stringify(
 								createMessage(SERVER_MSG.LOAD_WORLD, {
 									worldId: loadWorldId,
@@ -145,8 +148,16 @@ const server = Bun.serve<{ playerId: string }>({
 					} else if (sequencer.isInGamePhase()) {
 						const result = sequencer.onGameWorldLoaded(playerId);
 						if (result.processed) {
-							const data = result.data as { loaded?: number; total?: number; allLoaded?: boolean };
-							console.log(`[Server] ${username} → game_world_loaded (loaded=${data?.loaded}/${data?.total})`);
+							const data = result.data as { loaded?: number; total?: number; allLoaded?: boolean; gameAlreadyRunning?: boolean };
+							if (data?.gameAlreadyRunning) {
+								const worldId = sequencer.getCurrentGameMode();
+								if (worldId) {
+									sendTo(playerId, JSON.stringify(createMessage(SERVER_MSG.START_WORLD, { worldId })));
+									console.log(`[Server] ${username} → re-synced to running game (worldId=${worldId})`);
+								}
+							} else {
+								console.log(`[Server] ${username} → game_world_loaded (loaded=${data?.loaded}/${data?.total})`);
+							}
 						}
 					}
 					break;

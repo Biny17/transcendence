@@ -28,6 +28,7 @@ export class PlayerBodyModule implements Module {
 	private textureUrl: string;
 	private size: number;
 	private physics: PlayerBodyModuleOptions["physics"];
+	private spawnPosition: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
 	constructor(options: PlayerBodyModuleOptions = {}) {
 		this.modelUrl = options.modelUrl ?? "/game/modeles/charactere/scene.gltf";
 		this.textureUrl = options.textureUrl ?? "/game/modeles/charactere/character_texture.png";
@@ -41,34 +42,40 @@ export class PlayerBodyModule implements Module {
 			lockRotations: options.physics?.lockRotations ?? true
 		};
 	}
+	async createBody(playerId: string): Promise<void> {
+		if (!this.ctx) return;
+		const physicsDesc: PhysicsDescriptor = this.physics!;
+		const spawnPos = this.spawnPosition;
+		const mesh = await this.ctx.gltf.load("player_character_" + playerId, this.modelUrl, this.textureUrl);
+		this.ctx.objects.addPiece(
+			playerId,
+			{
+				asset: mesh,
+				relativePosition: { x: 0, y: -0.9, z: -0.05 },
+				hitboxes: [{ shape: { kind: "box", halfExtents: { x: 0.4, y: 0.9, z: 0.4 } }, relativeOffset: { x: 0, y: 0, z: 0 }, collidesWith: [OBJECT_TYPE.MAP, OBJECT_TYPE.PLAYER] }]
+			},
+			physicsDesc,
+			false
+		);
+		const obj = this.ctx.objects.getById(playerId, OBJECT_TYPE.PLAYER);
+		if (obj) obj.extraData.spawnpoint = { x: spawnPos.x, y: spawnPos.y + 1, z: spawnPos.z };
+		this.ctx.objects.setPosition(playerId, { x: spawnPos.x, y: spawnPos.y + 1, z: spawnPos.z });
+		if (mesh.animations.length > 0) {
+			this.ctx.objects.playAnimation(playerId, mesh.animations[1].name);
+		}
+		this.ctx.logger.log("INFO", "PlayerBodyModule", `Attached character to player ${playerId}`);
+	}
 	async init(ctx: WorldContext): Promise<void> {
 		this.ctx = ctx;
 		const allMapObjs = ctx.objects.getByType(OBJECT_TYPE.MAP);
 		const spawnObjs = allMapObjs.filter((o) => o.componentId === "spawn_point");
+		if (spawnObjs.length > 0 && spawnObjs[0].pieces[0]?.asset) {
+			this.spawnPosition = spawnObjs[0].pieces[0].asset.position.clone();
+		}
 		const players = ctx.objects.getByType(OBJECT_TYPE.PLAYER);
 		console.log("[PlayerBody] Players found:", players.length);
 		for (const player of players) {
-			const physics = this.physics!;
-			const physicsDesc: PhysicsDescriptor = physics;
-			const spawnPos = spawnObjs.length > 0 && spawnObjs[0].pieces[0]?.asset ? spawnObjs[0].pieces[0].asset.position : new THREE.Vector3(0, 0, 0);
-			const mesh = await ctx.gltf.load("player_character_" + player.id, this.modelUrl, this.textureUrl);
-			ctx.objects.addPiece(
-				player.id,
-				{
-					asset: mesh,
-					relativePosition: { x: 0, y: -0.9, z: -0.05 },
-					hitboxes: [{ shape: { kind: "box", halfExtents: { x: 0.4, y: 0.9, z: 0.4 } }, relativeOffset: { x: 0, y: 0, z: 0 }, collidesWith: [OBJECT_TYPE.MAP, OBJECT_TYPE.PLAYER] }]
-				},
-				physicsDesc,
-				false
-			);
-			const obj = ctx.objects.getById(player.id, OBJECT_TYPE.PLAYER);
-			if (obj) obj.extraData.spawnpoint = { x: spawnPos.x, y: spawnPos.y + 1, z: spawnPos.z };
-			ctx.objects.setPosition(player.id, { x: spawnPos.x, y: spawnPos.y + 1, z: spawnPos.z });
-			if (mesh.animations.length > 0) {
-				ctx.objects.playAnimation(player.id, mesh.animations[1].name);
-			}
-			ctx.logger.log("INFO", "PlayerBodyModule", `Attached character to player ${player.id}`);
+			await this.createBody(player.id);
 		}
 	}
 	update(_delta: number): void {}
