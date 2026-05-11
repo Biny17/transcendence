@@ -15,6 +15,15 @@ function formatApiError(parsed: Record<string, unknown>, fallback: string): stri
   return (parsed.detail as string) || (parsed.title as string) || fallback;
 }
 
+function getAuthHeader() {
+  if (typeof document === 'undefined') return {};
+  const match = document.cookie.match(/auth_token=([^;]+)/);
+  if (match) {
+    return { 'Authorization': `Basic ${match[1]}` };
+  }
+  return {};
+}
+
 export const api = {
   get: async <T>(path: string, options?: RequestInit): Promise<T | undefined> => {
     const response = await fetch(`${API_BASE}${path}`, {
@@ -23,6 +32,7 @@ export const api = {
       credentials: 'include',
       headers: {
         'Accept': 'application/json, application/problem+json',
+        ...getAuthHeader(),
         ...options?.headers,
       },
     });
@@ -49,6 +59,7 @@ export const api = {
       headers: {
         'Accept': 'application/problem+json',
         ...(body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
+        ...getAuthHeader(),
         ...options?.headers,
       },
       body: body instanceof FormData ? body : (body ? JSON.stringify(body) : undefined),
@@ -76,6 +87,7 @@ export const api = {
       headers: {
         'Accept': 'application/problem+json',
         ...(body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
+        ...getAuthHeader(),
         ...options?.headers,
       },
       body: body instanceof FormData ? body : (body ? JSON.stringify(body) : undefined),
@@ -103,6 +115,7 @@ export const api = {
       headers: {
         'Accept': 'application/problem+json',
         ...(body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
+        ...getAuthHeader(),
         ...options?.headers,
       },
       body: body instanceof FormData ? body : (body ? JSON.stringify(body) : undefined),
@@ -130,6 +143,7 @@ export const api = {
       headers: {
         'Accept': 'application/problem+json',
         ...(body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
+        ...getAuthHeader(),
         ...options?.headers,
       },
       body: body instanceof FormData ? body : (body ? JSON.stringify(body) : undefined),
