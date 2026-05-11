@@ -64,5 +64,5 @@ export type LobbySequenceConfig = {
   id: string
   globalLives: number
   phases: SequencePhase[]
-  lobbyWinCondition: LobbyWinCondition
+  lobbyWinCondition?: LobbyWinCondition
 }
