@@ -43,7 +43,7 @@ func (gs *GameService) Register(api huma.API, m *mid.Middleware) {
 	huma.Register(api, huma.Operation{
 		Summary: "GAME HISTORY USERID",
 		Method:  http.MethodGet,
-		Path:    routes.GetGames,
+		Path:    routes.GetGame,
 	}, gs.GetUserGames)
 	huma.Register(api, huma.Operation{
 		Method:  http.MethodGet,
@@ -60,4 +60,9 @@ func (gs *GameService) Register(api huma.API, m *mid.Middleware) {
 		Path:    routes.ListResults,
 		Summary: "RESULT LIST",
 	}, gs.ListLastResults)
+	huma.Register(api, huma.Operation{
+		Method:  http.MethodGet,
+		Path:    routes.GetGamesResults,
+		Summary: "GAMES+RESULTS",
+	}, gs.GetGamesResults)
 }

@@ -44,6 +44,10 @@ func (us *UserService) Register(api huma.API, m *mid.Middleware) {
 		Path:          routes.DeleteUser,
 		Summary:       "USER DELETE",
 		DefaultStatus: 200,
+		Middlewares:   huma.Middlewares{m.Admin},
+		Security: []map[string][]string{
+			{"apiKey": {}},
+		},
 	}, us.DelUser)
 	huma.Register(api, huma.Operation{
 		Method:  http.MethodGet,
