@@ -1,6 +1,6 @@
 "use client";
 import type { GameEventMap } from "shared/events";
-import type { WSMessage, PlayerInputPayload, PlayerInteractPayload, PlayerChoosePayload, ConnectedPayload, JoinPayload, IncomingInterceptor, OutgoingInterceptor, InterceptorHandle } from "shared/protocol";
+import type { WSMessage, PlayerInputPayload, PlayerInteractPayload, PlayerChoosePayload, ConnectedPayload, JoinPayload, PlayerJoinPayload, IncomingInterceptor, OutgoingInterceptor, InterceptorHandle } from "shared/protocol";
 import { SERVER_MSG, CLIENT_MSG, PHASE_EVENTS, createMessage, parseMessage } from "shared/protocol";
 import type { LoadWorldPlayer } from "shared/state";
 import type { World } from "@/ThreeWrapper/2.world/WorldClass";
@@ -47,6 +47,7 @@ export class ServerHandler {
 	private pendingPlayers: LoadWorldPlayer[] = [];
 	private pendingWorld: World | null = null;
 	private worldResolver: ((worldId: string) => Promise<World>) | null = null;
+	private pendingJoins: PlayerJoinPayload[] = [];
 	private incomingInterceptors: IncomingInterceptor[] = [];
 	private outgoingInterceptors: OutgoingInterceptor[] = [];
 	readonly send: ServerSend;
@@ -238,6 +239,17 @@ export class ServerHandler {
 			this.logger.debug("Loading world: " + p.worldId);
 			this.pendingWorldId = p.worldId;
 			this.pendingPlayers = p.players;
+			this.pendingJoins = [];
+			const unsubInterceptor = this.addIncomingInterceptor((msg) => {
+				if (msg.type === SERVER_MSG.PLAYER_JOIN) {
+					const handlers = this.handlers.get(SERVER_MSG.PLAYER_JOIN);
+					if (!handlers || handlers.length === 0) {
+						this.pendingJoins.push(msg.payload as PlayerJoinPayload);
+						return false;
+					}
+				}
+				return true;
+			});
 			try {
 				if (!this.worldResolver) throw new Error("[ServerHandler] No world resolver set");
 				const loading = await this.worldResolver("Loading");
@@ -252,6 +264,17 @@ export class ServerHandler {
 				this.logger.error(`Failed to load world "${p.worldId}":`, { error: String(e) });
 				this.pendingWorldId = null;
 				this.pendingPlayers = [];
+			} finally {
+				unsubInterceptor();
+				if (this.pendingJoins.length > 0) {
+					const handlers = this.handlers.get(SERVER_MSG.PLAYER_JOIN);
+					if (handlers) {
+						for (const join of this.pendingJoins) {
+							for (const handler of handlers) handler(join);
+						}
+					}
+					this.pendingJoins = [];
+				}
 			}
 		});
 		this.on(SERVER_MSG.START_WORLD, async (p) => {
