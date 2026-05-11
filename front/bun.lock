@@ -6,7 +6,7 @@
       "name": "test-trans5",
       "dependencies": {
         "@biomejs/biome": "^2.4.6",
-        "@dimforge/rapier3d-compat": "^0.19.3",
+        "@dimforge/rapier3d-compat": "*",
         "@dotlottie/react-player": "^1.6.19",
         "@emotion/react": "^11.14.0",
         "@emotion/styled": "^11.14.1",
