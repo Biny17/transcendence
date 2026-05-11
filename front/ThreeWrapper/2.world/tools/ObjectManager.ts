@@ -237,6 +237,7 @@ const solidHitboxes = piece.hitboxes.filter(h => !h.isSensor).map(h => this.reso
 					);
 				}
 			}
+			this.physicsWorld.setPosition(id, { x: managed.position.x, y: managed.position.y, z: managed.position.z });
 		}
 		this.registry.set(id, managed);
 		return managed;
@@ -299,8 +300,9 @@ const solidHitboxes = piece.hitboxes.filter(h => !h.isSensor).map(h => this.reso
 		this.scene.add(sceneAsset);
 		const solidHitboxes = piece.hitboxes.filter(h => !h.isSensor).map(h => this.resolveAutoHitbox(sceneAsset, h));
 		if (this.physicsWorld && (solidHitboxes.length > 0 || physics)) {
+			const pieceId = `${objectId}_${pieceIndex}`;
 			this.physicsWorld.registerPiece(
-				`${objectId}_${pieceIndex}`,
+				pieceId,
 				physics ?? managed.physics ?? {},
 				solidHitboxes,
 				noSync ? undefined : ((pos, rot) => {
@@ -311,6 +313,7 @@ const solidHitboxes = piece.hitboxes.filter(h => !h.isSensor).map(h => this.reso
 				}),
 				managed.type as string
 			);
+			this.physicsWorld.setPosition(pieceId, { x: managed.position.x, y: managed.position.y, z: managed.position.z });
 		}
 	}
 	addHitbox(objectId: string, pieceIndex: number, hitbox: PieceHitbox, physics?: PhysicsDescriptor): void {

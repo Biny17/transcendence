@@ -62,7 +62,8 @@ export abstract class World {
 			"playersIds",
 			players.map((p) => p.id)
 		);
-		const selfWorldPlayer = engineCtx.selfServerClient.id ? (this._objects.getById(engineCtx.selfServerClient.id, OBJECT_TYPE.PLAYER) ?? null) : players.length > 0 ? (this._objects.getById(players[0].id, OBJECT_TYPE.PLAYER) ?? null) : null;
+		const rawSelf = engineCtx.selfServerClient.id ? (this._objects.getById(engineCtx.selfServerClient.id, OBJECT_TYPE.PLAYER) ?? null) : players.length > 0 ? (this._objects.getById(players[0].id, OBJECT_TYPE.PLAYER) ?? null) : null;
+		const selfWorldPlayer = rawSelf?.extraData.serverData.isSpectator ? null : rawSelf;
 		log.logVariable("selfWorldPlayerResolved", selfWorldPlayer?.id ?? null);
 		this.ctx = {
 			renderer: engineCtx.renderer,

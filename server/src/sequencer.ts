@@ -99,6 +99,7 @@ export class Sequencer {
 	}
 	getLoadWorldId(): string {
 		if (this.isInLobbyWait()) return "Lobby";
+		if (this.currentGame) return this.currentGame.modeId;
 		const phase = this.frame?.phases[this.frame.index] as any;
 		return phase?.worldId ?? "Lobby";
 	}
@@ -207,6 +208,9 @@ export class Sequencer {
 	onGameWorldLoaded(playerId: string): EventResult {
 		if (!this.isPhaseType("game")) return { processed: false, reason: FAIL_REASON.WRONG_PHASE_TYPE };
 		if (this.isSpectator(playerId)) return { processed: false, reason: FAIL_REASON.PLAYER_IS_SPECTATOR };
+		if (this.gameRunning) {
+			return { processed: true, data: { gameAlreadyRunning: true } };
+		}
 		if (this.gameLoaded.has(playerId)) return { processed: true, data: {} };
 		this.gameLoaded.add(playerId);
 		const total = this.getActivePlayers().length;
@@ -294,18 +298,25 @@ export class Sequencer {
 	private startWaitPhase(phase: WaitPhase): void {
 		this.waitCollected.clear();
 		if (this.waitTimer) clearTimeout(this.waitTimer);
-		this.waitTimer = setTimeout(() => {
-			console.log(`[Sequencer] Wait phase for "${phase.worldId}" timed out - starting game`);
-			this.finishWaitPhase();
-		}, phase.timeout * 1000);
-		const players = [...this.lives.entries()].map(([id, lives]) => ({
-			id,
-			name: usernames.get(id) ?? id,
-			lives,
-			isSpectator: lives <= 0
-		}));
-		broadcast(JSON.stringify(createMessage(SERVER_MSG.LOAD_WORLD, { worldId: phase.worldId, players })));
-		console.log(`[Sequencer] Broadcasting LOAD_WORLD for ${phase.worldId}`);
+		this.waitTimer = null;
+		if (phase.timeout > 0) {
+			this.waitTimer = setTimeout(() => {
+				console.log(`[Sequencer] Wait phase for "${phase.worldId}" timed out - starting game`);
+				this.finishWaitPhase();
+			}, phase.timeout * 1000);
+		}
+		if (this.lives.size > 0) {
+			const players = [...this.lives.entries()].map(([id, lives]) => ({
+				id,
+				name: usernames.get(id) ?? id,
+				lives,
+				isSpectator: lives <= 0
+			}));
+			broadcast(JSON.stringify(createMessage(SERVER_MSG.LOAD_WORLD, { worldId: phase.worldId, players })));
+			console.log(`[Sequencer] Broadcasting LOAD_WORLD for ${phase.worldId}`);
+		} else {
+			console.log(`[Sequencer] Skipping LOAD_WORLD broadcast for ${phase.worldId} — no players yet`);
+		}
 	}
 	private finishWaitPhase(): void {
 		this.waitCollected.clear();

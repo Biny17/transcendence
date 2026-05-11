@@ -19,7 +19,13 @@ export function Background({ signInOpen, setSignInOpen }) {
   const [form, setForm] = useState({ age: "", email: "", password: "", username: "" });
   const [Profile, setProfile] = useState([]);
   const [error, setError] = useState("");
+  const [notification, setNotification] = useState("");
   const router = useRouter();
+
+  function showNotification(msg) {
+    setNotification(msg);
+    setTimeout(() => setNotification(""), 6000);
+  }
 
   async function fetchVerified() {
     try {
@@ -30,9 +36,9 @@ export function Background({ signInOpen, setSignInOpen }) {
       setIsSignIn(true);
       setSubmit(!Submit)
     } catch (error) {
-      console.log(error);
-      setError("Invalid credentials");
-      setForm({ email: "", password: "" });
+      setError(error instanceof Error ? error.message : "Invalid credentials");
+      showNotification(error instanceof Error ? error.message : "Invalid credentials");
+      setForm({ email: "", password: "", age: "", username: "" });
     }
   }
 
@@ -41,9 +47,9 @@ export function Background({ signInOpen, setSignInOpen }) {
   }
 
   const handleSubmit = () => {
-    if (!form.email || !form.password) { setError("Remplissez tous les champs !"); return; }
-    if (isSignUpMode && !form.age) { setError("Remplissez tous les champs !"); return; }
-    if (isSignUpMode && !form.username) { setError("Choisissez un pseudo !"); return; }
+    if (!form.email || !form.password) { setError("Remplissez tous les champs !"); showNotification("Remplissez tous les champs !"); return; }
+    if (isSignUpMode && !form.age) { setError("Remplissez tous les champs !"); showNotification("Remplissez tous les champs !"); return; }
+    if (isSignUpMode && !form.username) { setError("Choisissez un pseudo !"); showNotification("Choisissez un pseudo !"); return; }
     else if (isSignUpMode) { setIsSignUp(true); setSubmit(!Submit); return; }
     else { fetchVerified(); return; }
   };
@@ -74,12 +80,16 @@ export function Background({ signInOpen, setSignInOpen }) {
           router.push("/home");
         } else {
           setError("Mail not verified");
+          showNotification("Mail not verified");
           setForm({ email: "", password: "", age: "", username: "" });
         }
       } catch (error) {
-        console.log(error);
-        setError("Invalid credentials");
+        setError(error instanceof Error ? error.message : "Invalid credentials");
+        showNotification(error instanceof Error ? error.message : "Invalid credentials");
         setForm({ email: "", password: "", age: "", username: "" });
+        setIsSignUp(false);
+        setIsSignIn(false);
+        setSubmit(false);
       }
     }
     fetchData();
@@ -135,10 +145,27 @@ export function Background({ signInOpen, setSignInOpen }) {
     anim5.destroy();
   };
 }, []);
+
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  const err = params.get("error");
+  if (err === "need_reconnect") {
+    showNotification("Session expirée — veuillez vous reconnecter");
+  }
+}, []);
  
     
   return (
 	<>
+    {notification && (
+      <div style={{
+        position: "fixed", top: 0, left: 0, right: 0, zIndex: 9999,
+        background: "#ef4444", color: "#fff", textAlign: "center",
+        padding: "14px 20px", fontSize: "16px", fontWeight: 600
+      }}>
+        {notification}
+      </div>
+    )}
     <div className="background">
 		 <div ref={celebRef} className="absolute inset-0 z-10 pointer-events-none"/>
 	      <div className="blob blob-1"></div>
@@ -207,7 +234,7 @@ export function Background({ signInOpen, setSignInOpen }) {
               <label className="w-24 text-right text-[15px] text-slate-200">Pseudo</label>
               <input
                 type="text"
-                value={form.username}
+                value={form.username ?? ""}
                 className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"
                 onChange={e => setForm({ ...form, username: e.target.value })}
                 placeholder={error ? error : "Your Pseudo here"}
@@ -218,7 +245,7 @@ export function Background({ signInOpen, setSignInOpen }) {
             <label className="w-24 text-right text-[15px] text-slate-200">Email</label>
             <input
               type="email"
-              value={form.email}
+              value={form.email ?? ""}
               className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"
               onChange={e => setForm({ ...form, email: e.target.value })}
               placeholder={error ? error : "Your Email here"}
@@ -229,7 +256,7 @@ export function Background({ signInOpen, setSignInOpen }) {
             <label className="w-24 text-right text-[15px] text-slate-200">Age</label>
             <input
               type="age"
-              value={form.age}
+              value={form.age ?? ""}
               className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"
               onChange={e => setForm({ ...form, age: e.target.value })}
               placeholder={error ? error : "Your Age here"}
@@ -241,7 +268,7 @@ export function Background({ signInOpen, setSignInOpen }) {
             <input
               id = "password"
               type="password"
-              value={form.password}
+              value={form.password ?? ""}
               className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-blue-300 shadow-sm focus:shadow"
               onChange={e => setForm({ ...form, password: e.target.value })}
               placeholder={error ? error : "Your Password here"}

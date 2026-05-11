@@ -65,6 +65,7 @@ export { EndlineModule } from "./modules/gameplay/EndLineModule";
 export type { EndLineModuleOptions } from "./modules/gameplay/EndLineModule";
 export { WinZoneModule } from "./modules/gameplay/WinZoneModule";
 export type { WinZoneModuleOptions } from "./modules/gameplay/WinZoneModule";
+export { SpectatorFlyModule } from "./modules/camera/SpectatorFlyModule";
 export { CharacterOrbitCameraModule } from "./modules/editor/CharacterOrbitCameraModule";
 export { CharacterCustomizerModule } from "./modules/editor/CharacterCustomizerModule";
 export type { AccessoryConfig } from "./modules/editor/CharacterCustomizerModule";

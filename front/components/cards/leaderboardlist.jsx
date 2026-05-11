@@ -9,7 +9,8 @@ export default function LeaderBoardList() {
   const [img, setImg] = useState([]);
   const [UserName, setUserName] = useState("");
   const [playerImgs, setPlayerImgs] = useState({});
-
+  const [ playersStats, setPlayerStats] = useState({})
+  
   async function fetchData() {
     try {
       const data = await api.get("/api/users");
@@ -18,12 +19,12 @@ export default function LeaderBoardList() {
       console.error(error);
     }
   }
+
 useEffect(() => {
   async function loadImages() {
     const imgs = {};
     for (const player of players) {
       const url = await fetchImg(player.id);
-      console.log(url)
       imgs[player.id] = url;
     }
     setPlayerImgs(imgs);
@@ -52,9 +53,43 @@ async function fetchImg(id) {
 }
 
 useEffect(() => {
+  async function fetchUserData(id) {
+    try {
+      const statsResponse = await fetch(`${API_BASE}/api/users/${id}/stats`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: { Accept: 'application/json, application/problem+json' }
+      });
+      
+      if (!statsResponse.ok) return;
+      const statsData = await statsResponse.json();
+      return(statsData.stats);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function fetchStats() {
+  const wins = {};
+  for (const player of players) {
+      console.log(player)
+      const data = await fetchUserData(player.id);
+      wins[player.id] = data.games_played;
+  }
+  setPlayerStats(wins);
+}
+
+  if (players.length > 0) {
+    fetchStats();
+    console.log(playersStats)
+  }
+}, [players]);
+
+
+useEffect(() => {
   fetchData();
-  fetchImg();
 }, []);
+
 players.sort((a, b) => b.win - a.win);
   return (
     <div className="w-full h-full flex flex-col items-center justify-center bg-[#0b1328]">
@@ -85,7 +120,7 @@ players.sort((a, b) => b.win - a.win);
             </div>
             <div>
               <h6 className="font-medium text-white">{player.username}</h6>
-              <span className="font-bold w-6 text-center">Wins: {player.win}</span>
+              <span className="font-bold w-6 text-center">Wins: {playersStats[player.id]}</span>
             </div>
           </div>
         ))}

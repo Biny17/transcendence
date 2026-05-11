@@ -22,6 +22,8 @@ const (
 	FieldGameID = "game_id"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
+	// FieldUsername holds the string denoting the username field in the database.
+	FieldUsername = "username"
 	// EdgeGame holds the string denoting the game edge name in mutations.
 	EdgeGame = "game"
 	// EdgeUser holds the string denoting the user edge name in mutations.
@@ -52,6 +54,7 @@ var Columns = []string{
 	FieldDeath,
 	FieldGameID,
 	FieldUserID,
+	FieldUsername,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -95,6 +98,11 @@ func ByGameID(opts ...sql.OrderTermOption) OrderOption {
 // ByUserID orders the results by the user_id field.
 func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserID, opts...).ToFunc()
+}
+
+// ByUsername orders the results by the username field.
+func ByUsername(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUsername, opts...).ToFunc()
 }
 
 // ByGameField orders the results by game field.

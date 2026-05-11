@@ -16,7 +16,7 @@ export const Navbar = ({OptionsOpen, setOptionsOpen}) => {
 const [dropdownOpen, setDropdownOpen] = useState(false);
 const [error, setError] = useState("");
 const [username, setUserName] = useState('');
-const [Img, setImg] = useState("")
+const [Img, setImg] = useState(null)
 const router = useRouter();
 const slothRef = useRef(null);
 
@@ -32,7 +32,7 @@ async function fetchImg() {
   try {
     const response = await fetch(url, options);
     if (!response.ok) {
-      setImg("");
+      setImg(null);
       return;
     }
     const blob = await response.blob();
@@ -40,7 +40,7 @@ async function fetchImg() {
     setImg(imgUrl);
   } catch (error) {
     console.error(error);
-    setImg("");
+    setImg(null);
   }
 }
 
