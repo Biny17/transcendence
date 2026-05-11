@@ -6,6 +6,7 @@ import (
 	"backend/internal/mid"
 	"context"
 	"log"
+
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/go-chi/chi/v5"
 	"github.com/samber/do/v2"
@@ -64,6 +65,18 @@ type GetConversationsOutput struct {
 	Body []*ConversationResponse
 }
 
+type OnlineUser struct {
+	ID       int    `json:"id"`
+	Username string `json:"username"`
+}
+
+type OnlineUsersInput struct {
+}
+
+type OnlineUsersOutput struct {
+	Body []OnlineUser `json:"body"`
+}
+
 type AddParticipantsInput struct {
 	ID   int `path:"id"`
 	Body struct {
@@ -96,11 +109,11 @@ func ProvideAndRegister(i do.Injector) *Handler {
 	m := do.MustInvoke[*mid.Middleware](i)
 
 	hub := NewHub(client)
-	
+
 	globalGroupID, err := EnsureGlobalGroup(context.Background(), client)
-    if err != nil {
-        log.Fatalf("failed to ensure global group: %v", err)
-    }
+	if err != nil {
+		log.Fatalf("failed to ensure global group: %v", err)
+	}
 	log.Printf("global group ID: %d", globalGroupID)
 
 	go hub.Run()
@@ -114,4 +127,3 @@ func ProvideAndRegister(i do.Injector) *Handler {
 	h.Register(api, mux)
 	return h
 }
-
