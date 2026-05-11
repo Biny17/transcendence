@@ -71,6 +71,7 @@ export default function Home() {
 	const [currentFaceColor, setCurrentFaceColor] = useState("#ffffff");
 	const [currentEyeColor, setCurrentEyeColor] = useState("#00ff00");
 	const [isChangingColor, setIsChangingColor] = useState(false);
+	const [canvasHeight, setCanvasHeight] = useState(500);
 	const bearRef = useRef(null);
 	const characterArgsRef = useRef({
 		bodyColor: "#c0ccc0",
@@ -91,6 +92,20 @@ export default function Home() {
 		return () => {
 			anim.destroy();
 		};
+	}, []);
+	useEffect(() => {
+		const updateCanvasHeight = () => {
+			if (window.innerWidth < 768) {
+				setCanvasHeight(300); 
+			} else if (window.innerWidth < 1024) {
+				setCanvasHeight(400); 
+			} else {
+				setCanvasHeight(500);
+			}
+		};
+		updateCanvasHeight();
+		window.addEventListener("resize", updateCanvasHeight);
+		return () => window.removeEventListener("resize", updateCanvasHeight);
 	}, []);
 	const handleAnimationChange = (anim) => {
 		setCurrentAnim(anim);
@@ -162,9 +177,9 @@ export default function Home() {
 					<div className="absolute inset-0 flex items-center justify-center gap-12">
 						<div className="flex flex-row items-center gap-12">
 							<div className="baloo_button fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-6">
-								<div className="w-[200px] h-[200px] sm:w-[200px] sm:h-[200px] md:w-[300px] md:h-[300px] lg:w-[300px] lg:h-[300px] xl:w-[500px] xl:h-[500px]">
-									<EngineCanvas config={{ mode: "standalone" }} world={() => new CharacterVisualizerWorld(characterArgsRef.current)} onReady={(world) => setWorldApi(world)} style={{ width: "full", height: "500px" /*TODO FIX HEIGHT */ }} />
-								</div>
+								
+									<EngineCanvas config={{ mode: "standalone" }} world={() => new CharacterVisualizerWorld(characterArgsRef.current)} onReady={(world) => setWorldApi(world)} style={{ width: "100%", height: `${canvasHeight}px` }} />
+								
 								<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: OptionsOpen ? 0 : 1, y: OptionsOpen ? 20 : 0 }} transition={{ duration: 0.4, ease: "easeOut" }}>
 									<div className="grid grid-flow-col auto-cols-max gap-4">
 										<Button statement="Your Friends" onClick={() => setYourFriendsOpen(true)} />
