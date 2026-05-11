@@ -14,6 +14,7 @@ export type EditorUIState = {
   env: { sky: any; fog: any; lights: any[]; clouds: boolean }
   gridSize: number
   showGrid: boolean
+  description: string
 }
 type Props = {
   components: string[]
@@ -37,6 +38,7 @@ type Props = {
   onLoadSavedMap: (path: string) => Promise<void>
   onTestMode: () => void
   onRefreshComponents: () => Promise<string[]>
+  onDescriptionChange: (text: string) => void
 }
 const C = {
   bg: 'rgba(10, 10, 28, 0.88)',
@@ -91,6 +93,7 @@ export function EditorUI({
   onPlayAnimation, onStopAnimation,
   onPlayAll, onStopAll, onEnvChange,
   onSaveMap, onLoadMapList,   onLoadSavedMap, onTestMode, onRefreshComponents,
+  onDescriptionChange,
 }: Props) {
   const [items, setItems] = useState(components)
   const [selected, setSelected] = useState<string | null>(null)
@@ -103,6 +106,7 @@ export function EditorUI({
     isPlayingAll: false, hasAnyAnimations: false,
     env: { sky: null, fog: null, lights: [], clouds: false },
     gridSize: 1, showGrid: true,
+    description: '',
   })
   const [mapName, setMapName] = useState('')
   const [isSaving, setIsSaving] = useState(false)
@@ -458,6 +462,33 @@ export function EditorUI({
             </div>
           </div>
         )}
+      </div>
+      {}
+      <div style={sectionBorder}>
+        <div style={{ fontSize: '10px', color: C.textDim, marginBottom: '5px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Description</div>
+        <textarea
+          value={state.description}
+          onChange={(e) => {
+            const val = e.target.value
+            setState(s => ({ ...s, description: val }))
+            onDescriptionChange?.(val)
+          }}
+          placeholder="Describe your map for the cinematic intro..."
+          rows={3}
+          style={{
+            width: '100%',
+            background: 'rgba(0,0,0,0.3)',
+            border: `1px solid ${C.btnBorder}`,
+            borderRadius: '3px',
+            color: C.textBright,
+            fontFamily: 'monospace',
+            fontSize: '11px',
+            padding: '4px 6px',
+            outline: 'none',
+            resize: 'vertical',
+            boxSizing: 'border-box',
+          }}
+        />
       </div>
       {}
       <div style={{ padding: '5px 12px', borderBottom: `1px solid ${C.border}`, fontSize: '10px', color: C.textDim }}>

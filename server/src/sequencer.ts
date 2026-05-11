@@ -222,7 +222,24 @@ export class Sequencer {
 				this.gameLoadTimer = null;
 			}
 			const phase = this.phase as GamePhase;
-			this.broadcastStartWorld(phase);
+			const game = this.currentGame!;
+			if (game.candidate.cinematic) {
+				broadcast(
+					JSON.stringify(
+						createMessage(SERVER_MSG.PHASE_CHANGED, {
+							phaseId: `cinematic_${game.candidate.worldId}`,
+							phaseType: "cinematic"
+						})
+					)
+				);
+				const timeout = game.candidate.cinematicTimeout ?? 10;
+				console.log(`[Sequencer] Cinematic phase started (${timeout}s) for ${game.candidate.worldId}`);
+				setTimeout(() => {
+					this.broadcastStartWorld(phase);
+				}, timeout * 1000);
+			} else {
+				this.broadcastStartWorld(phase);
+			}
 		}
 		return { processed: true, data: { loaded: this.gameLoaded.size, total, allLoaded } };
 	}
@@ -358,7 +375,11 @@ export class Sequencer {
 			lives,
 			isSpectator: lives <= 0
 		}));
-		broadcast(JSON.stringify(createMessage(SERVER_MSG.LOAD_WORLD, { worldId: candidate.worldId, players })));
+		const loadPayload: Record<string, unknown> = { worldId: candidate.worldId, players };
+		if (candidate.cinematic) {
+			loadPayload.extra = { cinematic: true };
+		}
+		broadcast(JSON.stringify(createMessage(SERVER_MSG.LOAD_WORLD, loadPayload)));
 		console.log(`[Sequencer] Broadcasting LOAD_WORLD for game: ${candidate.worldId} (loadTimeout=${timeout}s)`);
 	}
 	private broadcastStartWorld(phase: GamePhase): void {

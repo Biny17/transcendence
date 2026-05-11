@@ -63,6 +63,7 @@ export type MapObjectInstance = {
 };
 export type MapDef = {
 	id: string;
+	description?: string;
 	sky?: SkyDef;
 	fog?: FogDef;
 	lights?: LightDef[];

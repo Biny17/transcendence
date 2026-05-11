@@ -102,6 +102,9 @@ export abstract class World {
 	getCamera(): THREE.PerspectiveCamera {
 		return this.ctx.camera;
 	}
+	get mapDefinition(): import("./tools/MapLoader").MapDef | null {
+		return this.ctx?.map?.definition ?? null;
+	}
 	addModule(module: Module): void {
 		this.modules.set(module.type, module);
 	}

@@ -45,7 +45,8 @@ export class ServerHandler {
 	private readonly engine: Engine;
 	private pendingWorldId: string | null = null;
 	private pendingPlayers: LoadWorldPlayer[] = [];
-	private pendingWorld: World | null = null;
+	pendingWorld: World | null = null;
+	isCinematic: boolean = false;
 	private worldResolver: ((worldId: string) => Promise<World>) | null = null;
 	private pendingJoins: PlayerJoinPayload[] = [];
 	private incomingInterceptors: IncomingInterceptor[] = [];
@@ -239,6 +240,7 @@ export class ServerHandler {
 			this.logger.debug("Loading world: " + p.worldId);
 			this.pendingWorldId = p.worldId;
 			this.pendingPlayers = p.players;
+			this.isCinematic = !!(p as any).extra?.cinematic;
 			this.pendingJoins = [];
 			const unsubInterceptor = this.addIncomingInterceptor((msg) => {
 				if (msg.type === SERVER_MSG.PLAYER_JOIN) {
@@ -280,6 +282,12 @@ export class ServerHandler {
 		this.on(SERVER_MSG.START_WORLD, async (p) => {
 			if (!this.pendingWorld) return;
 			this.logger.debug("Starting world: " + this.pendingWorldId);
+			if (this.isCinematic) {
+				this.engine.previewWorld = null;
+				this.engine.uiModule.hide("cinematic");
+				window.dispatchEvent(new CustomEvent("cinematic:hide"));
+				this.isCinematic = false;
+			}
 			this.engine.activate(this.pendingWorld);
 			this.engine.startActive(p.initialState);
 			this.pendingWorld = null;

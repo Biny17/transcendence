@@ -21,6 +21,7 @@ export class Engine {
 	private clock = new THREE.Clock();
 	private animationId: number | null = null;
 	private active: World | null = null;
+	previewWorld: World | null = null;
 	private lastFpsTime = 0;
 	private frameCount = 0;
 	public paused = false;
@@ -61,6 +62,19 @@ export class Engine {
 				this.logger.for("Engine").info("Received playerId from server", { playerId: p.playerId });
 			});
 			this.server.on(SERVER_MSG.PHASE_CHANGED, (p: PhaseChangedPayload) => {
+				if (p.phaseType === "cinematic") {
+					this.uiModule.hide("loading");
+					const server = this.server!;
+					const world = server.pendingWorld;
+					if (world) {
+						this.previewWorld = world;
+					}
+					const description = world?.mapDefinition?.description;
+					if (description) {
+						window.dispatchEvent(new CustomEvent("cinematic:show", { detail: { description } }));
+					}
+					return;
+				}
 				if (p.phaseId === "game" && p.phaseType === "end" && p.data?.rankings) {
 					const selfId = this.selfServerClient.id;
 					if (!selfId) return;
@@ -79,6 +93,20 @@ export class Engine {
 			networkLogger.attach(this.server);
 			(window as any).__networkMgr = this.server.networkManager;
 			(window as any).__serverHandler = this.server;
+			window.addEventListener("cinematic:show", (e: Event) => {
+				const { description } = (e as CustomEvent).detail;
+				if (description) {
+					import("react").then(({ createElement }) =>
+						import("@/ThreeWrapper/4.module/modules/ui/components/CinematicUI").then(({ CinematicUI }) => {
+							this.uiModule.show("cinematic", createElement(CinematicUI, { description }));
+							this.uiModule.enablePointer("cinematic");
+						})
+					);
+				}
+			});
+			window.addEventListener("cinematic:hide", () => {
+				this.uiModule.hide("cinematic");
+			});
 		}
 	}
 	private createCanvas(): HTMLCanvasElement {
@@ -159,13 +187,24 @@ export class Engine {
 				eng.stepRequested = false;
 				this.stepOneFrame = true;
 			}
-			if (this.paused && !this.stepOneFrame) return;
-			this.stepOneFrame = false;
-			const delta = this.clock.getDelta() * this.timeScale;
-			if (this.active) {
-				this.active.update(delta);
-				this.debug.update(delta); 
-				this.renderer.render(this.active.scene, this.active.getCamera());
+		if (this.paused && !this.stepOneFrame) return;
+		this.stepOneFrame = false;
+		const delta = this.clock.getDelta() * this.timeScale;
+		if (this.previewWorld) {
+			const camera = this.previewWorld.getCamera();
+			const t = performance.now() / 1000;
+			const speed = 0.15;
+			const radius = Math.max(5, camera.position.length());
+			camera.position.x = Math.sin(t * speed) * radius;
+			camera.position.z = Math.cos(t * speed) * radius;
+			camera.lookAt(0, 0, 0);
+			this.renderer.render(this.previewWorld.scene, camera);
+			return;
+		}
+		if (this.active) {
+			this.active.update(delta);
+			this.debug.update(delta); 
+			this.renderer.render(this.active.scene, this.active.getCamera());
 				if (eng) {
 					eng.frameCount++;
 					this.frameCount++;
