@@ -38,6 +38,13 @@ func (h *Handler) Register(api huma.API, mux *chi.Mux) {
 		Summary:     "Get all conversations for the current user",
 	}, h.GetConversations)
 	huma.Register(api, huma.Operation{
+		OperationID: "get-online-users",
+		Method:      "GET",
+		Path:        routes.OnlineUsers,
+		Middlewares: huma.Middlewares{h.M.Auth},
+		Summary:     "Get list of online users",
+	}, h.GetOnlineUsers)
+	huma.Register(api, huma.Operation{
 		OperationID: "join-group-conversation",
 		Method:      "POST",
 		Path:        routes.JoinGroupConversation,

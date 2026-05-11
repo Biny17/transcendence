@@ -1,6 +1,7 @@
 package gameserv
 
 import (
+	"backend/ent/game"
 	"backend/ent/result"
 	"backend/ent/user"
 	"backend/internal/pkg/myhuma"
@@ -88,4 +89,32 @@ func (gs *GameService) GetPlayersFromGameId(ctx context.Context, gameid int) ([]
 		})
 	}
 	return ret, nil
+}
+
+func (gs *GameService) GetGamesResults(
+	ctx context.Context,
+	input *struct{},
+) (
+	*Games,
+	error,
+) {
+	games := &Games{}
+	ent_games, err := gs.Client.Game.Query().Order(game.ByTimeStamp(sql.OrderDesc())).Limit(50).All(ctx)
+	if err != nil {
+		return nil, myhuma.EntErrToHumaErr(err)
+	}
+	for _, gr := range ent_games {
+		players, err := gs.GetPlayersFromGameId(ctx, gr.ID)
+		if err != nil {
+			return nil, myhuma.EntErrToHumaErr(err)
+		}
+		games.Body.Game = append(games.Body.Game, GameInfo{
+			GameId:      gr.ID,
+			LobbyType:   gr.Type,
+			TimeStamp:   gr.TimeStamp,
+			TotalPlayer: len(players),
+			Players:     players,
+		})
+	}
+	return games, nil
 }

@@ -6,6 +6,7 @@ import (
 )
 
 type PlayerStat struct {
+	Wins         int     `json:"wins"`
 	TotalGames   int     `json:"games_played"`
 	TotalKills   int     `json:"total_kills"`
 	TotalDeath   int     `json:"total_deaths"`
@@ -47,6 +48,9 @@ func (gs GameService) GetPlayerStats(
 	for _, res := range results {
 		pstat.TotalDeath += res.Death
 		ranksum += res.Rank
+		if res.Rank == 1 {
+			pstat.Wins++
+		}
 		pstat.TotalKills += res.Kills
 	}
 	if pstat.TotalGames != 0 {
