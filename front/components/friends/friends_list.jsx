@@ -218,7 +218,7 @@ useEffect(() => {
             </div>
             <div className="flex-1">
               <h6 className="font-medium text-white">{player.username}</h6>
-              <span className="font-bold w-6 text-center">Wins: {player.win}</span>
+              {/* <span className="font-bold w-6 text-center">Wins: {player.win}</span> */}
             </div>
             <div className="ml-auto">
               {!props.FriendsDisplay && (
