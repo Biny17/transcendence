@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { ENV_PRESETS } from '../environmentPresets'
 export type EditorUIState = {
   canUndo: boolean
   canRedo: boolean
@@ -272,6 +273,24 @@ export function EditorUI({
         </div>
         {envOpen && (
           <div style={{ padding: '8px 12px', fontSize: '10px' }}>
+            {}
+            <div style={{ marginBottom: '8px' }}>
+              <div style={labelStyle}>Preset</div>
+              <select
+                value={''}
+                onChange={(e) => {
+                  if (!e.target.value) return
+                  const preset = ENV_PRESETS.find(p => p.id === e.target.value)
+                  if (preset) handleEnvChange(preset.env)
+                }}
+                style={inputStyle}
+              >
+                <option value="">-- Apply preset --</option>
+                {ENV_PRESETS.map(p => (
+                  <option key={p.id} value={p.id}>{p.label}</option>
+                ))}
+              </select>
+            </div>
             {}
             <div style={{ marginBottom: '8px' }}>
               <div style={labelStyle}>Sky</div>

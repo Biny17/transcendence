@@ -1,14 +1,23 @@
 id: editor_export
-sky:
-  preset: day
 fog:
-  kind: linear
-  color: 8421504
-  near: 10
-  far: 200
+  kind: exponential
+  color: 13426943
+  density: 0.002
 lights:
   - type: ambient
     color: 16777215
+    intensity: 0.8
+  - type: directional
+    color: 16777215
+    intensity: 2
+    position:
+      x: 10
+      'y': 20
+      z: 5
+    castShadow: true
+  - type: hemisphere
+    skyColor: 8900331
+    groundColor: 5597999
     intensity: 0.5
 clouds: true
 objects:
@@ -19,21 +28,6 @@ objects:
       x: 3
       'y': 0.5
       z: -2
-    rotation:
-      x: 0
-      'y': 0
-      z: 0
-    scale:
-      x: 1
-      'y': 1
-      z: 1
-  - id: utils_spawn_point_1
-    component: /game/components/utils_spawn_point.yaml
-    type: map
-    position:
-      x: 3
-      'y': 0.5
-      z: -0.0
     rotation:
       x: 0
       'y': 0
@@ -57,6 +51,81 @@ objects:
       x: 1
       'y': 1
       z: 1
+  - id: utils_win_crown_1
+    component: /game/components/utils_win_crown.yaml
+    type: map
+    position:
+      x: -34
+      'y': 3
+      z: 0
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 1
+      'y': 1
+      z: 1
+  - id: element_fallguys_floor_0
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: 0
+      'y': 0
+      z: 0
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_2
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -25
+      'y': 0
+      z: -0.0
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: utils_spawn_point_1
+    component: /game/components/utils_spawn_point.yaml
+    type: map
+    position:
+      x: 3
+      'y': 0.5
+      z: -0.0
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 1
+      'y': 1
+      z: 1
+  - id: element_fallguys_floor_1
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -13
+      'y': 0
+      z: 0
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
   - id: utils_spawn_point_3
     component: /game/components/utils_spawn_point.yaml
     type: map
@@ -72,6 +141,21 @@ objects:
       x: 1
       'y': 1
       z: 1
+  - id: element_fallguys_floor_3
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: 12
+      'y': 0
+      z: -0.0
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
   - id: utils_spawn_point_4
     component: /game/components/utils_spawn_point.yaml
     type: map
@@ -87,6 +171,21 @@ objects:
       x: 1
       'y': 1
       z: 1
+  - id: element_fallguys_floor_4
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: 0
+      'y': 0
+      z: 13
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
   - id: utils_spawn_point_5
     component: /game/components/utils_spawn_point.yaml
     type: map
@@ -139,66 +238,6 @@ objects:
       x: -1
       'y': 0.5
       z: 2
-    rotation:
-      x: 0
-      'y': 0
-      z: 0
-    scale:
-      x: 1
-      'y': 1
-      z: 1
-  - id: element_fallguys_floor_0
-    component: /game/components/element_fallguys_floor.yaml
-    type: map
-    position:
-      x: 0
-      'y': 0
-      z: 0
-    rotation:
-      x: 0
-      'y': 0
-      z: 0
-    scale:
-      x: 0.003
-      'y': 0.003
-      z: 0.003
-  - id: element_fallguys_floor_1
-    component: /game/components/element_fallguys_floor.yaml
-    type: map
-    position:
-      x: -13
-      'y': 0
-      z: 0
-    rotation:
-      x: 0
-      'y': 0
-      z: 0
-    scale:
-      x: 0.003
-      'y': 0.003
-      z: 0.003
-  - id: element_fallguys_floor_2
-    component: /game/components/element_fallguys_floor.yaml
-    type: map
-    position:
-      x: -25
-      'y': 0
-      z: -0.0
-    rotation:
-      x: 0
-      'y': 0
-      z: 0
-    scale:
-      x: 0.003
-      'y': 0.003
-      z: 0.003
-  - id: utils_win_crown_1
-    component: /game/components/utils_win_crown.yaml
-    type: map
-    position:
-      x: -34
-      'y': 3
-      z: 0
     rotation:
       x: 0
       'y': 0

@@ -554,6 +554,7 @@ export class EditorPlacementModule implements Module {
       if (this.ctx.objects.getById(id)) this.ctx.objects.remove(id)
     }
     this.meshRegistry.clear()
+    this.placementCounter.clear()
     this.placed = []
     this.history = []
     this.historyIndex = -1
@@ -587,6 +588,15 @@ export class EditorPlacementModule implements Module {
         scale: obj.scale ?? { x: 1, y: 1, z: 1 },
       })
     }))
+    for (const p of this.placed) {
+      const m = p.id.match(/^(.*)_(\d+)$/)
+      if (m) {
+        const prefix = m[1]
+        const idx = parseInt(m[2], 10)
+        const cur = this.placementCounter.get(prefix) ?? 0
+        if (idx + 1 > cur) this.placementCounter.set(prefix, idx + 1)
+      }
+    }
     this.onStateChange?.()
   }
   private _hitTestSelected(e: PointerEvent): boolean {
