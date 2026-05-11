@@ -29,6 +29,7 @@ const (
 	LeaveGroupConversation  = "/api/chat/group-conversation/{id}/leave"
 	JoinGroupConversation   = "/api/chat/group-conversation/{id}/join"
 	GetConversations        = "/api/chat/conversations"
+	OnlineUsers             = "/api/chat/online"
 	ConversationHistory     = "/api/chat/conversation/{id}/messages"
 	UpdateProfilePic        = "/api/update/profile-picture"
 	GetMyPicture            = "/api/users/me/profile-picture"
