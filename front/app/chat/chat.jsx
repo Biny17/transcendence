@@ -160,7 +160,7 @@ useEffect(() => {
     });
   }
   initChat()
-  fetchImg()
+//   fetchImg()
   }, []);
 
   const sendMessage = async () => {

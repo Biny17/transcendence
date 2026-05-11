@@ -1,9 +1,10 @@
 package chat
 
 import (
-	"context"
 	"backend/ent/conversation"
+	"backend/ent/user"
 	"backend/internal/pkg"
+	"context"
 	"log"
 	"net/http"
 	"strconv"
@@ -143,6 +144,41 @@ func (h *Handler) GetConversations(ctx context.Context, input *GetConversationsI
 	}
 	return &GetConversationsOutput{
 		Body: convs,
+	}, nil
+}
+
+func (h *Handler) GetOnlineUsers(ctx context.Context, input *OnlineUsersInput) (*OnlineUsersOutput, error) {
+	_, err := pkg.ContextUserId(ctx)
+	if err != nil {
+		return nil, huma.Error401Unauthorized(err.Error())
+	}
+
+	userIds := h.Hub.GetOnlineUsers()
+	if len(userIds) == 0 {
+		return &OnlineUsersOutput{
+			Body: []OnlineUser{},
+		}, nil
+	}
+
+	users, err := h.Client.User.Query().
+		Where(user.IDIn(userIds...)).
+		Select(user.FieldID, user.FieldUsername).
+		All(ctx)
+	if err != nil {
+		log.Printf("failed to query online users: %v", err)
+		return nil, huma.Error500InternalServerError("failed to query online users")
+	}
+
+	var onlineUsers []OnlineUser
+	for _, u := range users {
+		onlineUsers = append(onlineUsers, OnlineUser{
+			ID:       u.ID,
+			Username: u.Username,
+		})
+	}
+
+	return &OnlineUsersOutput{
+		Body: onlineUsers,
 	}, nil
 }
 

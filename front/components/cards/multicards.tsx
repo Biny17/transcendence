@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
-
+import { useEffect, useState } from 'react';
+import { api, API_BASE } from "@/lib/api";
 // @material-tailwind/react
 import {
   Button,
@@ -13,16 +14,17 @@ import {
   CardBody,
 } from "@material-tailwind/react";
 
-import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
+// import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
 
-interface KpiCardPropsType {
-  title: string;
-  percentage: string;
-  price: string;
-  color: string;
-  icon: React.ReactNode;
-  nb: React.ReactNode;
-}
+// interface KpiCardPropsType {
+//   title: string;
+//   percentage: string;
+//   price: string;
+//   color: string;
+//   icon: React.ReactNode;
+//   nb: React.ReactNode;
+// }
+
 
 function KpiCard({
   title,
@@ -141,31 +143,62 @@ const StyledCard = styled(Card)`
   }
 `;
 
-const data = [
+
+function KpiCard1() {
+  const [DataUser, setDataUser] = useState("")
+  const data = [
   {
     title: "Game",
     nb: <button className="min-w-5 w-5 h-5 sm:min-w-9 sm:w-auto sm:h-auto rounded-full py-0.5 px-1.5 sm:py-2 sm:px-3.5 text-center text-[10px] sm:text-sm transition-all shadow-sm text-white bg-[#0b1328] focus:bg-[#0b1328] focus:text-white active:bg-[#0b1328] active:text-white ml-0 sm:ml-0 md:ml-0 lg:ml-2">
-      2
+      {DataUser.games_played}
     </button>,
     icon: "🎮",
   },
   {
     title: "Win",
     nb: <button className="min-w-5 w-5 h-5 sm:min-w-9 sm:w-auto sm:h-auto rounded-full py-0.5 px-1.5 sm:py-2 sm:px-3.5 text-center text-[10px] sm:text-sm transition-all shadow-sm text-white bg-[#0b1328] focus:bg-[#0b1328] focus:text-white active:bg-[#0b1328] active:text-white ml-0 sm:ml-0 md:ml-0 lg:ml-2">
-      2
+      {DataUser.wins}
     </button>,
     icon: "🏆",
   },
   {
     title: "Death",
     nb: <button className="min-w-5 w-5 h-5 sm:min-w-9 sm:w-auto sm:h-auto rounded-full py-0.5 px-1.5 sm:py-2 sm:px-3.5 text-center text-[10px] sm:text-sm transition-all shadow-sm text-white bg-[#0b1328] focus:bg-[#0b1328] focus:text-white active:bg-[#0b1328] active:text-white ml-0 sm:ml-0 md:ml-0 lg:ml-2">
-      2
+      {DataUser.total_deaths}
     </button>,
     icon: "💀",
   },
 ];
 
-function KpiCard1() {
+  useEffect(() => {
+  async function fetchUserData() {
+    try {
+      const idResponse = await fetch(`${API_BASE}/api/users/me`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: { Accept: 'application/json, application/problem+json' }
+      });
+      
+      if (!idResponse.ok) return;
+      const idData = await idResponse.json();
+      const userId = idData[0].id;
+      
+      const statsResponse = await fetch(`${API_BASE}/api/users/${userId}/stats`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: { Accept: 'application/json, application/problem+json' }
+      });
+      
+      if (!statsResponse.ok) return;
+      const statsData = await statsResponse.json();
+      setDataUser(statsData.stats);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  
+  fetchUserData();
+}, []);
   return (
     <section className="container ">
       <div className="grid grid-flow-col auto-cols-max gap-4">

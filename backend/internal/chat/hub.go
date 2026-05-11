@@ -1,12 +1,12 @@
 package chat
 
 import (
-"context"
-"encoding/json"
-"log"
+	"context"
+	"encoding/json"
+	"log"
 
-"backend/ent"
-"backend/ent/conversation"
+	"backend/ent"
+	"backend/ent/conversation"
 )
 
 type Hub struct {
@@ -19,17 +19,26 @@ type Hub struct {
 
 	Unregister chan *Client
 
+	OnlineUsersReq chan chan []int
+
 	DB *ent.Client
 }
 
 func NewHub(db *ent.Client) *Hub {
 	return &Hub{
-		Broadcast:  make(chan []byte),
-		Register:   make(chan *Client),
-		Unregister: make(chan *Client),
-		Clients:    make(map[int]map[*Client]bool),
-		DB:         db,
+		Broadcast:      make(chan []byte),
+		Register:       make(chan *Client),
+		Unregister:     make(chan *Client),
+		OnlineUsersReq: make(chan chan []int),
+		Clients:        make(map[int]map[*Client]bool),
+		DB:             db,
 	}
+}
+
+func (h *Hub) GetOnlineUsers() []int {
+	req := make(chan []int)
+	h.OnlineUsersReq <- req
+	return <-req
 }
 
 func (h *Hub) Run() {
@@ -51,6 +60,13 @@ func (h *Hub) Run() {
 					}
 				}
 			}
+
+		case req := <-h.OnlineUsersReq:
+			users := make([]int, 0, len(h.Clients))
+			for userID := range h.Clients {
+				users = append(users, userID)
+			}
+			req <- users
 
 		case message := <-h.Broadcast:
 			var msg struct {

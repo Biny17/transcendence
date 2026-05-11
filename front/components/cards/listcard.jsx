@@ -19,6 +19,7 @@ export default function ListCard({OptionsOpen}) {
   const [img, setImg] = useState(null);
   const [UserName, setUserName] = useState("");
   const [playerImgs, setPlayerImgs] = useState({});
+  const [connectedPlayers, setConnectedPlayers] = useState([]);
 
   async function fetchData() {
     try {
@@ -78,15 +79,58 @@ function getCookie(name) {
 }
 
 useEffect(() => {
-  const token = getCookie('auth_token');
-  if (!token) return;
+  let intervalId;
 
-  const payload = token.split('.')[1];
-  const decoded = JSON.parse(atob(payload));
-  fetchUserById(decoded.sub);
-  fetchData();
-}, [OptionsOpen]);
+  const poll = () => {
+    const token = getCookie('auth_token');
+    if (!token) return;
 
+    const payload = token.split('.')[1];
+    const decoded = JSON.parse(atob(payload));
+    fetchUserById(decoded.sub);
+    fetchData();
+  };
+
+  poll();
+  intervalId = setInterval(poll, 5000);
+
+  return () => clearInterval(intervalId);
+}, []);
+
+useEffect(() => {
+  async function fetchConnectedPlayers() {
+    try {
+      const Response = await fetch(`${API_BASE}/api/chat/online`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: { Accept: 'application/json, application/problem+json' }
+      });
+      
+      if (!Response.ok) return;
+      const Data = await Response.json();
+      setConnectedPlayers(Data)
+      console.log(connectedPlayers)
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  fetchConnectedPlayers()
+
+//   async function fetchStats() {
+//   const wins = {};
+//   for (const player of players) {
+//       console.log(player)
+//       const data = await fetchUserData(player.id);
+//       wins[player.id] = data.games_played;
+//   }
+//   setPlayerStats(wins);
+// }
+
+//   if (players.length > 0) {
+//     fetchStats();
+//     console.log(playersStats)
+//   }
+}, [players]);
 players.sort((a, b) => b.win - a.win);
   return (
     <div className="w-full h-full flex flex-col items-center justify-center bg-[#0b1328]">
@@ -103,7 +147,7 @@ players.sort((a, b) => b.win - a.win);
             <div className="mr-4 flex items-center gap-2">
               <span className="font-bold w-6 text-center">{idx + 1}</span>
               <Badge
-                color="green"
+                color={connectedPlayers?.some(cp => cp.id === player.id) ? "green" : "red"}
                 // withBorder
                 overlap="circular"
                 placement="top-bottom"
@@ -117,7 +161,7 @@ players.sort((a, b) => b.win - a.win);
             </div>
             <div>
               <h6 className="font-medium text-white">{player.username}</h6>
-              <span className="font-bold w-6 text-center">Wins: {player.win}</span>
+              {/* <span className="font-bold w-6 text-center">Wins: {player.win}</span> */}
             </div>
           </div>
         ))}
