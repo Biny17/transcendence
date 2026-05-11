@@ -163,7 +163,7 @@ export default function Home() {
 						<div className="flex flex-row items-center gap-12">
 							<div className="baloo_button fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-6">
 								<div className="w-[200px] h-[200px] sm:w-[200px] sm:h-[200px] md:w-[300px] md:h-[300px] lg:w-[300px] lg:h-[300px] xl:w-[500px] xl:h-[500px]">
-									<EngineCanvas config={{ mode: "standalone" }} world={() => new CharacterVisualizerWorld(characterArgsRef.current)} onReady={(world) => setWorldApi(world)} style={{ width: "full", height: "500px" /*TODO FIX HEIGHT */ }} />
+									<EngineCanvas config={{ mode: "standalone" }} world={() => new CharacterVisualizerWorld(characterArgsRef.current)} onReady={(world) => setWorldApi(world)} style={{ width: "full", height: "500px"  }} />
 								</div>
 								<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: OptionsOpen ? 0 : 1, y: OptionsOpen ? 20 : 0 }} transition={{ duration: 0.4, ease: "easeOut" }}>
 									<div className="grid grid-flow-col auto-cols-max gap-4">
@@ -172,7 +172,7 @@ export default function Home() {
 											statement="Let's play"
 											onClick={() => {
 												setIsTransitioning(true);
-												router.push("/online");
+												window.location.href = "/online";
 											}}
 										/>
 										<Button statement="LeaderBoard" onClick={() => setLeaderBoardOpen(true)} />

@@ -1,6 +1,6 @@
 "use client";
 import type { GameEventMap } from "shared/events";
-import type { WSMessage, PlayerInputPayload, PlayerInteractPayload, PlayerChoosePayload, ConnectedPayload, JoinPayload, PhaseEventPayload, IncomingInterceptor, OutgoingInterceptor, InterceptorHandle } from "shared/protocol";
+import type { WSMessage, PlayerInputPayload, PlayerInteractPayload, PlayerChoosePayload, ConnectedPayload, JoinPayload, IncomingInterceptor, OutgoingInterceptor, InterceptorHandle } from "shared/protocol";
 import { SERVER_MSG, CLIENT_MSG, PHASE_EVENTS, createMessage, parseMessage } from "shared/protocol";
 import type { LoadWorldPlayer } from "shared/state";
 import type { World } from "@/ThreeWrapper/2.world/WorldClass";
@@ -83,6 +83,13 @@ export class ServerHandler {
 		};
 	}
 	connect(): void {
+		if (this.ws) {
+			if (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING) {
+				this.logger.warn("Closing existing WebSocket before reconnecting");
+				this.ws.close();
+			}
+			this.ws = null;
+		}
 		this.ws = new WebSocket(this.serverUrl);
 		if (!this.handlersRegistered) {
 			this.registerInternalHandlers();
@@ -256,8 +263,6 @@ export class ServerHandler {
 			this.pendingWorldId = null;
 			this.pendingPlayers = [];
 		});
-		this.on(SERVER_MSG.PHASE_EVENT, (p: PhaseEventPayload) => {
-			this.dispatch({ type: p.event, payload: p, ts: Date.now() });
-		});
+
 	}
 }

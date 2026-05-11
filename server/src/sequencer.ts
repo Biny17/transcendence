@@ -1,7 +1,7 @@
 import { createMessage, SERVER_MSG, PHASE_EVENTS } from "shared/index";
 import type { LobbySequenceConfig, SequencePhase, WaitPhase, GamePhase, LoopPhase, GameModeSelectEntry, GameModeCandidate, WinCondition, WinConditionQuorumWin, WinConditionTimerSurvival, CinematicPhase, EndPhase } from "shared/config";
 import type { Ranking } from "shared/state";
-import { broadcast, sockets, usernames, resetState } from "./state";
+import { broadcast, sendTo, sockets, usernames, resetState } from "./state";
 export type ActiveGame = {
 	modeId: string;
 	winCondition: WinCondition;
@@ -409,10 +409,10 @@ export class Sequencer {
 		this.applyElimination(losers, game.candidate.elimination.livesLost);
 		const winners = [...game.activePlayers].filter((id) => !losers.has(id));
 		for (const winnerId of winners) {
-			broadcast(JSON.stringify(createMessage(SERVER_MSG.PHASE_EVENT, { event: PHASE_EVENTS.WIN })));
+			sendTo(winnerId, JSON.stringify(createMessage(SERVER_MSG.PHASE_EVENT, { event: PHASE_EVENTS.WIN })));
 		}
 		for (const loserId of losers) {
-			broadcast(JSON.stringify(createMessage(SERVER_MSG.PHASE_EVENT, { event: PHASE_EVENTS.LOST })));
+			sendTo(loserId, JSON.stringify(createMessage(SERVER_MSG.PHASE_EVENT, { event: PHASE_EVENTS.LOST })));
 		}
 		const rankings: Ranking[] = [
 			...winners.map((id, i) => ({
@@ -460,7 +460,7 @@ export class Sequencer {
 			this.lives.set(id, next);
 			if (next <= 0) {
 				this.spectators.add(id);
-				broadcast(JSON.stringify(createMessage(SERVER_MSG.PHASE_EVENT, { event: PHASE_EVENTS.PLAYER_ELIMINATED })));
+				sendTo(id, JSON.stringify(createMessage(SERVER_MSG.PHASE_EVENT, { event: PHASE_EVENTS.PLAYER_ELIMINATED })));
 				console.log(`[Sequencer] Player ${id} eliminated → spectator (reflected in next LOAD_WORLD)`);
 			}
 		}

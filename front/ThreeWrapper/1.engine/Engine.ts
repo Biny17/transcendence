@@ -66,6 +66,7 @@ export class Engine {
 					if (!selfId) return;
 					const myEntry = p.data.rankings.find((r) => r.playerId === selfId);
 					if (!myEntry) return;
+					this.server?.disconnect();
 					if (myEntry.rank === 1) {
 						this.logger.for("Engine").info("Player won — redirecting to /wining");
 						window.location.href = "/wining";
@@ -216,7 +217,9 @@ export class Engine {
 	dispose(): void {
 		this.stop();
 		this.active?.dispose();
+		networkLogger.detach();
 		this.server?.dispose();
+		this.debug.dispose();
 		this.renderer.dispose();
 	}
 }
