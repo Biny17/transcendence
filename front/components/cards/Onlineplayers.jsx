@@ -30,26 +30,6 @@ import { PrimaryMessage } from "@/components/examples/primary-message";
 import { AdditionalMessage } from "@/components/examples/additional-message";
 import { DateItem } from "@/components/examples/date-item";
 import ListCard from "@/components/cards/listcard";
-// type Message = {
-//   id: string;
-//   role: "user" | "assistant";
-//   content: string;
-//   timestamp: Date;
-// };
-
-// const USER_SENDER = {
-//   id: "user",
-//   name: "Vous",
-//   username: "user",
-//   avatarUrl: "",
-// };
-
-// const ASSISTANT_SENDER = {
-//   id: "assistant",
-//   name: "Assistant IA",
-//   username: "assistant",
-//   avatarUrl: "https://cdn.jsdelivr.net/gh/alohe/avatars/png/upstream_20.png",
-// };
 
 export default function Online(OptionsOpen) {
 
