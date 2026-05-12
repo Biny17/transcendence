@@ -67,3 +67,4 @@ secret
 # ========================
 .DS_Store
 front/.DS_Store
+node_modules

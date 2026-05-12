@@ -24,6 +24,13 @@ function getAuthHeader() {
   return {};
 }
 
+function getCredentialHeader() {
+  if (process.env.NEXT_PUBLIC_CREDENTIAL) {
+    return { 'Authorization': `Basic ${process.env.NEXT_PUBLIC_CREDENTIAL}` };
+  }
+  return {};
+}
+
 export const api = {
   get: async <T>(path: string, options?: RequestInit): Promise<T | undefined> => {
     const response = await fetch(`${API_BASE}${path}`, {
@@ -87,7 +94,7 @@ export const api = {
       headers: {
         'Accept': 'application/problem+json',
         ...(body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
-        ...getAuthHeader(),
+        ...getCredentialHeader(),
         ...options?.headers,
       },
       body: body instanceof FormData ? body : (body ? JSON.stringify(body) : undefined),

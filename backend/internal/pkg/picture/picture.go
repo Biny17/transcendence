@@ -64,7 +64,7 @@ func SaveImg(content_type string, dir string, b []byte) (string, error) {
 }
 
 func DeleteImg(filename string, dir string) error {
-	if filename == "" {
+	if filename == "" || filename == "default.jpg" {
 		return nil
 	}
 	err := os.Remove(path.Join(dir, filename))
@@ -78,3 +78,4 @@ func GetImg(filename string, dir string) ([]byte, error) {
 	}
 	return io.ReadAll(file)
 }
+

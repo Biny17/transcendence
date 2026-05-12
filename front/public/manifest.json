@@ -1,0 +1,25 @@
+{
+    "name": "Fun Guy",
+    "short_name": "Fun Guy",
+    "description": "Fun Game",
+    "start_url": "/",
+    "display": "standalone",
+    "orientation": "landscape",
+    "background_color": "#ffffff",
+    "theme_color": "#000000",
+    "scope": "/",
+    "icons": [
+        {
+            "src": "champion.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "champion.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        }
+    ]
+}
