@@ -82,6 +82,7 @@ export default function Home() {
 		animation: "FG_Emote_Pattycake_A", //"FG_Idle_A",
 		background: false
 	});
+	
 	useEffect(() => {
 		const anim = lottie.loadAnimation({
 			container: bearRef.current,
@@ -93,6 +94,7 @@ export default function Home() {
 			anim.destroy();
 		};
 	}, []);
+
 	useEffect(() => {
 		const updateCanvasHeight = () => {
 			if (window.innerWidth < 768) {
