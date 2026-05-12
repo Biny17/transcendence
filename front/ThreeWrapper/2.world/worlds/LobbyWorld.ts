@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { World } from "../WorldClass";
 import { OnlineEnvironement } from "@/ThreeWrapper/3.environment/envs/OnlineEnvironement";
-import { GeometryFactory, LightFactory, OBJECT_TYPE } from "../tools";
+import { ComponentLoader, GeometryFactory, LightFactory, OBJECT_TYPE } from "../tools";
 import { ParkourEnvironement } from "@/ThreeWrapper/3.environment/envs/ParkourEnvironment";
 import { LobbyEnvironment } from "@/ThreeWrapper/3.environment/envs/LobbyEnvironment";
 interface FloatingPlatform {
@@ -22,7 +22,7 @@ export class LobbyWorld extends World {
 		this.applyEnvironment(new LobbyEnvironment());
 	}
 	protected override async onLoad(): Promise<void> {
-		const { sun, sky, bounce } = LightFactory.createCinematicLighting();
+		/*const { sun, sky, bounce } = LightFactory.createCinematicLighting();
 		this.ctx.objects.addSimple({ type: OBJECT_TYPE.MAP, asset: sun });
 		this.ctx.objects.addSimple({ type: OBJECT_TYPE.MAP, asset: sky });
 		this.ctx.objects.addSimple({ type: OBJECT_TYPE.MAP, asset: bounce });
@@ -56,7 +56,10 @@ export class LobbyWorld extends World {
 		});
 		this.ctx.objects.add({ type: OBJECT_TYPE.MAP, componentId: "spawn_point", position: { x: 0, y: 2, z: 0 } });
 		this.ctx.camera.position.set(0, 8, 20);
-		this.ctx.camera.lookAt(0, 3, 0);
+		this.ctx.camera.lookAt(0, 3, 0);*/
+		const components = new ComponentLoader();
+		const def = await this.ctx.map.loadFile("/game/maps/lobby1.yaml");
+		await this.ctx.map.spawn(def, components, this.ctx.gltf, this.ctx.objects);
 	}
 	protected override onStart(): void {
 		console.log("LobbyWorld started");

@@ -1,0 +1,11 @@
+Model Information:
+* title:	Colorful 100-Stage Obby
+* source:	https://sketchfab.com/3d-models/colorful-100-stage-obby-b8235d7bfa964119b07f574378a1e715
+* author:	ElGallo629 (https://sketchfab.com/ElGallo629)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Colorful 100-Stage Obby" (https://sketchfab.com/3d-models/colorful-100-stage-obby-b8235d7bfa964119b07f574378a1e715) by ElGallo629 (https://sketchfab.com/ElGallo629) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

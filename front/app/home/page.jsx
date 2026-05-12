@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { Background } from "./Background";
@@ -19,6 +19,7 @@ import Bear from "@/public/cute-bear.json";
 import { CharacterVisualizerWorld } from "@/ThreeWrapper/2.world/worlds/CharacterVisualizerWorld";
 import { EngineCanvas } from "../../ThreeWrapper/1.engine/EngineCanvas";
 import "./character_controls.css";
+import { api } from "@/lib/api";
 const ANIMATIONS = [
 	"FG_Loading_Falling_A",
 	"FG_Idle_A",
@@ -65,24 +66,26 @@ export default function Home() {
 	const [PrivacyOpen, setPrivacyOpen] = useState(false);
 	const [LeaderBoardOpen, setLeaderBoardOpen] = useState(false);
 	const [YourFriendsOpen, setYourFriendsOpen] = useState(false);
+	const [colorPanelOpen, setColorPanelOpen] = useState(false);
 	const [worldApi, setWorldApi] = useState(null);
 	const [currentAnim, setCurrentAnim] = useState("FG_Idle_A");
 	const [currentBodyColor, setCurrentBodyColor] = useState("#c000c0");
 	const [currentFaceColor, setCurrentFaceColor] = useState("#ffffff");
 	const [currentEyeColor, setCurrentEyeColor] = useState("#00ff00");
 	const [isChangingColor, setIsChangingColor] = useState(false);
+	const [colorsReady, setColorsReady] = useState(false);
 	const [canvasHeight, setCanvasHeight] = useState(500);
 	const bearRef = useRef(null);
 	const characterArgsRef = useRef({
-		bodyColor: "#c0ccc0",
+		bodyColor: "#c000c0",
 		faceColor: "#ffffff",
-		eyeColor: "#00fff0",
+		eyeColor: "#00ff00",
 		cameraPos: { x: 0, y: 1.1, z: 1.5 },
 		cameraTarget: { x: 0, y: 0.95, z: 0 },
-		animation: "FG_Emote_Pattycake_A", //"FG_Idle_A",
+		animation: "FG_Idle_A",
 		background: false
 	});
-	
+
 	useEffect(() => {
 		const anim = lottie.loadAnimation({
 			container: bearRef.current,
@@ -94,13 +97,32 @@ export default function Home() {
 			anim.destroy();
 		};
 	}, []);
-
 	useEffect(() => {
+		const userId = getUserIdFromCookie();
+		if (!userId) {
+			setColorsReady(true);
+			return;
+		}
+		api.get("/api/users/" + userId)
+			.then((data) => {
+				const user = Array.isArray(data) ? data[0] : data;
+				console.log("Loaded saved colors:", { skin_color: user.skin_color, face_color: user.face_color });
+				if (user.skin_color) {
+					characterArgsRef.current.bodyColor = user.skin_color;
+					setCurrentBodyColor(user.skin_color);
+				}
+				if (user.face_color) {
+					characterArgsRef.current.faceColor = user.face_color;
+					setCurrentFaceColor(user.face_color);
+				}
+			})
+			.catch(console.error)
+			.finally(() => setColorsReady(true));
 		const updateCanvasHeight = () => {
 			if (window.innerWidth < 768) {
-				setCanvasHeight(300); 
+				setCanvasHeight(300);
 			} else if (window.innerWidth < 1024) {
-				setCanvasHeight(400); 
+				setCanvasHeight(400);
 			} else {
 				setCanvasHeight(500);
 			}
@@ -109,6 +131,19 @@ export default function Home() {
 		window.addEventListener("resize", updateCanvasHeight);
 		return () => window.removeEventListener("resize", updateCanvasHeight);
 	}, []);
+	function getUserIdFromCookie() {
+		const auth_token = document.cookie
+			.split("; ")
+			.find((row) => row.startsWith("auth_token="))
+			?.split("=")[1];
+		if (!auth_token) return null;
+		try {
+			return JSON.parse(atob(auth_token.split(".")[1])).sub;
+		} catch {
+			return null;
+		}
+	}
+
 	const handleAnimationChange = (anim) => {
 		setCurrentAnim(anim);
 		worldApi?.playAnimation(anim);
@@ -117,14 +152,32 @@ export default function Home() {
 		setCurrentBodyColor(color);
 		if (!worldApi) return;
 		setIsChangingColor(true);
-		await worldApi.setBodyColor(color);
+		try {
+			await worldApi.setBodyColor(color);
+			const userId = getUserIdFromCookie();
+			if (userId) {
+				console.log("PATCH /api/users/" + userId, { skin_color: color });
+				await api.patch("/api/users/" + userId, { skin_color: color });
+			}
+		} catch (e) {
+			console.error("Failed to save body color:", e);
+		}
 		setIsChangingColor(false);
 	};
 	const handleFaceColorChange = async (color) => {
 		setCurrentFaceColor(color);
 		if (!worldApi) return;
 		setIsChangingColor(true);
-		await worldApi.setFaceColor(color);
+		try {
+			await worldApi.setFaceColor(color);
+			const userId = getUserIdFromCookie();
+			if (userId) {
+				console.log("PATCH /api/users/" + userId, { face_color: color });
+				await api.patch("/api/users/" + userId, { face_color: color });
+			}
+		} catch (e) {
+			console.error("Failed to save face color:", e);
+		}
 		setIsChangingColor(false);
 	};
 	const handleEyeColorChange = async (color) => {
@@ -134,73 +187,76 @@ export default function Home() {
 		await worldApi.setEyeColor(color);
 		setIsChangingColor(false);
 	};
+	const handleWorldReady = (world) => {
+		setWorldApi(world);
+	};
 	return (
 		<OrientationGuard>
 			<main className="relative min-h-screen">
 				<motion.div animate={{ opacity: isTransitioning ? 0 : 1 }} transition={{ duration: 0.3 }}>
 					<Navbar OptionsOpen={OptionsOpen} setOptionsOpen={setOptionsOpen} />
 
-					{/*<div className={`character-controls ${isChangingColor ? "loading" : ""}`}>
-					<div className="control-section">
-						<span className="control-label">Animation</span>
-						<div className="control-buttons">
-							{ANIMATIONS.map((anim) => (
-								<button key={anim} className={`control-btn ${currentAnim === anim ? "active" : ""}`} onClick={() => handleAnimationChange(anim)}>
-									{anim.replace("FG_", "")}
-								</button>
-							))}
-						</div>
-					</div>
-					<div className="control-section">
-						<span className="control-label">Body</span>
-						<div className="color-buttons">
-							{BODY_COLORS.map((color) => (
-								<button key={color} className={`color-btn ${currentBodyColor === color ? "active" : ""}`} style={{ backgroundColor: color }} onClick={() => handleBodyColorChange(color)} />
-							))}
-						</div>
-					</div>
-					<div className="control-section">
-						<span className="control-label">Face</span>
-						<div className="color-buttons">
-							{FACE_COLORS.map((color) => (
-								<button key={color} className={`color-btn ${currentFaceColor === color ? "active" : ""}`} style={{ backgroundColor: color }} onClick={() => handleFaceColorChange(color)} />
-							))}
-						</div>
-					</div>
-					<div className="control-section">
-						<span className="control-label">Eyes</span>
-						<div className="color-buttons">
-							{EYE_COLORS.map((color) => (
-								<button key={color} className={`color-btn ${currentEyeColor === color ? "active" : ""}`} style={{ backgroundColor: color }} onClick={() => handleEyeColorChange(color)} />
-							))}
-						</div>
-					</div>
-				</div>*/}
-					<div className="absolute inset-0 flex items-center justify-center gap-12">
-						<div className="flex flex-row items-center gap-12">
-							<div className="baloo_button fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-6">
-								
-									<EngineCanvas config={{ mode: "standalone" }} world={() => new CharacterVisualizerWorld(characterArgsRef.current)} onReady={(world) => setWorldApi(world)} style={{ width: "100%", height: `${canvasHeight}px` }} />
-								
-								<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: OptionsOpen ? 0 : 1, y: OptionsOpen ? 20 : 0 }} transition={{ duration: 0.4, ease: "easeOut" }}>
-									<div className="grid grid-flow-col auto-cols-max gap-4">
-										<Button statement="Your Friends" onClick={() => setYourFriendsOpen(true)} />
-										<Button
-											statement="Let's play"
-											onClick={() => {
-												setIsTransitioning(true);
-												window.location.href = "/online";
-											}}
-										/>
-										<Button statement="LeaderBoard" onClick={() => setLeaderBoardOpen(true)} />
+					{colorsReady ? (
+						<>
+							<button className="customize-toggle" onClick={() => setColorPanelOpen((prev) => !prev)}>
+								{colorPanelOpen ? "Close" : "Customize"}
+							</button>
+							<AnimatePresence>
+								{colorPanelOpen && (
+									<motion.div className={`character-controls ${isChangingColor ? "loading" : ""}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} transition={{ duration: 0.2 }}>
+										<button className="control-close" onClick={() => setColorPanelOpen(false)}>
+											✕
+										</button>
+										<div className="control-section">
+											<span className="control-label">Body</span>
+											<div className="color-buttons">
+												{BODY_COLORS.map((color) => (
+													<button key={color} className={`color-btn ${currentBodyColor === color ? "active" : ""}`} style={{ backgroundColor: color }} onClick={() => handleBodyColorChange(color)} />
+												))}
+											</div>
+										</div>
+										<div className="control-section">
+											<span className="control-label">Face</span>
+											<div className="color-buttons">
+												{FACE_COLORS.map((color) => (
+													<button key={color} className={`color-btn ${currentFaceColor === color ? "active" : ""}`} style={{ backgroundColor: color }} onClick={() => handleFaceColorChange(color)} />
+												))}
+											</div>
+										</div>
+									</motion.div>
+								)}
+							</AnimatePresence>
+							<div className="absolute inset-0 flex items-center justify-center gap-12">
+								<div className="flex flex-row items-center gap-12">
+									<div className="baloo_button fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-6">
+										<div className="w-[200px] h-[200px] sm:w-[200px] sm:h-[200px] md:w-[300px] md:h-[300px] lg:w-[300px] lg:h-[300px] xl:w-[500px] xl:h-[500px]">
+											<EngineCanvas config={{ mode: "standalone" }} world={() => new CharacterVisualizerWorld(characterArgsRef.current)} onReady={handleWorldReady} style={{ width: "full", height: `${canvasHeight}px` }} />
+										</div>
+										<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: OptionsOpen ? 0 : 1, y: OptionsOpen ? 20 : 0 }} transition={{ duration: 0.4, ease: "easeOut" }}>
+											<div className="grid grid-flow-col auto-cols-max gap-4">
+												<Button statement="Your Friends" onClick={() => setYourFriendsOpen(true)} />
+												<Button
+													statement="Let's play"
+													onClick={() => {
+														setIsTransitioning(true);
+														router.push("/online");
+													}}
+												/>
+												<Button statement="LeaderBoard" onClick={() => setLeaderBoardOpen(true)} />
+											</div>
+										</motion.div>
 									</div>
-								</motion.div>
+									<div className="chat xl:fixed xl:right-2 xl:top-1/2 xl:-translate-y-1/2">
+										<Online OptionsOpen={OptionsOpen} />
+									</div>
+								</div>
 							</div>
-							<div className="chat xl:fixed xl:right-2 xl:top-1/2 xl:-translate-y-1/2">
-								<Online OptionsOpen={OptionsOpen} />
-							</div>
+						</>
+					) : (
+						<div className="absolute inset-0 flex items-center justify-center">
+							<span className="text-white/50 text-sm">Loading...</span>
 						</div>
-					</div>
+					)}
 					<div className="chat">
 						<Chat OptionsOpen={OptionsOpen} />
 					</div>

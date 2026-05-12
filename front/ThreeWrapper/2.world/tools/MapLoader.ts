@@ -334,17 +334,18 @@ function buildMaterial(textures: TextureDef | undefined, color?: number, displac
 		return keys.map((k) => new THREE.MeshStandardMaterial({ color: color ?? 0xffffff, map: f[k] ? loader.load(f[k]!) : undefined }));
 	}
 	const pbr = textures as TexturePBR;
-	return new THREE.MeshStandardMaterial({
-		color: color ?? 0xffffff,
-		map: pbr.map ? loader.load(pbr.map) : undefined,
-		normalMap: pbr.normalMap ? loader.load(pbr.normalMap) : undefined,
-		roughnessMap: pbr.roughnessMap ? loader.load(pbr.roughnessMap) : undefined,
-		metalnessMap: pbr.metalnessMap ? loader.load(pbr.metalnessMap) : undefined,
-		emissiveMap: pbr.emissiveMap ? loader.load(pbr.emissiveMap) : undefined,
-		aoMap: pbr.aoMap ? loader.load(pbr.aoMap) : undefined,
-		displacementMap: pbr.displacementMap ? loader.load(pbr.displacementMap) : undefined,
-		displacementScale: displacementScale ?? 0.1
-	});
+	const matProps: Record<string, unknown> = {
+		color: color ?? 0xffffff
+	};
+	if (pbr.map) matProps.map = loader.load(pbr.map);
+	if (pbr.normalMap) matProps.normalMap = loader.load(pbr.normalMap);
+	if (pbr.roughnessMap) matProps.roughnessMap = loader.load(pbr.roughnessMap);
+	if (pbr.metalnessMap) matProps.metalnessMap = loader.load(pbr.metalnessMap);
+	if (pbr.emissiveMap) matProps.emissiveMap = loader.load(pbr.emissiveMap);
+	if (pbr.aoMap) matProps.aoMap = loader.load(pbr.aoMap);
+	if (pbr.displacementMap) matProps.displacementMap = loader.load(pbr.displacementMap);
+	if (displacementScale !== undefined) matProps.displacementScale = displacementScale;
+	return new THREE.MeshStandardMaterial(matProps as THREE.MeshStandardMaterialParameters);
 }
 function hitboxToShape(hitbox: HitboxDef): HitboxShape {
 	if (hitbox.shape === "sphere") {

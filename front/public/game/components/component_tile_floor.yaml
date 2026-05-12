@@ -1,0 +1,25 @@
+# $schema: ./component.schema.json
+# ---
+id: component_tile_floor
+meshes:
+  - primitive: box
+    size:
+      x: 25
+      'y': 0.2
+      z: 25
+    color: 16777215
+    textures:
+      map: /game/textures/BathroomTiles_albedo.png
+      normalMap: /game/textures/BathroomTiles_normal.png
+      roughnessMap: /game/textures/BathroomTiles_Roughness.png
+      aoMap: /game/textures/BathroomTiles_ao.png
+    displacementScale: 0.55
+physics:
+  bodyType: static
+  restitution: 0.1
+hitboxes:
+  - shape: box
+    size:
+      x: 25
+      'y': 0.20000000298023224
+      z: 25

@@ -1,7 +1,9 @@
 import { createMessage, SERVER_MSG, PHASE_EVENTS } from "shared/index";
 import type { LobbySequenceConfig, SequencePhase, WaitPhase, GamePhase, LoopPhase, GameModeSelectEntry, GameModeCandidate, WinCondition, WinConditionQuorumWin, WinConditionTimerSurvival, CinematicPhase, EndPhase } from "shared/config";
 import type { Ranking } from "shared/state";
-import { broadcast, sendTo, sockets, usernames, resetState } from "./state";
+import { broadcast, sendTo, sockets, usernames, cosmetics, resetState } from "./state";
+import type { LoadWorldPlayer } from "shared/protocol";
+import { postGameResult } from "./api-client";
 export type ActiveGame = {
 	modeId: string;
 	winCondition: WinCondition;
@@ -34,6 +36,7 @@ export class Sequencer {
 	private spectators = new Set<string>();
 	private currentGame: ActiveGame | null = null;
 	private roundsPlayed = 0;
+	private eliminationOrder: string[] = [];
 	private stack: Array<{ phases: SequencePhase[]; index: number; gamePhase?: GamePhase }> = [];
 	private waitCollected = new Set<string>();
 	private waitTimer: ReturnType<typeof setTimeout> | null = null;
@@ -50,6 +53,7 @@ export class Sequencer {
 		this.spectators.clear();
 		this.currentGame = null;
 		this.roundsPlayed = 0;
+		this.eliminationOrder = [];
 		this.stack = [];
 		this.waitCollected.clear();
 		if (this.waitTimer) clearTimeout(this.waitTimer);
@@ -369,12 +373,19 @@ export class Sequencer {
 			console.log(`[Sequencer] Game load timeout fired for ${candidate.worldId}`);
 			this.broadcastStartWorld(phase);
 		}, timeout * 1000);
-		const players = [...this.lives.entries()].map(([id, lives]) => ({
-			id,
-			name: usernames.get(id) ?? id,
-			lives,
-			isSpectator: lives <= 0
-		}));
+		const players: LoadWorldPlayer[] = [...this.lives.entries()].map(([id, lives]) => {
+			const c = cosmetics.get(id);
+			return {
+				id,
+				name: usernames.get(id) ?? id,
+				skin: c?.skinColor,
+				cosmetics: c ? [c.faceColor] : undefined,
+				skinColor: c?.skinColor,
+				faceColor: c?.faceColor,
+				lives,
+				isSpectator: lives <= 0
+			};
+		});
 		const loadPayload: Record<string, unknown> = { worldId: candidate.worldId, players };
 		if (candidate.cinematic) {
 			loadPayload.extra = { cinematic: true };
@@ -462,6 +473,11 @@ export class Sequencer {
 			)
 		);
 		const nextPhase = this.frame!.phases[this.frame!.index + 1];
+		if (this.isLobbyOver()) {
+			console.log(`[Sequencer] Lobby win condition met — advancing to end phase`);
+			this.advance();
+			return;
+		}
 		if (nextPhase && nextPhase.type === "wait") {
 			this.advance();
 			return;
@@ -481,6 +497,9 @@ export class Sequencer {
 			this.lives.set(id, next);
 			if (next <= 0) {
 				this.spectators.add(id);
+				if (!this.eliminationOrder.includes(id)) {
+					this.eliminationOrder.push(id);
+				}
 				sendTo(id, JSON.stringify(createMessage(SERVER_MSG.PHASE_EVENT, { event: PHASE_EVENTS.PLAYER_ELIMINATED })));
 				console.log(`[Sequencer] Player ${id} eliminated → spectator (reflected in next LOAD_WORLD)`);
 			}
@@ -506,6 +525,34 @@ export class Sequencer {
 		const active = this.getActivePlayers();
 		const winner = active[0] ?? null;
 		console.log(`[Sequencer] Lobby ended. Winner: ${winner}`);
+
+		const allPlayerIds = [...this.lives.keys()];
+
+		const rankMap = new Map<string, number>();
+		if (winner) rankMap.set(winner, 1);
+
+		const elimNonWinners = this.eliminationOrder.filter(id => id !== winner);
+		let rank = 2;
+		for (const id of elimNonWinners.reverse()) {
+			rankMap.set(id, rank++);
+		}
+		for (const id of allPlayerIds) {
+			if (!rankMap.has(id)) rankMap.set(id, rank++);
+		}
+
+		const players = allPlayerIds.map(id => ({
+			username: usernames.get(id) ?? id,
+			kill: 0,
+			death: 0,
+			rank: rankMap.get(id) ?? allPlayerIds.length,
+		}));
+
+		postGameResult({
+			lobbyType: this.config.id,
+			players,
+			totalPlayer: allPlayerIds.length,
+		});
+
 		broadcast(
 			JSON.stringify(
 				createMessage(SERVER_MSG.LOBBY_END, {

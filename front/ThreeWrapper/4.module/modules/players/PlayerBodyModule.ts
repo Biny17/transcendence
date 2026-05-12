@@ -2,6 +2,27 @@ import * as THREE from "three";
 import type { Module, WorldContext } from "@/ThreeWrapper/4.module";
 import { ModuleKey } from "@/ThreeWrapper/4.module";
 import { OBJECT_TYPE, GeometryFactory, PhysicsDescriptor } from "@/ThreeWrapper/2.world/tools";
+function makeNameSprite(name: string): THREE.Sprite {
+	const canvas = document.createElement("canvas");
+	canvas.width = 256;
+	canvas.height = 48;
+	const ctx = canvas.getContext("2d")!;
+	ctx.clearRect(0, 0, 256, 48);
+	ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+	ctx.font = "bold 18px monospace";
+	ctx.textAlign = "center";
+	ctx.textBaseline = "middle";
+	ctx.strokeStyle = "rgba(0, 0, 0, 0.5)";
+	ctx.lineWidth = 3;
+	ctx.strokeText(name, 128, 24);
+	ctx.fillText(name, 128, 24);
+	const tex = new THREE.CanvasTexture(canvas);
+	tex.needsUpdate = true;
+	const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false, depthWrite: false });
+	const sprite = new THREE.Sprite(mat);
+	sprite.scale.set(1.5, 0.28, 1);
+	return sprite;
+}
 function resetObjectTransform(obj: THREE.Object3D): void {
 	obj.position.set(0, 0, 0);
 	obj.rotation.set(0, 0, 0);
@@ -36,7 +57,7 @@ export class PlayerBodyModule implements Module {
 		this.physics = {
 			bodyType: options.physics?.bodyType ?? "dynamic",
 			mass: options.physics?.mass ?? 1,
-			gravityScale: options.physics?.gravityScale ?? 1,
+			gravityScale: options.physics?.gravityScale ?? 1.2,
 			friction: options.physics?.friction ?? 0.3,
 			restitution: options.physics?.restitution ?? 0.1,
 			lockRotations: options.physics?.lockRotations ?? true
@@ -47,7 +68,10 @@ export class PlayerBodyModule implements Module {
 		if (!ctx) return;
 		const physicsDesc: PhysicsDescriptor = this.physics!;
 		const spawnPos = this.spawnPosition;
-		const mesh = await ctx.gltf.load("player_character_" + playerId, this.modelUrl, this.textureUrl);
+		const playerObj = ctx.objects.getById(playerId, OBJECT_TYPE.PLAYER);
+		const sd = playerObj?.extraData.serverData;
+		const colorSwap = sd?.skinColor || sd?.faceColor ? { bodyColor: sd!.skinColor, faceColor: sd!.faceColor } : undefined;
+		const mesh = await ctx.gltf.load("player_character_" + playerId, this.modelUrl, this.textureUrl, colorSwap);
 		if (!this.ctx) return;
 		const c = this.ctx;
 		c.objects.addPiece(
@@ -63,6 +87,12 @@ export class PlayerBodyModule implements Module {
 		const obj = c.objects.getById(playerId, OBJECT_TYPE.PLAYER);
 		if (obj) obj.extraData.spawnpoint = { x: spawnPos.x, y: spawnPos.y + 1, z: spawnPos.z };
 		c.objects.setPosition(playerId, { x: spawnPos.x, y: spawnPos.y + 1, z: spawnPos.z });
+		if (obj && obj.pieces.length > 0) {
+			const playerName = sd?.name || playerId;
+			const nameSprite = makeNameSprite(playerName);
+			nameSprite.position.set(0, 2, 0);
+			obj.pieces[0].asset.add(nameSprite);
+		}
 		if (mesh.animations.length > 0) {
 			c.objects.playAnimation(playerId, mesh.animations[1].name);
 		}
@@ -70,14 +100,20 @@ export class PlayerBodyModule implements Module {
 	}
 	async init(ctx: WorldContext): Promise<void> {
 		this.ctx = ctx;
+		let isSpawnPointsInWorld = false;
+		let spawnPointIndex = 0;
 		const allMapObjs = ctx.objects.getByType(OBJECT_TYPE.MAP);
 		const spawnObjs = allMapObjs.filter((o) => o.componentId === "spawn_point");
-		if (spawnObjs.length > 0 && spawnObjs[0].pieces[0]?.asset) {
-			this.spawnPosition = spawnObjs[0].pieces[0].asset.position.clone();
-		}
+
+		if (spawnObjs.length > 0) isSpawnPointsInWorld = true;
 		const players = ctx.objects.getByType(OBJECT_TYPE.PLAYER);
 		console.log("[PlayerBody] Players found:", players.length);
 		for (const player of players) {
+			if (isSpawnPointsInWorld) {
+				this.spawnPosition = spawnObjs[spawnPointIndex].position;
+				spawnPointIndex++;
+				if (spawnPointIndex == spawnObjs.length) spawnPointIndex = 0;
+			}
 			if (player.extraData.serverData?.isSpectator) continue;
 			await this.createBody(player.id);
 		}

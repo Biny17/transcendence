@@ -16,6 +16,7 @@ server                                          # Bun WebSocket game server
 │   │   │   ├── PHASE_EVENT                     #   → route event to onWin/onLost/onPlayerEliminated/onResultsAck
 │   │   │   └── RESET                          #   → reset state + sequencer, restart lobby
 │   │   └── close                               # Remove from state; if lobby wait, also remove from sequencer
+│   ├── api-client.ts                           # POST game results to backend /api/game/add
 │   ├── state.ts                                # Shared mutable server state (single lobby)
 │   │   ├── sockets: Map<id, ClientWS>          # Connected WebSocket handles
 │   │   ├── positions: Map<id, pos+rot+action>  # Latest position per player (written by PLAYER_INPUT)

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import type { EngineConfig, KeyBinding } from "shared/config";
 import type { World } from "@/ThreeWrapper/2.world/WorldClass";
 import { Engine } from "./Engine";
@@ -13,6 +14,7 @@ type EngineCanvasProps = {
 	onReady?: (world: World) => void;
 };
 export function EngineCanvas({ config, world, keymap, style, className, onReady }: EngineCanvasProps) {
+	const router = useRouter();
 	const containerRef = useRef<HTMLDivElement>(null);
 	const configRef = useRef(config);
 	const worldRef = useRef(world);
@@ -24,7 +26,13 @@ export function EngineCanvas({ config, world, keymap, style, className, onReady 
 	useEffect(() => {
 		const container = containerRef.current;
 		if (!container) return;
-		const engine = new Engine(configRef.current, keymapRef.current);
+		const augmentedConfig: EngineConfig = {
+			...configRef.current,
+			onEndGame: (won: boolean) => {
+				router.push(won ? "/wining" : "/lose");
+			}
+		};
+		const engine = new Engine(augmentedConfig, keymapRef.current);
 		engine.server?.setWorldResolver(resolveWorld);
 		container.appendChild(engine.canvas);
 		const resize = () => engine.resize(container.clientWidth, container.clientHeight);

@@ -1,6 +1,6 @@
 "use client";
 import type { GameEventMap } from "shared/events";
-import type { WSMessage, PlayerInputPayload, PlayerInteractPayload, PlayerChoosePayload, ConnectedPayload, JoinPayload, PlayerJoinPayload, IncomingInterceptor, OutgoingInterceptor, InterceptorHandle } from "shared/protocol";
+import type { WSMessage, PlayerInputPayload, PlayerInteractPayload, PlayerChoosePayload, PlayerEmotePayload, ConnectedPayload, JoinPayload, PlayerJoinPayload, IncomingInterceptor, OutgoingInterceptor, InterceptorHandle } from "shared/protocol";
 import { SERVER_MSG, CLIENT_MSG, PHASE_EVENTS, createMessage, parseMessage } from "shared/protocol";
 import type { LoadWorldPlayer } from "shared/state";
 import type { World } from "@/ThreeWrapper/2.world/WorldClass";
@@ -21,6 +21,7 @@ export interface ServerSend {
 	resultsAck(): void;
 	playerInteract(payload: PlayerInteractPayload): void;
 	playerChoose(payload: PlayerChoosePayload): void;
+	playerEmote(payload: PlayerEmotePayload): void;
 	reset(): void;
 }
 export interface ServerHandlerScope {
@@ -66,6 +67,7 @@ export class ServerHandler {
 			resultsAck: () => this.sendRaw(CLIENT_MSG.PHASE_EVENT, { event: PHASE_EVENTS.RESULTS_ACK }),
 			playerInteract: (payload) => this.sendRaw(CLIENT_MSG.PLAYER_INTERACT, payload),
 			playerChoose: (payload) => this.sendRaw(CLIENT_MSG.PLAYER_CHOOSE, payload),
+			playerEmote: (payload) => this.sendRaw(CLIENT_MSG.PLAYER_EMOTE, payload),
 			reset: () => this.sendRaw(CLIENT_MSG.RESET, {})
 		};
 	}

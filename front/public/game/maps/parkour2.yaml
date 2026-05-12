@@ -1,0 +1,700 @@
+id: editor_export
+description: You should get crwon to win the race
+sky:
+  preset: day
+fog:
+  kind: exponential
+  color: 13924411
+  density: 0.006
+lights:
+  - type: ambient
+    color: 13924411
+    intensity: 0.3
+  - type: directional
+    color: 16737843
+    intensity: 2.5
+    position:
+      x: -15
+      'y': 2
+      z: 10
+  - type: hemisphere
+    skyColor: 16746564
+    groundColor: 4465152
+    intensity: 0.4
+clouds: true
+objects:
+  - id: utils_spawn_point_0
+    component: /game/components/utils_spawn_point.yaml
+    type: map
+    position:
+      x: -2
+      'y': 2.5
+      z: -4
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 1
+      'y': 1
+      z: 1
+  - id: utils_spawn_point_1
+    component: /game/components/utils_spawn_point.yaml
+    type: map
+    position:
+      x: 3
+      'y': 2.5
+      z: -4
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 1
+      'y': 1
+      z: 1
+  - id: utils_win_crown_0
+    component: /game/components/utils_win_crown.yaml
+    type: map
+    position:
+      x: -246
+      'y': 25
+      z: 633
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 1
+      'y': 1
+      z: 1
+  - id: map_parkour_0
+    component: /game/components/map_parkour.yaml
+    type: map
+    position:
+      x: 1
+      'y': 0
+      z: 1
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 20
+      'y': 20
+      z: 20
+  - id: element_fallguys_floor_2
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -80
+      'y': 1
+      z: -54
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_3
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -89
+      'y': 1
+      z: -54
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: utils_spawn_point_2
+    component: /game/components/utils_spawn_point.yaml
+    type: map
+    position:
+      x: 10
+      'y': 2.5
+      z: -4
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 1
+      'y': 1
+      z: 1
+  - id: element_fallguys_floor_4
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -97
+      'y': 1
+      z: -55
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: utils_spawn_point_3
+    component: /game/components/utils_spawn_point.yaml
+    type: map
+    position:
+      x: 10
+      'y': 2.5
+      z: 4
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 1
+      'y': 1
+      z: 1
+  - id: element_fallguys_floor_5
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -106
+      'y': 1
+      z: -55
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: utils_spawn_point_4
+    component: /game/components/utils_spawn_point.yaml
+    type: map
+    position:
+      x: 0
+      'y': 2.5
+      z: 2
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 1
+      'y': 1
+      z: 1
+  - id: element_fallguys_floor_6
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -116
+      'y': 1
+      z: -55
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: utils_spawn_point_5
+    component: /game/components/utils_spawn_point.yaml
+    type: map
+    position:
+      x: -4
+      'y': 2.5
+      z: 9
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 1
+      'y': 1
+      z: 1
+  - id: element_fallguys_floor_7
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -126
+      'y': 1
+      z: -55
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: utils_spawn_point_6
+    component: /game/components/utils_spawn_point.yaml
+    type: map
+    position:
+      x: 8
+      'y': 2.5
+      z: 10
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 1
+      'y': 1
+      z: 1
+  - id: element_fallguys_floor_8
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -138
+      'y': 1
+      z: -50
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: utils_spawn_point_7
+    component: /game/components/utils_spawn_point.yaml
+    type: map
+    position:
+      x: 3
+      'y': 2.5
+      z: 9
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 1
+      'y': 1
+      z: 1
+  - id: element_fallguys_floor_9
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -136
+      'y': 1
+      z: -55
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_10
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -146
+      'y': 1
+      z: -55
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_11
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -156
+      'y': 1
+      z: -55
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_12
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -166
+      'y': 1
+      z: -55
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_13
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -176
+      'y': 1
+      z: -55
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_14
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -186
+      'y': 1
+      z: -55
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_15
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -195
+      'y': 1
+      z: -55
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_16
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -205
+      'y': 1
+      z: -55
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_17
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -215
+      'y': 1
+      z: -56
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_18
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -226
+      'y': 1
+      z: -57
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_19
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -208
+      'y': 1
+      z: 522
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_20
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -217
+      'y': 1
+      z: 522
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_21
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -226
+      'y': 1
+      z: 522
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_22
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -236
+      'y': 1
+      z: 522
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_23
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -245
+      'y': 1
+      z: 522
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_24
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -254
+      'y': 1
+      z: 522
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_25
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -261
+      'y': 1
+      z: 522
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_26
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -270
+      'y': 1
+      z: 522
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_27
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -276
+      'y': 1
+      z: 522
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_28
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -283
+      'y': 1
+      z: 522
+    rotation:
+      x: 0
+      'y': -2.356194
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_29
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -283
+      'y': 1
+      z: 531
+    rotation:
+      x: 0
+      'y': 1.570796
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_30
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -283
+      'y': 1
+      z: 540
+    rotation:
+      x: 0
+      'y': 1.570796
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_31
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -283
+      'y': 1
+      z: 549
+    rotation:
+      x: 0
+      'y': 1.570796
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_32
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -283
+      'y': 1
+      z: 558
+    rotation:
+      x: 0
+      'y': 1.570796
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_33
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -283
+      'y': 1
+      z: 567
+    rotation:
+      x: 0
+      'y': 1.570796
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_34
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -283
+      'y': 1
+      z: 576
+    rotation:
+      x: 0
+      'y': 1.570796
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_35
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -284
+      'y': 1
+      z: 585
+    rotation:
+      x: 0
+      'y': 0.785398
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_36
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -293
+      'y': 1
+      z: 585
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003

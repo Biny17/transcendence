@@ -1,7 +1,8 @@
 import { Sequencer, type EventResult } from "./sequencer";
-import { addPlayer, removePlayer, positions, sockets, broadcast, broadcastExcept, sendTo, usernames, findPlayerByUsername, resetState } from "./state";
+import { addPlayer, removePlayer, positions, sockets, broadcast, broadcastExcept, sendTo, usernames, cosmetics, findPlayerByUsername, resetState } from "./state";
+import { fetchUserProfile } from "./api-client";
 import { createMessage, parseMessage, SERVER_MSG, CLIENT_MSG, PHASE_EVENTS } from "shared/protocol";
-import type { WSMessage, JoinPayload, PlayerInputPayload, PhaseEventPayload } from "shared/protocol";
+import type { WSMessage, JoinPayload, PlayerInputPayload, PhaseEventPayload, LoadWorldPlayer } from "shared/protocol";
 import type { LobbySequenceConfig } from "shared/config";
 import type { PlayerState } from "shared/state";
 import yaml from "js-yaml";
@@ -24,7 +25,7 @@ setInterval(() => {
 }, TICK_MS);
 const server = Bun.serve<{ playerId: string }>({
 	port: PORT,
-	fetch(req, server) {
+	fetch(req: Request, server: any) {
 		const url = new URL(req.url);
 		if (url.pathname === "/") {
 			const upgraded = server.upgrade(req, { data: { playerId: "" } });
@@ -34,14 +35,14 @@ const server = Bun.serve<{ playerId: string }>({
 		return new Response("Engine Server OK", { status: 200 });
 	},
 	websocket: {
-		open(ws) {
+		open(ws: any) {
 			const playerId = `player_${crypto.randomUUID().slice(0, 8)}`;
 			ws.data.playerId = playerId;
 			addPlayer(playerId, ws as any);
 			ws.send(JSON.stringify(createMessage(SERVER_MSG.CONNECTED, { playerId })));
 			console.log(`[Server] Socket opened: ${playerId} (awaiting JOIN)`);
 		},
-		message(ws, raw) {
+		async message(ws: any, raw: string) {
 			const msg = parseMessage(raw as string) as WSMessage;
 			const playerId = ws.data.playerId;
 			switch (msg.type) {
@@ -50,6 +51,8 @@ const server = Bun.serve<{ playerId: string }>({
 					if (!username) break;
 					console.log(`[Server] JOIN received | playerId=${playerId} username=${username}`);
 					console.log(`[Server] sequencer.isStarted()=${sequencer.isStarted()} sequencer.isInLobbyWait()=${sequencer.isInLobbyWait()}`);
+					const profile = await fetchUserProfile(username);
+					cosmetics.set(playerId, { skinColor: profile?.skin_color ?? "#FFDBAC", faceColor: profile?.face_color ?? "#222222" });
 					if (!sequencer.isStarted()) {
 						sequencer.start();
 					}
@@ -66,24 +69,31 @@ const server = Bun.serve<{ playerId: string }>({
 						broadcast(JSON.stringify(createMessage(SERVER_MSG.PLAYER_DISCONNECT, { playerId: existingId, reason: "duplicate_username" })));
 						sockets.get(existingId)?.close();
 					}
+					function playerData(id: string): LoadWorldPlayer {
+						const c = cosmetics.get(id);
+						return {
+							id,
+							name: usernames.get(id) ?? id,
+							skin: c?.skinColor,
+							cosmetics: c ? [c.faceColor] : undefined,
+							skinColor: c?.skinColor,
+							faceColor: c?.faceColor,
+							lives: sequencer.getLives(id),
+							isSpectator: sequencer.getLives(id) <= 0
+						};
+					}
 					if (sequencer.isInLobbyWait()) {
 						console.log(`[Server] BRANCH: lobby_wait - adding new player`);
 						usernames.set(playerId, username);
 						sequencer.addPlayer(playerId);
-						const newPlayerData = { id: playerId, name: username, lives: sequencer.getLives(playerId), isSpectator: sequencer.getLives(playerId) <= 0 };
-						broadcastExcept(playerId, JSON.stringify(createMessage(SERVER_MSG.PLAYER_JOIN, newPlayerData)));
+						broadcastExcept(playerId, JSON.stringify(createMessage(SERVER_MSG.PLAYER_JOIN, playerData(playerId))));
 						const loadWorldId = "Lobby";
 						sendTo(
 							playerId,
 							JSON.stringify(
 								createMessage(SERVER_MSG.LOAD_WORLD, {
 									worldId: loadWorldId,
-									players: [...sequencer.getActivePlayers()].map((id) => ({
-										id,
-										name: usernames.get(id) ?? id,
-										lives: sequencer.getLives(id),
-										isSpectator: sequencer.getLives(id) <= 0
-									}))
+									players: [...sequencer.getActivePlayers()].map(playerData)
 								})
 							)
 						);
@@ -100,18 +110,13 @@ const server = Bun.serve<{ playerId: string }>({
 						sequencer.addActivePlayer(playerId);
 						const activePlayers = sequencer.getActivePlayers();
 						const worldId = sequencer.isInGamePhase() && sequencer.getCurrentGameMode() ? sequencer.getCurrentGameMode() : sequencer.getLoadWorldId();
-						broadcastExcept(playerId, JSON.stringify(createMessage(SERVER_MSG.PLAYER_JOIN, { id: playerId, name: username })));
+						broadcastExcept(playerId, JSON.stringify(createMessage(SERVER_MSG.PLAYER_JOIN, playerData(playerId))));
 						sendTo(
 							playerId,
 							JSON.stringify(
 								createMessage(SERVER_MSG.LOAD_WORLD, {
 									worldId,
-									players: activePlayers.map((id) => ({
-										id,
-										name: usernames.get(id) ?? id,
-										lives: sequencer.getLives(id),
-										isSpectator: sequencer.getLives(id) <= 0
-									}))
+									players: activePlayers.map(playerData)
 								})
 							)
 						);
@@ -131,13 +136,8 @@ const server = Bun.serve<{ playerId: string }>({
 								createMessage(SERVER_MSG.LOAD_WORLD, {
 									worldId: sequencer.getLoadWorldId(),
 									players: [...sequencer.getActivePlayers()]
-										.map((id) => ({
-											id,
-											name: usernames.get(id) ?? id,
-											lives: sequencer.getLives(id),
-											isSpectator: false
-										}))
-										.concat([{ id: playerId, name: username, lives: 0, isSpectator: true }])
+										.map(playerData)
+										.concat([playerData(playerId)])
 								})
 							)
 						);
@@ -152,6 +152,11 @@ const server = Bun.serve<{ playerId: string }>({
 						rot: input.rot,
 						action: input.action
 					});
+					break;
+				}
+				case CLIENT_MSG.PLAYER_EMOTE: {
+					const emotePayload = msg.payload as { clipName: string };
+					broadcastExcept(playerId, JSON.stringify(createMessage(SERVER_MSG.PLAYER_EMOTE, { playerId, clipName: emotePayload.clipName })));
 					break;
 				}
 				case CLIENT_MSG.WORLD_LOADED: {
@@ -246,7 +251,7 @@ const server = Bun.serve<{ playerId: string }>({
 			console.log("[Server] All clients disconnected - sequence reset, waiting in lobby");
 		}
 	},
-	close(ws) {
+	close(ws: any) {
 		const playerId = ws.data.playerId;
 		const username = usernames.get(playerId);
 		console.log(`[Server] ${username ?? playerId} disconnected`);

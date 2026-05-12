@@ -26,12 +26,14 @@ export class EscapeUIModule implements Module {
 			const stored = localStorage.getItem("game_keybindings");
 			if (stored) {
 				const bindings = JSON.parse(stored);
-				for (const binding of bindings) {
-					if (binding.action === "player_ready") {
-						binding.action = "interact";
-					}
-					ctx.keymap.rebind(binding.action, binding.key);
+			for (const binding of bindings) {
+				if (binding.action === "player_ready") {
+					binding.action = "interact";
 				}
+				const oldKey = ctx.keymap.getKey(binding.action);
+				ctx.keymap.rebind(binding.action, binding.key);
+				this.input?.onKeymapRebind(binding.action, binding.key, oldKey);
+			}
 			}
 		} catch (error) {
 			console.error("[EscapeUIModule] Failed to load keybindings from localStorage:", error);
@@ -66,7 +68,7 @@ export class EscapeUIModule implements Module {
 			createElement(EscapeMenu, {
 				onResume: () => this.closeEscapeMenu(),
 				onKeybinds: () => this.openKeybindsMenu(),
-				onReset: () => this.ctx.server?.send.reset()
+				onReturnToLobby: () => { window.location.href = "/home" }
 			})
 		);
 		this.ui.enablePointer("escape-menu");

@@ -1,0 +1,55 @@
+id: editor_export
+sky:
+  preset: day
+fog:
+  kind: exponential
+  color: 13426943
+  density: 0.002
+lights:
+  - type: ambient
+    color: 16777215
+    intensity: 0.8
+  - type: directional
+    color: 16777215
+    intensity: 2
+    position:
+      x: 10
+      'y': 20
+      z: 5
+    castShadow: true
+  - type: hemisphere
+    skyColor: 8900331
+    groundColor: 5597999
+    intensity: 0.5
+clouds: true
+objects:
+  - id: utils_spawn_point_1
+    component: /game/components/utils_spawn_point.yaml
+    type: map
+    position:
+      x: 0
+      'y': 3
+      z: 0
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 1
+      'y': 1
+      z: 1
+  - id: component_tile_floor_0
+    component: /game/components/component_tile_floor.yaml
+    type: map
+    position:
+      x: -0.0
+      'y': 0
+      z: -0.0
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 1
+      'y': 1
+      z: 1

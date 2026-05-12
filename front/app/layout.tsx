@@ -68,6 +68,17 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.addEventListener('unhandledrejection', function(e) {
+                if (e.reason instanceof TypeError && e.reason.message && e.reason.message.includes('NetworkError')) {
+                  e.preventDefault();
+                }
+              });
+            `,
+          }}
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${baloo2.variable} antialiased`}

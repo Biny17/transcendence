@@ -64,6 +64,51 @@ objects:
       x: 1
       'y': 1
       z: 1
+  - id: utils_win_crown_1
+    component: /game/components/utils_win_crown.yaml
+    type: map
+    position:
+      x: -34
+      'y': 3
+      z: 0
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 1
+      'y': 1
+      z: 1
+  - id: element_fallguys_floor_0
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: 0
+      'y': 0
+      z: 0
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: element_fallguys_floor_2
+    component: /game/components/element_fallguys_floor.yaml
+    type: map
+    position:
+      x: -25
+      'y': 0
+      z: -0.0
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
   - id: utils_spawn_point_2
     component: /game/components/utils_spawn_point.yaml
     type: map
@@ -139,66 +184,6 @@ objects:
       x: 1
       'y': 1
       z: 1
-  - id: utils_win_crown_1
-    component: /game/components/utils_win_crown.yaml
-    type: map
-    position:
-      x: -34
-      'y': 3
-      z: 0
-    rotation:
-      x: 0
-      'y': 0
-      z: 0
-    scale:
-      x: 1
-      'y': 1
-      z: 1
-  - id: element_fallguys_floor_0
-    component: /game/components/element_fallguys_floor.yaml
-    type: map
-    position:
-      x: 0
-      'y': 0
-      z: 0
-    rotation:
-      x: 0
-      'y': 0
-      z: 0
-    scale:
-      x: 0.003
-      'y': 0.003
-      z: 0.003
-  - id: element_fallguys_floor_2
-    component: /game/components/element_fallguys_floor.yaml
-    type: map
-    position:
-      x: -25
-      'y': 0
-      z: -0.0
-    rotation:
-      x: 0
-      'y': 0
-      z: 0
-    scale:
-      x: 0.003
-      'y': 0.003
-      z: 0.003
-  - id: element_fallguys_floor_1
-    component: /game/components/element_fallguys_floor.yaml
-    type: map
-    position:
-      x: -13
-      'y': 0
-      z: 0
-    rotation:
-      x: 0
-      'y': 0
-      z: 0
-    scale:
-      x: 0.003
-      'y': 0.003
-      z: 0.003
   - id: utils_spawn_point_7
     component: /game/components/utils_spawn_point.yaml
     type: map

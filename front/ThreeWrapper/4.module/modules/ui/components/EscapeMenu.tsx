@@ -5,10 +5,10 @@ import { Button } from "../../../../../app/animations/Button.jsx"
 type EscapeMenuProps = {
   onResume: () => void
   onKeybinds: () => void
-  onReset?: () => void
+  onReturnToLobby?: () => void
 }
 
-export function EscapeMenu({ onResume, onKeybinds, onReset }: EscapeMenuProps) {
+export function EscapeMenu({ onResume, onKeybinds, onReturnToLobby }: EscapeMenuProps) {
   return (
     <div className="w-full h-full flex flex-col items-center justify-center bg-[#05113a]/50">
       <div className="relative m-2 h-[60vh] w-[94vw] max-h-96 max-w-sm overflow-hidden rounded-3xl border-20 border-double border-yellow bg-[#0b1328] shadow-xl">
@@ -24,9 +24,9 @@ export function EscapeMenu({ onResume, onKeybinds, onReset }: EscapeMenuProps) {
               <div className="w-full flex justify-center">
                 <Button statement="Keybinds" onClick={onKeybinds} isAdded={false} />
               </div>
-              {onReset && (
+              {onReturnToLobby && (
                 <div className="w-full flex justify-center">
-                  <Button statement="Reset" onClick={onReset} isAdded={false} />
+                  <Button statement="Return to lobby" onClick={onReturnToLobby} isAdded={false} />
                 </div>
               )}
             </div>

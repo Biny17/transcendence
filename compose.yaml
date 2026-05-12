@@ -31,6 +31,8 @@ services:
                 environment:
                         - NODE_ENV=development
                         - LOBBY_CONFIG=${LOBBY_CONFIG:-one_game}
+                        - API_URL=http://api:8080
+                        - CREDENTIAL=${CREDENTIAL}
                 depends_on:
                         api:
                                 condition: service_healthy

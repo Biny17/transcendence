@@ -4,6 +4,11 @@ export type PlayerPosition = { pos: Vec3; rot: Quat; action?: string };
 export const sockets = new Map<string, ClientWS>();
 export const positions = new Map<string, PlayerPosition>();
 export const usernames = new Map<string, string>();
+export type PlayerCosmetics = {
+  skinColor: string;
+  faceColor: string;
+};
+export const cosmetics = new Map<string, PlayerCosmetics>();
 export let hostId: string | null = null;
 export function setHost(id: string | null): void {
 	hostId = id;
@@ -12,6 +17,7 @@ export function resetState(): void {
 	sockets.clear();
 	positions.clear();
 	usernames.clear();
+	cosmetics.clear();
 	hostId = null;
 }
 export function addPlayer(id: string, ws: ClientWS): void {
@@ -22,6 +28,7 @@ export function addPlayer(id: string, ws: ClientWS): void {
 export function removePlayer(id: string): void {
 	sockets.delete(id);
 	positions.delete(id);
+	cosmetics.delete(id);
 	if (hostId === id) {
 		hostId = sockets.size > 0 ? sockets.keys().next().value! : null;
 	}

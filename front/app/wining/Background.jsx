@@ -1,5 +1,6 @@
 "use client";
 import "./Background.css";
+import { useEffect } from "react";
 import { motion } from "motion/react"
 import { BackgroundGradientAnimation } from "@/components/ui/background-gradient-animation";
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
@@ -10,8 +11,10 @@ export function Background() {
   
   const router = useRouter();
   
+  useEffect(() => { router.prefetch("/home") }, [router]);
+  
   function handleClick(){
-    router.push("/home")
+    setTimeout(() => router.push("/home"), 0);
   }
   return (
     <div className="h-screen w-screen relative bg-slate-950 flex flex-col items-center justify-center overflow-hidden">

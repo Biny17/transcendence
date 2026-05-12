@@ -16,14 +16,11 @@ import {
 
 // import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
 
-// interface KpiCardPropsType {
-//   title: string;
-//   percentage: string;
-//   price: string;
-//   color: string;
-//   icon: React.ReactNode;
-//   nb: React.ReactNode;
-// }
+type KpiCardPropsType = {
+  title: string;
+  icon: React.ReactNode;
+  nb: React.ReactNode;
+};
 
 
 function KpiCard({
@@ -145,26 +142,26 @@ const StyledCard = styled(Card)`
 
 
 function KpiCard1() {
-  const [DataUser, setDataUser] = useState("")
+  const [DataUser, setDataUser] = useState<{ games_played: number; wins: number; total_deaths: number } | null>(null)
   const data = [
   {
     title: "Game",
     nb: <button className="min-w-5 w-5 h-5 sm:min-w-9 sm:w-auto sm:h-auto rounded-full py-0.5 px-1.5 sm:py-2 sm:px-3.5 text-center text-[10px] sm:text-sm transition-all shadow-sm text-white bg-[#0b1328] focus:bg-[#0b1328] focus:text-white active:bg-[#0b1328] active:text-white ml-0 sm:ml-0 md:ml-0 lg:ml-2">
-      {DataUser.games_played}
+      {DataUser?.games_played ?? 0}
     </button>,
     icon: "🎮",
   },
   {
     title: "Win",
     nb: <button className="min-w-5 w-5 h-5 sm:min-w-9 sm:w-auto sm:h-auto rounded-full py-0.5 px-1.5 sm:py-2 sm:px-3.5 text-center text-[10px] sm:text-sm transition-all shadow-sm text-white bg-[#0b1328] focus:bg-[#0b1328] focus:text-white active:bg-[#0b1328] active:text-white ml-0 sm:ml-0 md:ml-0 lg:ml-2">
-      {DataUser.wins}
+      {DataUser?.wins ?? 0}
     </button>,
     icon: "🏆",
   },
   {
     title: "Death",
     nb: <button className="min-w-5 w-5 h-5 sm:min-w-9 sm:w-auto sm:h-auto rounded-full py-0.5 px-1.5 sm:py-2 sm:px-3.5 text-center text-[10px] sm:text-sm transition-all shadow-sm text-white bg-[#0b1328] focus:bg-[#0b1328] focus:text-white active:bg-[#0b1328] active:text-white ml-0 sm:ml-0 md:ml-0 lg:ml-2">
-      {DataUser.total_deaths}
+      {DataUser?.total_deaths ?? 0}
     </button>,
     icon: "💀",
   },

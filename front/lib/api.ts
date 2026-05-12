@@ -15,7 +15,7 @@ function formatApiError(parsed: Record<string, unknown>, fallback: string): stri
   return (parsed.detail as string) || (parsed.title as string) || fallback;
 }
 
-function getAuthHeader() {
+function getAuthHeader(): Record<string, string> {
   if (typeof document === 'undefined') return {};
   const match = document.cookie.match(/auth_token=([^;]+)/);
   if (match) {
@@ -24,25 +24,9 @@ function getAuthHeader() {
   return {};
 }
 
-function getCredentialHeader() {
-  if (process.env.NEXT_PUBLIC_CREDENTIAL) {
-    return { 'Authorization': `Basic ${process.env.NEXT_PUBLIC_CREDENTIAL}` };
-  }
-  return {};
-}
-
-export const api = {
-  get: async <T>(path: string, options?: RequestInit): Promise<T | undefined> => {
-    const response = await fetch(`${API_BASE}${path}`, {
-      ...options,
-      method: 'GET',
-      credentials: 'include',
-      headers: {
-        'Accept': 'application/json, application/problem+json',
-        ...getAuthHeader(),
-        ...options?.headers,
-      },
-    });
+async function fetchWithErrorHandling<T>(url: string, options: RequestInit): Promise<T | undefined> {
+  try {
+    const response = await fetch(url, options);
     if (!response.ok) {
       const text = await response.text();
       let message = `API Error: ${response.status}`;
@@ -56,10 +40,31 @@ export const api = {
     }
     const text = await response.text();
     return text ? JSON.parse(text) : (undefined as T);
+  } catch (error) {
+    if (error instanceof TypeError) {
+      console.warn(`[API] Network error on ${options.method ?? 'GET'} ${url}:`, error.message);
+      return undefined;
+    }
+    throw error;
+  }
+}
+
+export const api = {
+  get: async <T>(path: string, options?: RequestInit): Promise<T | undefined> => {
+    return fetchWithErrorHandling<T>(`${API_BASE}${path}`, {
+      ...options,
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Accept': 'application/json, application/problem+json',
+        ...getAuthHeader(),
+        ...(options?.headers ?? {}),
+      },
+    });
   },
 
   post: async <T>(path: string, body?: unknown, options?: RequestInit): Promise<T | undefined> => {
-    const response = await fetch(`${API_BASE}${path}`, {
+    return fetchWithErrorHandling<T>(`${API_BASE}${path}`, {
       ...options,
       method: 'POST',
       credentials: 'include',
@@ -67,55 +72,34 @@ export const api = {
         'Accept': 'application/problem+json',
         ...(body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
         ...getAuthHeader(),
-        ...options?.headers,
+        ...(options?.headers ?? {}),
       },
       body: body instanceof FormData ? body : (body ? JSON.stringify(body) : undefined),
     });
-    if (!response.ok) {
-      const text = await response.text();
-      let message = `API Error: ${response.status}`;
-      if (text) {
-        try {
-          const parsed = JSON.parse(text);
-          message = formatApiError(parsed, message);
-        } catch {}
-      }
-      throw new Error(message);
-    }
-    const text = await response.text();
-    return text ? JSON.parse(text) : (undefined as T);
   },
 
   delete: async <T>(path: string, body?: unknown, options?: RequestInit): Promise<T | undefined> => {
-    const response = await fetch(`${API_BASE}${path}`, {
+    return fetchWithErrorHandling<T>(`${API_BASE}${path}`, {
       ...options,
       method: 'DELETE',
       credentials: 'include',
       headers: {
         'Accept': 'application/problem+json',
         ...(body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
+<<<<<<< HEAD
+        ...getAuthHeader(),
+        ...(options?.headers ?? {}),
+=======
         ...getCredentialHeader(),
         ...options?.headers,
+>>>>>>> refs/remotes/origin/front
       },
       body: body instanceof FormData ? body : (body ? JSON.stringify(body) : undefined),
     });
-    if (!response.ok) {
-      const text = await response.text();
-      let message = `API Error: ${response.status}`;
-      if (text) {
-        try {
-          const parsed = JSON.parse(text);
-          message = formatApiError(parsed, message);
-        } catch {}
-      }
-      throw new Error(message);
-    }
-    const text = await response.text();
-    return text ? JSON.parse(text) : (undefined as T);
   },
 
   patch: async <T>(path: string, body?: unknown, options?: RequestInit): Promise<T | undefined> => {
-    const response = await fetch(`${API_BASE}${path}`, {
+    return fetchWithErrorHandling<T>(`${API_BASE}${path}`, {
       ...options,
       method: 'PATCH',
       credentials: 'include',
@@ -123,27 +107,14 @@ export const api = {
         'Accept': 'application/problem+json',
         ...(body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
         ...getAuthHeader(),
-        ...options?.headers,
+        ...(options?.headers ?? {}),
       },
       body: body instanceof FormData ? body : (body ? JSON.stringify(body) : undefined),
     });
-    if (!response.ok) {
-      const text = await response.text();
-      let message = `API Error: ${response.status}`;
-      if (text) {
-        try {
-          const parsed = JSON.parse(text);
-          message = formatApiError(parsed, message);
-        } catch {}
-      }
-      throw new Error(message);
-    }
-    const text = await response.text();
-    return text ? JSON.parse(text) : (undefined as T);
   },
 
   put: async <T>(path: string, body?: unknown, options?: RequestInit): Promise<T | undefined> => {
-    const response = await fetch(`${API_BASE}${path}`, {
+    return fetchWithErrorHandling<T>(`${API_BASE}${path}`, {
       ...options,
       method: 'PUT',
       credentials: 'include',
@@ -151,23 +122,10 @@ export const api = {
         'Accept': 'application/problem+json',
         ...(body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
         ...getAuthHeader(),
-        ...options?.headers,
+        ...(options?.headers ?? {}),
       },
       body: body instanceof FormData ? body : (body ? JSON.stringify(body) : undefined),
     });
-    if (!response.ok) {
-      const text = await response.text();
-      let message = `API Error: ${response.status}`;
-      if (text) {
-        try {
-          const parsed = JSON.parse(text);
-          message = formatApiError(parsed, message);
-        } catch {}
-      }
-      throw new Error(message);
-    }
-    const text = await response.text();
-    return text ? JSON.parse(text) : (undefined as T);
   },
 
   getChatWebSocketUrl: (path: string): string => {
