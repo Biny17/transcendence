@@ -1,6 +1,6 @@
 #!/bin/bash
 
-USERS=("demo1" "demo2" "demo3")
+USERS=("Lio" "Tommy" "Ella")
 
 for USER in "${USERS[@]}"; do
   curl --request POST \
