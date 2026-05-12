@@ -28,6 +28,14 @@ export class PlayerSyncModule implements Module {
 	}
 	private async handlePlayerJoin(payload: PlayerJoinPayload): Promise<void> {
 		if (!this.ctx) return;
+		if (payload.name) {
+			const existing = this.ctx.objects.get(payload.name, OBJECT_TYPE.PLAYER);
+			if (existing && existing.id !== payload.id) {
+				console.log("[PlayerSync] PLAYER_JOIN: duplicate name, removing old player:", existing.id);
+				this.ctx.objects.remove(existing.id);
+				this.playerMeshes.delete(existing.id);
+			}
+		}
 		if (this.ctx.objects.has(payload.id)) {
 			console.log("[PlayerSync] PLAYER_JOIN: object already exists, re-associating:", payload.id);
 			return;

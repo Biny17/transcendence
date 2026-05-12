@@ -12,6 +12,7 @@ export type WinCondition = WinConditionQuorumWin | WinConditionTimerSurvival
 export type GameModeCandidate = {
   worldId: string
   cinematic?: boolean
+  cinematicTimeout?: number
   loadTimeout?: number
   winCondition: WinCondition
   elimination: EliminationRule
@@ -64,5 +65,5 @@ export type LobbySequenceConfig = {
   id: string
   globalLives: number
   phases: SequencePhase[]
-  lobbyWinCondition: LobbyWinCondition
+  lobbyWinCondition?: LobbyWinCondition
 }

@@ -1,4 +1,5 @@
 id: editor_export
+description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi finibus sollicitudin neque, vitae dapibus magna ultrices eget. In metus lorem, egestas sit amet leo pharetra, vestibulum pellentesque tellus. Phasellus varius augue at eros sagittis, a scelerisque velit maximus. Curabitur nisl velit, vehicula vel neque ut, imperdiet volutpat elit. Mauris semper porttitor est quis ornare. Integer auctor est velit, sit amet consequat augue condimentum vel. Vestibulum tortor lorem, interdum eu eros cursus, porttitor molestie nisi. Aenean faucibus felis sed mauris tincidunt interdum. '
 sky:
   preset: day
 fog:
@@ -9,7 +10,28 @@ fog:
 lights:
   - type: ambient
     color: 16777215
+    intensity: 0.7
+  - type: directional
+    color: 16777215
+    intensity: 1.5
+    position:
+      x: 5
+      'y': 8
+      z: 5
+  - type: directional
+    color: 16777215
+    intensity: 0.8
+    position:
+      x: -5
+      'y': 4
+      z: -5
+  - type: directional
+    color: 8947967
     intensity: 0.5
+    position:
+      x: 0
+      'y': -1
+      z: 5
 clouds: true
 objects:
   - id: utils_spawn_point_0
@@ -117,28 +139,13 @@ objects:
       x: 1
       'y': 1
       z: 1
-  - id: utils_spawn_point_7
-    component: /game/components/utils_spawn_point.yaml
+  - id: utils_win_crown_1
+    component: /game/components/utils_win_crown.yaml
     type: map
     position:
-      x: -1
-      'y': 0.5
+      x: -34
+      'y': 3
       z: 0
-    rotation:
-      x: 0
-      'y': 0
-      z: 0
-    scale:
-      x: 1
-      'y': 1
-      z: 1
-  - id: utils_spawn_point_8
-    component: /game/components/utils_spawn_point.yaml
-    type: map
-    position:
-      x: -1
-      'y': 0.5
-      z: 2
     rotation:
       x: 0
       'y': 0
@@ -152,21 +159,6 @@ objects:
     type: map
     position:
       x: 0
-      'y': 0
-      z: 0
-    rotation:
-      x: 0
-      'y': 0
-      z: 0
-    scale:
-      x: 0.003
-      'y': 0.003
-      z: 0.003
-  - id: element_fallguys_floor_1
-    component: /game/components/element_fallguys_floor.yaml
-    type: map
-    position:
-      x: -13
       'y': 0
       z: 0
     rotation:
@@ -192,13 +184,43 @@ objects:
       x: 0.003
       'y': 0.003
       z: 0.003
-  - id: utils_win_crown_1
-    component: /game/components/utils_win_crown.yaml
+  - id: element_fallguys_floor_1
+    component: /game/components/element_fallguys_floor.yaml
     type: map
     position:
-      x: -34
-      'y': 3
+      x: -13
+      'y': 0
       z: 0
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 0.003
+      'y': 0.003
+      z: 0.003
+  - id: utils_spawn_point_7
+    component: /game/components/utils_spawn_point.yaml
+    type: map
+    position:
+      x: -1
+      'y': 0.5
+      z: 0
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 1
+      'y': 1
+      z: 1
+  - id: utils_spawn_point_8
+    component: /game/components/utils_spawn_point.yaml
+    type: map
+    position:
+      x: -1
+      'y': 0.5
+      z: 2
     rotation:
       x: 0
       'y': 0

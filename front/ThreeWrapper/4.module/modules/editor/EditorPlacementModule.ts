@@ -63,6 +63,9 @@ export class EditorPlacementModule implements Module {
   private _dragStartClient = { x: 0, y: 0 }
   private _dragBeforePos: { x: number; y: number; z: number } | null = null
   private _dragBeforeRot: { x: number; y: number; z: number } | null = null
+  private _description: string = ''
+  get description(): string { return this._description }
+  setDescription(text: string): void { this._description = text }
   onStateChange: (() => void) | null = null
   get canUndo(): boolean { return this.historyIndex >= 0 }
   get canRedo(): boolean { return this.historyIndex < this.history.length - 1 }
@@ -541,8 +544,9 @@ export class EditorPlacementModule implements Module {
   }
   async loadMap(yamlText: string): Promise<void> {
     if (!this.ctx) return
-    const parsed = yamlLoad(yamlText) as { objects?: MapObjectInstance[]; sky?: any; fog?: any; lights?: any[]; clouds?: boolean }
+    const parsed = yamlLoad(yamlText) as { objects?: MapObjectInstance[]; sky?: any; fog?: any; lights?: any[]; clouds?: boolean; description?: string }
     const objects = parsed?.objects ?? []
+    this._description = parsed.description ?? ''
     this._env = {
       sky: parsed.sky ?? null,
       fog: parsed.fog ?? null,
@@ -554,6 +558,7 @@ export class EditorPlacementModule implements Module {
       if (this.ctx.objects.getById(id)) this.ctx.objects.remove(id)
     }
     this.meshRegistry.clear()
+    this.placementCounter.clear()
     this.placed = []
     this.history = []
     this.historyIndex = -1
@@ -587,6 +592,15 @@ export class EditorPlacementModule implements Module {
         scale: obj.scale ?? { x: 1, y: 1, z: 1 },
       })
     }))
+    for (const p of this.placed) {
+      const m = p.id.match(/^(.*)_(\d+)$/)
+      if (m) {
+        const prefix = m[1]
+        const idx = parseInt(m[2], 10)
+        const cur = this.placementCounter.get(prefix) ?? 0
+        if (idx + 1 > cur) this.placementCounter.set(prefix, idx + 1)
+      }
+    }
     this.onStateChange?.()
   }
   private _hitTestSelected(e: PointerEvent): boolean {
@@ -757,7 +771,8 @@ export class EditorPlacementModule implements Module {
     this.onStateChange?.()
   }
   private _onKeyDown = (e: KeyboardEvent): void => {
-    if ((e.target as HTMLElement).tagName === 'INPUT') return
+    const tag = (e.target as HTMLElement).tagName
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return
     if (e.key === 'Delete' || e.key === 'Backspace') {
       e.preventDefault()
       this.deleteSelected()
@@ -826,6 +841,7 @@ export class EditorPlacementModule implements Module {
         scale:    { x: round(o.scale.x),    y: round(o.scale.y),    z: round(o.scale.z) },
       }))
     }
+    if (this._description) def.description = this._description
     if (this._env.sky) def.sky = this._env.sky
     if (this._env.fog) def.fog = this._env.fog
     if (this._env.lights.length > 0) def.lights = this._env.lights
@@ -834,6 +850,7 @@ export class EditorPlacementModule implements Module {
   exportYaml(): string {
     const round = (n: number, d = 6) => Math.round(n * 10 ** d) / 10 ** d
     const envFields: Record<string, unknown> = {}
+    if (this._description) envFields.description = this._description
     if (this._env.sky) envFields.sky = this._env.sky
     if (this._env.fog) envFields.fog = this._env.fog
     if (this._env.lights.length > 0) envFields.lights = this._env.lights

@@ -189,7 +189,7 @@ export default function Home() {
 											statement="Let's play"
 											onClick={() => {
 												setIsTransitioning(true);
-												router.push("/online");
+												window.location.href = "/online";
 											}}
 										/>
 										<Button statement="LeaderBoard" onClick={() => setLeaderBoardOpen(true)} />

@@ -59,6 +59,13 @@ const server = Bun.serve<{ playerId: string }>({
 					console.log(`[Server] knownBySequencer=${knownBySequencer}`);
 					const hasLives = existingId ? sequencer.getLives(existingId) > 0 : false;
 					console.log(`[Server] hasLives=${hasLives} existingId=${existingId} existingLives=${existingId ? sequencer.getLives(existingId) : "N/A"}`);
+					if (existingId && existingId !== playerId) {
+						console.log(`[Server] BRANCH: lobby_wait - duplicate username "${username}" — replacing old player ${existingId} with ${playerId}`);
+						usernames.delete(existingId);
+						sequencer.removePlayer(existingId);
+						broadcast(JSON.stringify(createMessage(SERVER_MSG.PLAYER_DISCONNECT, { playerId: existingId, reason: "duplicate_username" })));
+						sockets.get(existingId)?.close();
+					}
 					if (sequencer.isInLobbyWait()) {
 						console.log(`[Server] BRANCH: lobby_wait - adding new player`);
 						usernames.set(playerId, username);
@@ -110,6 +117,13 @@ const server = Bun.serve<{ playerId: string }>({
 						);
 						console.log(`[Server] ${username} re-synced as ${playerId}`);
 					} else {
+						if (existingId && existingId !== playerId) {
+							console.log(`[Server] BRANCH: spectator - duplicate username "${username}" — replacing old player ${existingId} with ${playerId}`);
+							usernames.delete(existingId);
+							sequencer.removePlayer(existingId);
+							broadcast(JSON.stringify(createMessage(SERVER_MSG.PLAYER_DISCONNECT, { playerId: existingId, reason: "duplicate_username" })));
+							sockets.get(existingId)?.close();
+						}
 						usernames.set(playerId, username);
 						sendTo(
 							playerId,

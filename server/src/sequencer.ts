@@ -1,7 +1,7 @@
 import { createMessage, SERVER_MSG, PHASE_EVENTS } from "shared/index";
 import type { LobbySequenceConfig, SequencePhase, WaitPhase, GamePhase, LoopPhase, GameModeSelectEntry, GameModeCandidate, WinCondition, WinConditionQuorumWin, WinConditionTimerSurvival, CinematicPhase, EndPhase } from "shared/config";
 import type { Ranking } from "shared/state";
-import { broadcast, sockets, usernames } from "./state";
+import { broadcast, sendTo, sockets, usernames, resetState } from "./state";
 export type ActiveGame = {
 	modeId: string;
 	winCondition: WinCondition;
@@ -222,7 +222,24 @@ export class Sequencer {
 				this.gameLoadTimer = null;
 			}
 			const phase = this.phase as GamePhase;
-			this.broadcastStartWorld(phase);
+			const game = this.currentGame!;
+			if (game.candidate.cinematic) {
+				broadcast(
+					JSON.stringify(
+						createMessage(SERVER_MSG.PHASE_CHANGED, {
+							phaseId: `cinematic_${game.candidate.worldId}`,
+							phaseType: "cinematic"
+						})
+					)
+				);
+				const timeout = game.candidate.cinematicTimeout ?? 10;
+				console.log(`[Sequencer] Cinematic phase started (${timeout}s) for ${game.candidate.worldId}`);
+				setTimeout(() => {
+					this.broadcastStartWorld(phase);
+				}, timeout * 1000);
+			} else {
+				this.broadcastStartWorld(phase);
+			}
 		}
 		return { processed: true, data: { loaded: this.gameLoaded.size, total, allLoaded } };
 	}
@@ -358,7 +375,11 @@ export class Sequencer {
 			lives,
 			isSpectator: lives <= 0
 		}));
-		broadcast(JSON.stringify(createMessage(SERVER_MSG.LOAD_WORLD, { worldId: candidate.worldId, players })));
+		const loadPayload: Record<string, unknown> = { worldId: candidate.worldId, players };
+		if (candidate.cinematic) {
+			loadPayload.extra = { cinematic: true };
+		}
+		broadcast(JSON.stringify(createMessage(SERVER_MSG.LOAD_WORLD, loadPayload)));
 		console.log(`[Sequencer] Broadcasting LOAD_WORLD for game: ${candidate.worldId} (loadTimeout=${timeout}s)`);
 	}
 	private broadcastStartWorld(phase: GamePhase): void {
@@ -392,18 +413,8 @@ export class Sequencer {
 			this.advance();
 		}, phase.timeout * 1000);
 	}
-	private startEndPhase(phase: EndPhase): void {
-		if (phase.timeout > 0) {
-			setTimeout(() => {
-				this.endLobby();
-			}, phase.timeout * 1000);
-		}
-		broadcast(JSON.stringify(createMessage(SERVER_MSG.LOAD_WORLD, {
-			worldId: phase.worldId,
-			players: [...this.lives.entries()].map(([id, lives]) => ({
-				id, name: usernames.get(id) ?? id, lives, isSpectator: lives <= 0
-			}))
-		})));
+	private startEndPhase(_phase: EndPhase): void {
+		this.endLobby();
 	}
 	private finishGamePhase(phase: GamePhase): void {
 		console.log(`[Sequencer] finishGamePhase called | gameMode: ${this.currentGame?.modeId} | winPlayers: ${[...(this.currentGame?.winPlayers ?? [])]} | lostPlayers: ${[...(this.currentGame?.lostPlayers ?? [])]}`);
@@ -419,10 +430,10 @@ export class Sequencer {
 		this.applyElimination(losers, game.candidate.elimination.livesLost);
 		const winners = [...game.activePlayers].filter((id) => !losers.has(id));
 		for (const winnerId of winners) {
-			broadcast(JSON.stringify(createMessage(SERVER_MSG.PHASE_EVENT, { event: PHASE_EVENTS.WIN })));
+			sendTo(winnerId, JSON.stringify(createMessage(SERVER_MSG.PHASE_EVENT, { event: PHASE_EVENTS.WIN })));
 		}
 		for (const loserId of losers) {
-			broadcast(JSON.stringify(createMessage(SERVER_MSG.PHASE_EVENT, { event: PHASE_EVENTS.LOST })));
+			sendTo(loserId, JSON.stringify(createMessage(SERVER_MSG.PHASE_EVENT, { event: PHASE_EVENTS.LOST })));
 		}
 		const rankings: Ranking[] = [
 			...winners.map((id, i) => ({
@@ -450,11 +461,6 @@ export class Sequencer {
 				})
 			)
 		);
-		if (this.isLobbyOver()) {
-			console.log(`[Sequencer] isLobbyOver check | activePlayers: ${this.getActivePlayers()} | lobbyWinCondition: ${this.config.lobbyWinCondition.type}`);
-			this.endLobby();
-			return;
-		}
 		const nextPhase = this.frame!.phases[this.frame!.index + 1];
 		if (nextPhase && nextPhase.type === "wait") {
 			this.advance();
@@ -475,7 +481,7 @@ export class Sequencer {
 			this.lives.set(id, next);
 			if (next <= 0) {
 				this.spectators.add(id);
-				broadcast(JSON.stringify(createMessage(SERVER_MSG.PHASE_EVENT, { event: PHASE_EVENTS.PLAYER_ELIMINATED })));
+				sendTo(id, JSON.stringify(createMessage(SERVER_MSG.PHASE_EVENT, { event: PHASE_EVENTS.PLAYER_ELIMINATED })));
 				console.log(`[Sequencer] Player ${id} eliminated → spectator (reflected in next LOAD_WORLD)`);
 			}
 		}
@@ -489,11 +495,6 @@ export class Sequencer {
 			if (wc.type === "fixed_rounds") return this.roundsPlayed >= wc.value;
 			if (wc.type === "best_cumulative_score") return active.length <= 1;
 		}
-		const wc = this.config.lobbyWinCondition;
-		const active = this.getActivePlayers();
-		if (wc.type === "last_with_lives") return active.length <= 1;
-		if (wc.type === "fixed_rounds") return this.roundsPlayed >= wc.value;
-		if (wc.type === "best_cumulative_score") return active.length <= 1;
 		return false;
 	}
 	private shouldContinueLoop(): boolean {
@@ -513,9 +514,7 @@ export class Sequencer {
 				})
 			)
 		);
-		for (const ws of sockets.values()) {
-			ws.close();
-		}
+		resetState();
 		this.reset();
 		this.start();
 		console.log("[Sequencer] Lobby reset, waiting for new connections");

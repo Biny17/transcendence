@@ -3,6 +3,7 @@ import { Baloo_2, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "./home/Background.css";
 import "./online/online-background.css";
+import "./rules/comicspeechbubbles.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

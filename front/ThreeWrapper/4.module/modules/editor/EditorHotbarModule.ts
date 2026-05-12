@@ -35,6 +35,7 @@ export class EditorHotbarModule implements Module {
 					env: placement.env,
 					gridSize: placement.gridSize,
 					showGrid: placement.showGrid,
+					description: placement.description,
 				});
 			};
 		}
@@ -74,7 +75,7 @@ export class EditorHotbarModule implements Module {
 				},
 				onMount: (updater) => {
 					this.updateUI = updater;
-					updater({ canUndo: false, canRedo: false, placedCount: 0, placementY: 0, selectedRotation: null, selectedAnimations: [], playingAnimationName: null, isPlayingAll: false, hasAnyAnimations: false, env: { sky: null, fog: null, lights: [], clouds: false }, gridSize: 1, showGrid: true });
+					updater({ canUndo: false, canRedo: false, placedCount: 0, placementY: 0, selectedRotation: null, selectedAnimations: [], playingAnimationName: null, isPlayingAll: false, hasAnyAnimations: false, env: { sky: null, fog: null, lights: [], clouds: false }, gridSize: 1, showGrid: true, description: placement?.description ?? '' });
 				},
 				onRotationChange: (rot) => placement?.setSelectedRotation(rot.x, rot.y, rot.z),
 				onGridSizeChange: (n) => placement?.setGridSize(n),
@@ -89,6 +90,7 @@ export class EditorHotbarModule implements Module {
 				testMode?.enterTestMode()
 			},
 			onRefreshComponents: fetchComponents,
+			onDescriptionChange: (text: string) => placement?.setDescription(text),
 			})
 		);
 	}

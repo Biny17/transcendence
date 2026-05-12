@@ -74,7 +74,7 @@ useEffect(() => {
   for (const player of players) {
       console.log(player)
       const data = await fetchUserData(player.id);
-      wins[player.id] = data.games_played;
+      wins[player.id] = data.wins;
   }
   setPlayerStats(wins);
 }

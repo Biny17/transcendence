@@ -151,7 +151,7 @@ var (
 				Symbol:     "results_users_results",
 				Columns:    []*schema.Column{ResultsColumns[6]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}

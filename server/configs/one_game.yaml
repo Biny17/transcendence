@@ -23,7 +23,7 @@ phases:
                     pick: fixed
                     candidates:
                             - worldId: Parkour
-                              cinematic: false
+                              cinematic: true
                               loadTimeout: 60
                               winCondition:
                                       type: quorum_win

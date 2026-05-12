@@ -1,6 +1,6 @@
 "use client";
 import type { GameEventMap } from "shared/events";
-import type { WSMessage, PlayerInputPayload, PlayerInteractPayload, PlayerChoosePayload, ConnectedPayload, JoinPayload, PhaseEventPayload, IncomingInterceptor, OutgoingInterceptor, InterceptorHandle } from "shared/protocol";
+import type { WSMessage, PlayerInputPayload, PlayerInteractPayload, PlayerChoosePayload, ConnectedPayload, JoinPayload, PlayerJoinPayload, IncomingInterceptor, OutgoingInterceptor, InterceptorHandle } from "shared/protocol";
 import { SERVER_MSG, CLIENT_MSG, PHASE_EVENTS, createMessage, parseMessage } from "shared/protocol";
 import type { LoadWorldPlayer } from "shared/state";
 import type { World } from "@/ThreeWrapper/2.world/WorldClass";
@@ -45,8 +45,10 @@ export class ServerHandler {
 	private readonly engine: Engine;
 	private pendingWorldId: string | null = null;
 	private pendingPlayers: LoadWorldPlayer[] = [];
-	private pendingWorld: World | null = null;
+	pendingWorld: World | null = null;
+	isCinematic: boolean = false;
 	private worldResolver: ((worldId: string) => Promise<World>) | null = null;
+	private pendingJoins: PlayerJoinPayload[] = [];
 	private incomingInterceptors: IncomingInterceptor[] = [];
 	private outgoingInterceptors: OutgoingInterceptor[] = [];
 	readonly send: ServerSend;
@@ -83,6 +85,13 @@ export class ServerHandler {
 		};
 	}
 	connect(): void {
+		if (this.ws) {
+			if (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING) {
+				this.logger.warn("Closing existing WebSocket before reconnecting");
+				this.ws.close();
+			}
+			this.ws = null;
+		}
 		this.ws = new WebSocket(this.serverUrl);
 		if (!this.handlersRegistered) {
 			this.registerInternalHandlers();
@@ -231,6 +240,18 @@ export class ServerHandler {
 			this.logger.debug("Loading world: " + p.worldId);
 			this.pendingWorldId = p.worldId;
 			this.pendingPlayers = p.players;
+			this.isCinematic = !!(p as any).extra?.cinematic;
+			this.pendingJoins = [];
+			const unsubInterceptor = this.addIncomingInterceptor((msg) => {
+				if (msg.type === SERVER_MSG.PLAYER_JOIN) {
+					const handlers = this.handlers.get(SERVER_MSG.PLAYER_JOIN);
+					if (!handlers || handlers.length === 0) {
+						this.pendingJoins.push(msg.payload as PlayerJoinPayload);
+						return false;
+					}
+				}
+				return true;
+			});
 			try {
 				if (!this.worldResolver) throw new Error("[ServerHandler] No world resolver set");
 				const loading = await this.worldResolver("Loading");
@@ -245,19 +266,34 @@ export class ServerHandler {
 				this.logger.error(`Failed to load world "${p.worldId}":`, { error: String(e) });
 				this.pendingWorldId = null;
 				this.pendingPlayers = [];
+			} finally {
+				unsubInterceptor();
+				if (this.pendingJoins.length > 0) {
+					const handlers = this.handlers.get(SERVER_MSG.PLAYER_JOIN);
+					if (handlers) {
+						for (const join of this.pendingJoins) {
+							for (const handler of handlers) handler(join);
+						}
+					}
+					this.pendingJoins = [];
+				}
 			}
 		});
 		this.on(SERVER_MSG.START_WORLD, async (p) => {
 			if (!this.pendingWorld) return;
 			this.logger.debug("Starting world: " + this.pendingWorldId);
+			if (this.isCinematic) {
+				this.engine.previewWorld = null;
+				this.engine.uiModule.hide("cinematic");
+				window.dispatchEvent(new CustomEvent("cinematic:hide"));
+				this.isCinematic = false;
+			}
 			this.engine.activate(this.pendingWorld);
 			this.engine.startActive(p.initialState);
 			this.pendingWorld = null;
 			this.pendingWorldId = null;
 			this.pendingPlayers = [];
 		});
-		this.on(SERVER_MSG.PHASE_EVENT, (p: PhaseEventPayload) => {
-			this.dispatch({ type: p.event, payload: p, ts: Date.now() });
-		});
+
 	}
 }

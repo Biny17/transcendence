@@ -47,7 +47,14 @@ export abstract class World {
 		if (!this.modules.has(ModuleKey.ui) && engineCtx.uiModule) {
 			this.modules.set(ModuleKey.ui, engineCtx.uiModule);
 		}
-		for (const player of players) {
+		const seenNames = new Map<string, LoadWorldPlayer>();
+		for (const p of players) {
+			const key = p.name ?? p.id;
+			if (!seenNames.has(key) || p.id === engineCtx.selfServerClient.id) {
+				seenNames.set(key, p);
+			}
+		}
+		for (const player of seenNames.values()) {
 			this._objects.add({
 				id: player.id,
 				type: OBJECT_TYPE.PLAYER,
@@ -94,6 +101,9 @@ export abstract class World {
 	}
 	getCamera(): THREE.PerspectiveCamera {
 		return this.ctx.camera;
+	}
+	get mapDefinition(): import("./tools/MapLoader").MapDef | null {
+		return this.ctx?.map?.definition ?? null;
 	}
 	addModule(module: Module): void {
 		this.modules.set(module.type, module);

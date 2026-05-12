@@ -42,6 +42,7 @@
       "properties": {
         "worldId": { "type": "string" },
         "cinematic": { "type": "boolean" },
+        "cinematicTimeout": { "type": "number", "minimum": 1 },
         "loadTimeout": { "type": "number", "minimum": 1 },
         "winCondition": { "$ref": "#/definitions/WinCondition" },
         "elimination": { "$ref": "#/definitions/EliminationRule" }
