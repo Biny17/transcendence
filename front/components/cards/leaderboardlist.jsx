@@ -105,18 +105,11 @@ players.sort((a, b) => b.win - a.win);
           >
             <div className="mr-4 flex items-center gap-2">
               <span className="font-bold w-6 text-center">{idx + 1}</span>
-              <Badge
-                color="green"
-                // withBorder
-                overlap="circular"
-                placement="top-bottom"
-              >
                 <img
                   alt={player.username}
                   src={playerImgs[player.id]}
                   className="relative inline-block h-12 w-12 rounded-full object-cover object-center"
                 />
-              </Badge>
             </div>
             <div>
               <h6 className="font-medium text-white">{player.username}</h6>

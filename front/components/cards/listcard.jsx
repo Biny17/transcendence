@@ -145,7 +145,7 @@ players.sort((a, b) => b.win - a.win);
             className="flex w-full items-center rounded-lg p-4 bg-[#0b1328] text-white shadow-md border border-slate-700 transition-all hover:bg-[#162447] focus:bg-[#162447] active:bg-[#162447]"
           >
             <div className="mr-4 flex items-center gap-2">
-              <span className="font-bold w-6 text-center">{idx + 1}</span>
+              {/* <span className="font-bold w-6 text-center">{idx + 1}</span> */}
               <Badge
                 color={connectedPlayers?.some(cp => cp.id === player.id) ? "green" : "red"}
                 // withBorder

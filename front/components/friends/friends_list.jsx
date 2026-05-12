@@ -3,16 +3,6 @@ import { Button } from "../../app/animations/Button.jsx";
 import { useState, useEffect} from "react";
 import { api, API_BASE } from "@/lib/api";
 export default function FriendList(props) {
-  // const players = [
-  //   {  name: "Tania Andrew", img: "https://docs.material-tailwind.com/img/face-1.jpg", win: 20 },
-  //   {  name: "Alexander", img: "https://docs.material-tailwind.com/img/face-2.jpg", win: 18 },
-  //   {  name: "Emma Willever", img: "https://docs.material-tailwind.com/img/face-3.jpg", win: 15 },
-  //   { name: "Candice", img: "https://docs.material-tailwind.com/img/face-1.jpg", win: 10 },
-  //   { name: "John Doe", img: "https://randomuser.me/api/portraits/men/1.jpg", win: 9 },
-  //   { name: "Jane Smith", img: "https://randomuser.me/api/portraits/women/2.jpg", win: 8 },
-  //   { name: "Lucas", img: "https://randomuser.me/api/portraits/men/3.jpg", win: 7 },
-  //   { name: "Sophie", img: "https://randomuser.me/api/portraits/women/4.jpg", win: 6 },
-  // ];
 
   const [players, setPlayers] = useState([])
   const [friends, setFriends] = useState([])
@@ -25,28 +15,20 @@ export default function FriendList(props) {
   const [Requested, setRequested] = useState(false)
   const [playerImgs, setPlayerImgs] = useState({});
 
-  // function handleAdd(idx) {
-
-  //   setAdded((prev) => {
-  //     const updated = [...prev];
-  //     updated[idx] = !updated[idx];
-  //     return updated;
-  //   });
-  // }
-
+  
     async function fetchUsers() {
   try {
     const data = await api.get('/api/users');
     setPlayers(data)
   } catch (error) {
-    // console.error(error);
+
   }
 }
   async function fetchSendRequest(id) {
   try {
     await api.post('/api/friends/request', { friend_id: id });
   } catch (error) {
-    // // console.error(error);
+
   }
 }
 
@@ -56,7 +38,7 @@ export default function FriendList(props) {
       setDeleted(!deleted)
       setAdded([])
   } catch (error) {
-    // console.error(error);
+
   }
 }
 
@@ -65,7 +47,7 @@ export default function FriendList(props) {
     const data = await api.get('/api/friends/friendlist');
     setPlayers(data)
   } catch (error) {
-    // console.error(error);
+
   }
 }
 
@@ -74,7 +56,7 @@ export default function FriendList(props) {
     const data = await api.get('/api/friends/pending');
     setRequests(data)
   } catch (error) {
-    // console.error(error);
+
   }
 }
 
@@ -84,7 +66,7 @@ export default function FriendList(props) {
     setSentRequests(data)
     console.log(data)
   } catch (error) {
-    // console.error(error);
+
   }
 }
 
@@ -93,7 +75,7 @@ export default function FriendList(props) {
     const data = await api.get('/api/friends/friendlist');
     setFriends(data)
   } catch (error) {
-    // console.error(error);
+
   }
 }
 
@@ -110,7 +92,7 @@ export default function FriendList(props) {
     return (imgUrl);
 
   } catch (error) {
-    // console.error(error);
+
     setImg(null);
   }
 }
@@ -120,7 +102,7 @@ export default function FriendList(props) {
     const data = await api.get('/api/users/' + id);
     setUserName(data[0].username);
   } catch (error) {
-    // console.error(error);
+
   }
 }
 
@@ -184,11 +166,10 @@ useEffect(() => {
   };
 
   refreshAddablePlayers();
-  const addablePlayersIntervalId = setInterval(refreshAddablePlayers, 5000);
+  const addablePlayersIntervalId = setInterval(refreshAddablePlayers, 3000);
 
   return () => clearInterval(addablePlayersIntervalId);
 }, [props.FriendsDisplay, deleted]);
-// players.sort((a, b) => b.win - a.win);
   return (
     <div className="w-full h-full flex flex-col items-center justify-center bg-[#0b1328]">
       <nav
@@ -209,7 +190,6 @@ useEffect(() => {
             className="flex w-full items-center rounded-lg p-4 bg-[#0b1328] text-white shadow-md border border-slate-700 transition-all hover:bg-[#162447] focus:bg-[#162447] active:bg-[#162447]"
           >
             <div className="mr-4 flex items-center gap-2">
-              <span className="font-bold w-6 text-center">{idx + 1}</span>
               <img
                 alt={player.username}
                 src={playerImgs[player.id]}
@@ -218,7 +198,6 @@ useEffect(() => {
             </div>
             <div className="flex-1">
               <h6 className="font-medium text-white">{player.username}</h6>
-              {/* <span className="font-bold w-6 text-center">Wins: {player.win}</span> */}
             </div>
             <div className="ml-auto">
               {!props.FriendsDisplay && (
