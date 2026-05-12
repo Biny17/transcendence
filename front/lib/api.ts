@@ -86,13 +86,9 @@ export const api = {
       headers: {
         'Accept': 'application/problem+json',
         ...(body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
-<<<<<<< HEAD
+
         ...getAuthHeader(),
         ...(options?.headers ?? {}),
-=======
-        ...getCredentialHeader(),
-        ...options?.headers,
->>>>>>> refs/remotes/origin/front
       },
       body: body instanceof FormData ? body : (body ? JSON.stringify(body) : undefined),
     });
