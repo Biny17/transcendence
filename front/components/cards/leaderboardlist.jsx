@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Badge } from "@material-tailwind/react";
 import { api, API_BASE } from "@/lib/api";
 
@@ -88,14 +88,20 @@ useEffect(() => {
   fetchData();
 }, []);
 
-players.sort((a, b) => b.win - a.win);
+const sortedPlayers = useMemo(
+    () =>
+      [...players]
+        .filter((player) => player.username !== UserName)
+        .sort((a, b) => (playersStats[b.id] || 0) - (playersStats[a.id] || 0)),
+    [players, playersStats, UserName],
+  );
+
   return (
     <div className="w-full h-full flex flex-col items-center justify-center bg-[#0b1328]">
       <nav
         className="flex flex-col gap-4 w-full h-full overflow-y-auto scrollbar-hide p-2 box-border pb-12 max-h-[calc(100%-8px)]"
       >
-        {players
-        .filter((player) => player.username !== UserName)
+        {sortedPlayers
         .map((player, idx) => (
           <div
             key={idx}

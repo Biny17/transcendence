@@ -134,7 +134,7 @@ MailVerif
 ### Prerequisites
 
 - Docker & Docker Compose
-- Node.js 20+ / Bun (for local development)
+- Bun
 - Go 1.26+ (for backend development)
 
 ### Environment Setup
