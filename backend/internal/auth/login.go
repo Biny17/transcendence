@@ -5,6 +5,7 @@ import (
 	"backend/ent/user"
 	"backend/internal/pkg"
 	"context"
+	"log"
 	"net/http"
 	"time"
 
@@ -45,6 +46,7 @@ func (auth *AuthService) VerifyPwd(
 		out VerifyPwdOut
 	)
 
+	log.Printf("email: %s | user: %s | password: %s\n", input.Body.Email, input.Body.Username, input.Body.Password)
 	if input.Body.Email != "" {
 		u, err = auth.Client.User.Query().Where(user.EmailEQ(input.Body.Email)).Only(ctx)
 	} else {
@@ -78,4 +80,3 @@ func (auth *AuthService) VerifyPwd(
 	}
 	return &out, nil
 }
-

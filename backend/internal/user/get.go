@@ -68,7 +68,7 @@ func (us *UserService) QueryUser(ctx context.Context, input *InfoIn) (*InfoOut, 
 		query predicate.User
 	)
 	out := &InfoOut{}
-	log.Printf("id: %d | email: %s | username: %s\n", input.UserId, input.Email, input.Username)
+	// log.Printf("id: %d | email: %s | username: %s\n", input.UserId, input.Email, input.Username)
 	if input.UserId != 0 {
 		query = user.IDEQ(input.UserId)
 	} else if input.Email != "" {
