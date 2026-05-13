@@ -17,7 +17,8 @@ export const CLIENT_MSG = {
 	PLAYER_INPUT: "PLAYER_INPUT",
 	PLAYER_INTERACT: "PLAYER_INTERACT",
 	PLAYER_CHOOSE: "PLAYER_CHOOSE",
-	RESET: "RESET"
+	RESET: "RESET",
+	PLAYER_EMOTE: "PLAYER_EMOTE"
 } as const;
 export type RoundEndPayload = {
 	rankings: Ranking[];
@@ -29,6 +30,8 @@ export type PhaseEventPayload = { event: string; data?: Record<string, unknown> 
 export type PlayerInputPayload = { pos: Vec3; rot: Quat; action?: string };
 export type PlayerInteractPayload = { action: string; targetId?: string; data?: Record<string, unknown> };
 export type PlayerChoosePayload = { choiceId: string; data?: Record<string, unknown> };
+export type PlayerEmotePayload = { clipName: string };
+export type PlayerEmoteEventPayload = { playerId: string; clipName: string };
 export const SERVER_MSG = {
 	CONNECTED: "CONNECTED",
 	LOAD_WORLD: "LOAD_WORLD",
@@ -42,7 +45,8 @@ export const SERVER_MSG = {
 	LOBBY_END: "LOBBY_END",
 	ERROR: "ERROR",
 	PHASE_CHANGED: "PHASE_CHANGED",
-	PHASE_EVENT: "PHASE_EVENT"
+	PHASE_EVENT: "PHASE_EVENT",
+	PLAYER_EMOTE: "PLAYER_EMOTE"
 } as const;
 export type ConnectedPayload = { playerId: string };
 export type LoadWorldPayload = { worldId: string; players: LoadWorldPlayer[]; extra?: Record<string, unknown> };

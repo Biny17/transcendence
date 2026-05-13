@@ -6,6 +6,7 @@ import type {
   PlayerJoinPayload,
   PlayerDisconnectPayload,
   PlayerInteractEventPayload,
+  PlayerEmoteEventPayload,
   LoadGamemodePayload,
   LoadUiPayload,
   WorldStatePayload,
@@ -20,6 +21,7 @@ export type GameEventMap = {
   [SERVER_MSG.START_WORLD]:       StartWorldPayload
   [SERVER_MSG.PLAYER_JOIN]:       PlayerJoinPayload
   [SERVER_MSG.PLAYER_DISCONNECT]: PlayerDisconnectPayload
+  [SERVER_MSG.PLAYER_EMOTE]:      PlayerEmoteEventPayload
   [SERVER_MSG.PLAYER_INTERACT]:   PlayerInteractEventPayload
   [SERVER_MSG.LOAD_GAMEMODE]:     LoadGamemodePayload
   [SERVER_MSG.LOAD_UI]:           LoadUiPayload

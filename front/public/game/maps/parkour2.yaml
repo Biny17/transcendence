@@ -1,5 +1,5 @@
 id: editor_export
-description: You should get crwon to win the race
+description: You should get crown to win the race
 sky:
   preset: day
 fog:
@@ -53,6 +53,96 @@ objects:
       x: 1
       'y': 1
       z: 1
+  - id: utils_spawn_point_2
+    component: /game/components/utils_spawn_point.yaml
+    type: map
+    position:
+      x: 10
+      'y': 2.5
+      z: -4
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 1
+      'y': 1
+      z: 1
+  - id: utils_spawn_point_3
+    component: /game/components/utils_spawn_point.yaml
+    type: map
+    position:
+      x: 10
+      'y': 2.5
+      z: 4
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 1
+      'y': 1
+      z: 1
+  - id: utils_spawn_point_4
+    component: /game/components/utils_spawn_point.yaml
+    type: map
+    position:
+      x: 0
+      'y': 2.5
+      z: 2
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 1
+      'y': 1
+      z: 1
+  - id: utils_spawn_point_5
+    component: /game/components/utils_spawn_point.yaml
+    type: map
+    position:
+      x: -4
+      'y': 2.5
+      z: 9
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 1
+      'y': 1
+      z: 1
+  - id: utils_spawn_point_6
+    component: /game/components/utils_spawn_point.yaml
+    type: map
+    position:
+      x: 8
+      'y': 2.5
+      z: 10
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 1
+      'y': 1
+      z: 1
+  - id: utils_spawn_point_7
+    component: /game/components/utils_spawn_point.yaml
+    type: map
+    position:
+      x: 3
+      'y': 2.5
+      z: 9
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 1
+      'y': 1
+      z: 1
   - id: utils_win_crown_0
     component: /game/components/utils_win_crown.yaml
     type: map
@@ -68,21 +158,6 @@ objects:
       x: 1
       'y': 1
       z: 1
-  - id: map_parkour_0
-    component: /game/components/map_parkour.yaml
-    type: map
-    position:
-      x: 1
-      'y': 0
-      z: 1
-    rotation:
-      x: 0
-      'y': 0
-      z: 0
-    scale:
-      x: 20
-      'y': 20
-      z: 20
   - id: element_fallguys_floor_2
     component: /game/components/element_fallguys_floor.yaml
     type: map
@@ -113,21 +188,6 @@ objects:
       x: 0.003
       'y': 0.003
       z: 0.003
-  - id: utils_spawn_point_2
-    component: /game/components/utils_spawn_point.yaml
-    type: map
-    position:
-      x: 10
-      'y': 2.5
-      z: -4
-    rotation:
-      x: 0
-      'y': 0
-      z: 0
-    scale:
-      x: 1
-      'y': 1
-      z: 1
   - id: element_fallguys_floor_4
     component: /game/components/element_fallguys_floor.yaml
     type: map
@@ -143,51 +203,6 @@ objects:
       x: 0.003
       'y': 0.003
       z: 0.003
-  - id: utils_spawn_point_3
-    component: /game/components/utils_spawn_point.yaml
-    type: map
-    position:
-      x: 10
-      'y': 2.5
-      z: 4
-    rotation:
-      x: 0
-      'y': 0
-      z: 0
-    scale:
-      x: 1
-      'y': 1
-      z: 1
-  - id: element_fallguys_floor_5
-    component: /game/components/element_fallguys_floor.yaml
-    type: map
-    position:
-      x: -106
-      'y': 1
-      z: -55
-    rotation:
-      x: 0
-      'y': 0
-      z: 0
-    scale:
-      x: 0.003
-      'y': 0.003
-      z: 0.003
-  - id: utils_spawn_point_4
-    component: /game/components/utils_spawn_point.yaml
-    type: map
-    position:
-      x: 0
-      'y': 2.5
-      z: 2
-    rotation:
-      x: 0
-      'y': 0
-      z: 0
-    scale:
-      x: 1
-      'y': 1
-      z: 1
   - id: element_fallguys_floor_6
     component: /game/components/element_fallguys_floor.yaml
     type: map
@@ -203,21 +218,21 @@ objects:
       x: 0.003
       'y': 0.003
       z: 0.003
-  - id: utils_spawn_point_5
-    component: /game/components/utils_spawn_point.yaml
+  - id: element_fallguys_floor_5
+    component: /game/components/element_fallguys_floor.yaml
     type: map
     position:
-      x: -4
-      'y': 2.5
-      z: 9
+      x: -106
+      'y': 1
+      z: -55
     rotation:
       x: 0
       'y': 0
       z: 0
     scale:
-      x: 1
-      'y': 1
-      z: 1
+      x: 0.003
+      'y': 0.003
+      z: 0.003
   - id: element_fallguys_floor_7
     component: /game/components/element_fallguys_floor.yaml
     type: map
@@ -233,21 +248,6 @@ objects:
       x: 0.003
       'y': 0.003
       z: 0.003
-  - id: utils_spawn_point_6
-    component: /game/components/utils_spawn_point.yaml
-    type: map
-    position:
-      x: 8
-      'y': 2.5
-      z: 10
-    rotation:
-      x: 0
-      'y': 0
-      z: 0
-    scale:
-      x: 1
-      'y': 1
-      z: 1
   - id: element_fallguys_floor_8
     component: /game/components/element_fallguys_floor.yaml
     type: map
@@ -263,21 +263,6 @@ objects:
       x: 0.003
       'y': 0.003
       z: 0.003
-  - id: utils_spawn_point_7
-    component: /game/components/utils_spawn_point.yaml
-    type: map
-    position:
-      x: 3
-      'y': 2.5
-      z: 9
-    rotation:
-      x: 0
-      'y': 0
-      z: 0
-    scale:
-      x: 1
-      'y': 1
-      z: 1
   - id: element_fallguys_floor_9
     component: /game/components/element_fallguys_floor.yaml
     type: map
@@ -293,6 +278,21 @@ objects:
       x: 0.003
       'y': 0.003
       z: 0.003
+  - id: map_parkour_0
+    component: /game/components/map_parkour.yaml
+    type: map
+    position:
+      x: 1
+      'y': 0
+      z: 1
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 20
+      'y': 20
+      z: 20
   - id: element_fallguys_floor_10
     component: /game/components/element_fallguys_floor.yaml
     type: map
@@ -698,3 +698,18 @@ objects:
       x: 0.003
       'y': 0.003
       z: 0.003
+  - id: utils_win_crown_1
+    component: /game/components/utils_win_crown.yaml
+    type: map
+    position:
+      x: -174
+      'y': 2
+      z: 80
+    rotation:
+      x: 0
+      'y': 0
+      z: 0
+    scale:
+      x: 1
+      'y': 1
+      z: 1

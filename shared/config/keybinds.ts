@@ -8,6 +8,12 @@ export enum KeyAction {
   CROUCH = 'crouch',
   PAUSE = 'pause',
   INTERACT = 'interact',
+  EMOTE_1 = 'emote_1',
+  EMOTE_2 = 'emote_2',
+  EMOTE_3 = 'emote_3',
+  EMOTE_4 = 'emote_4',
+  EMOTE_5 = 'emote_5',
+  EMOTE_6 = 'emote_6',
 }
 export const KeyActionLabels: Record<KeyAction, string> = {
   [KeyAction.MOVE_FORWARD]: 'Move Forward',
@@ -19,6 +25,12 @@ export const KeyActionLabels: Record<KeyAction, string> = {
   [KeyAction.CROUCH]: 'Crouch',
   [KeyAction.PAUSE]: 'Pause Menu',
   [KeyAction.INTERACT]: 'Interact',
+  [KeyAction.EMOTE_1]: 'Emote 1',
+  [KeyAction.EMOTE_2]: 'Emote 2',
+  [KeyAction.EMOTE_3]: 'Emote 3',
+  [KeyAction.EMOTE_4]: 'Emote 4',
+  [KeyAction.EMOTE_5]: 'Emote 5',
+  [KeyAction.EMOTE_6]: 'Emote 6',
 }
 export const DEFAULT_KEYBINDINGS: Record<KeyAction, string> = {
   [KeyAction.MOVE_FORWARD]: 'KeyW',
@@ -30,4 +42,10 @@ export const DEFAULT_KEYBINDINGS: Record<KeyAction, string> = {
   [KeyAction.CROUCH]: 'ControlLeft',
   [KeyAction.PAUSE]: 'Escape',
   [KeyAction.INTERACT]: 'KeyE',
+  [KeyAction.EMOTE_1]: 'Digit1',
+  [KeyAction.EMOTE_2]: 'Digit2',
+  [KeyAction.EMOTE_3]: 'Digit3',
+  [KeyAction.EMOTE_4]: 'Digit4',
+  [KeyAction.EMOTE_5]: 'Digit5',
+  [KeyAction.EMOTE_6]: 'Digit6',
 }
