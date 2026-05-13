@@ -30,7 +30,7 @@ export class ParkourEnvironement extends Environment {
 		this.addModule(new RespawnModule({ fallThresholdY: -10 }));
 		this.addModule(new AntiFallModule({ fallThresholdY: -20 }));
 		this.addModule(new CheckpointModule());
-		this.addModule(new PlayerControlModule({ moveSpeed: 10 }, ModuleKey.input));
+		this.addModule(new PlayerControlModule({ moveSpeed: 15 }, ModuleKey.input));
 		this.addModule(new PlayerSyncModule());
 		this.addModule(new LagCompensationModule());
 		this.addModule(new PlayerAnimationModule());
