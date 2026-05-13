@@ -142,12 +142,12 @@ export function Profile({ SetProfileOpen }) {
 						<Button statement="Go back" onClick={() => SetProfileOpen(false)} />
 						<Button statement="Upload un avatar" onClick={() => inputRef.current.click()} />
 						<input ref={inputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={(event) => uploadPicture(event)} />
-						<Button
+						{/* <Button
 							statement="Delete Profile"
 							onClick={() => {
 								handleDelete();
 							}}
-						/>
+						/> */}
 						<Button
 							statement="Save Changes"
 							onClick={() => {
