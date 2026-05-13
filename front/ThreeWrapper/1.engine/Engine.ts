@@ -78,25 +78,22 @@ export class Engine {
 					}
 					return;
 				}
-				if (p.phaseId === "game" && p.phaseType === "end" && p.data?.rankings) {
-					if (this._redirecting) return;
-					const selfId = this.selfServerClient.id;
-					if (!selfId) return;
-					const myEntry = p.data.rankings.find((r) => r.playerId === selfId);
-					this._redirecting = true;
-					this.stop();
-					this.active?.dispose();
-					this.active = null;
-					this.server?.dispose();
-					// Not in rankings → spectator (eliminated) → treat as loss
-					const won = myEntry !== undefined && myEntry.rank === 1;
-					this.logger.for("Engine").info(`Player ${won ? "won" : "lost"} — redirecting`);
-					if (this._onEndGame) {
-						this._onEndGame(won);
-					} else {
-						window.location.href = won ? "/wining" : "/lose";
-					}
+			if (p.phaseId === "game" && p.phaseType === "end" && p.data?.rankings) {
+				if (this._redirecting) return;
+				const selfId = this.selfServerClient.id;
+				if (!selfId) return;
+				const myEntry = p.data.rankings.find((r) => r.playerId === selfId);
+				this._redirecting = true;
+				this.dispose();
+				// Not in rankings → spectator (eliminated) → treat as loss
+				const won = myEntry !== undefined && myEntry.rank === 1;
+				this.logger.for("Engine").info(`Player ${won ? "won" : "lost"} — redirecting`);
+				if (this._onEndGame) {
+					this._onEndGame(won);
+				} else {
+					window.location.href = won ? "/wining" : "/lose";
 				}
+			}
 			});
 			networkLogger.attach(this.server);
 			(window as any).__networkMgr = this.server.networkManager;
