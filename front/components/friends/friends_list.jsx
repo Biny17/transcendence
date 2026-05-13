@@ -135,9 +135,6 @@ useEffect(() => {
   fetchData(decoded.sub);
 }, []);
 
-useEffect(() => {
-  fetchImg();
-}, []);
 
 useEffect(() => {
   setAdded([]);
