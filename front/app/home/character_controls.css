@@ -89,10 +89,9 @@
 	transform: scale(1.2);
 }
 .customize-toggle {
-	position: fixed;
-	bottom: 40px;
-	left: 50%;
-	transform: translateX(-50%);
+	position: static;
+	align-self: center;
+	margin-top: 12px;
 	z-index: 100;
 	padding: 8px 20px;
 	font-size: 13px;

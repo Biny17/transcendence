@@ -106,7 +106,6 @@ useEffect(() => {
 	  {
       const data = await api.get('/api/chat/conversation/' + convId + '/messages');
       setMessages(data)
-      console.log(data)
     } 
     catch (error) 
     {
@@ -160,7 +159,6 @@ useEffect(() => {
     });
   }
   initChat()
-//   fetchImg()
   }, []);
 
   const sendMessage = async () => {

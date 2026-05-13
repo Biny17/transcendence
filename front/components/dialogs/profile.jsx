@@ -19,7 +19,6 @@ export function Profile({ SetProfileOpen }) {
 		try {
 			console.log("fetch data", id);
 			const data = await api.get("/api/users/" + id);
-			console.log(data);
 			setProfile({ age: data[0].age, email: data[0].email, password: ".........", username: data[0].username });
 			setinitialProfile({ age: data[0].age, email: data[0].email, password: ".........", username: data[0].username });
 		} catch (error) {
@@ -143,12 +142,6 @@ export function Profile({ SetProfileOpen }) {
 						<Button statement="Go back" onClick={() => SetProfileOpen(false)} />
 						<Button statement="Upload un avatar" onClick={() => inputRef.current.click()} />
 						<input ref={inputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={(event) => uploadPicture(event)} />
-						<Button
-							statement="Delete Profile"
-							onClick={() => {
-								handleDelete();
-							}}
-						/>
 						<Button
 							statement="Save Changes"
 							onClick={() => {

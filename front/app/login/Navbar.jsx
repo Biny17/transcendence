@@ -24,7 +24,6 @@ const slothRef = useRef(null)
 async function fetchVerified() {
     try {
       const data = await api.get('/api/users/find?email=' + form.email);
-	  console.log(data)
       setProfile(data[0]);
 	  setIsSignIn(true);
     } 

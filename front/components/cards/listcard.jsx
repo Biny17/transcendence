@@ -34,7 +34,6 @@ useEffect(() => {
     const imgs = {};
     for (const player of players) {
       const url = await fetchImg(player.id);
-      console.log(url)
       imgs[player.id] = url;
     }
     setPlayerImgs(imgs);
@@ -109,27 +108,12 @@ useEffect(() => {
       if (!Response.ok) return;
       const Data = await Response.json();
       setConnectedPlayers(Data)
-      console.log(connectedPlayers)
     } catch (error) {
       console.error(error);
     }
   }
   fetchConnectedPlayers()
 
-//   async function fetchStats() {
-//   const wins = {};
-//   for (const player of players) {
-//       console.log(player)
-//       const data = await fetchUserData(player.id);
-//       wins[player.id] = data.games_played;
-//   }
-//   setPlayerStats(wins);
-// }
-
-//   if (players.length > 0) {
-//     fetchStats();
-//     console.log(playersStats)
-//   }
 }, [players]);
 players.sort((a, b) => b.win - a.win);
   return (
