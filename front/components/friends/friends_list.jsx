@@ -64,7 +64,6 @@ export default function FriendList(props) {
   try {
     const data = await api.get('/api/friends/sent');
     setSentRequests(data)
-    console.log(data)
   } catch (error) {
 
   }
@@ -118,7 +117,6 @@ useEffect(() => {
     const imgs = {};
     for (const player of players) {
       const url = await fetchImg(player.id);
-      console.log(url)
       imgs[player.id] = url;
     }
     setPlayerImgs(imgs);

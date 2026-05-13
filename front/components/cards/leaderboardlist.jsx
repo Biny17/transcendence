@@ -72,7 +72,6 @@ useEffect(() => {
   async function fetchStats() {
   const wins = {};
   for (const player of players) {
-      console.log(player)
       const data = await fetchUserData(player.id);
       wins[player.id] = data.wins;
   }
@@ -81,7 +80,6 @@ useEffect(() => {
 
   if (players.length > 0) {
     fetchStats();
-    console.log(playersStats)
   }
 }, [players]);
 

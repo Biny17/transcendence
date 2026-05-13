@@ -19,7 +19,6 @@ export function Profile({ SetProfileOpen }) {
 		try {
 			console.log("fetch data", id);
 			const data = await api.get("/api/users/" + id);
-			console.log(data);
 			setProfile({ age: data[0].age, email: data[0].email, password: ".........", username: data[0].username });
 			setinitialProfile({ age: data[0].age, email: data[0].email, password: ".........", username: data[0].username });
 		} catch (error) {
