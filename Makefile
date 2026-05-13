@@ -21,6 +21,14 @@ ps:
 build:
 	docker compose build
 
+nginx/certs/cert.key: secrets
+	openssl genrsa -out $@ 4096
+
+nginx/certs/cert.pem: secrets secrets/cert.key
+	openssl req -x509 -key secrets/cert.key -out $@ \
+		-sha256 -days 365 -nodes \
+		-subj "/CN=localhost"
+
 re: fclean up
 
 fclean: down clean
