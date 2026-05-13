@@ -257,10 +257,8 @@ const server = Bun.serve<{ playerId: string }>({
 		console.log(`[Server] ${username ?? playerId} disconnected`);
 		broadcast(JSON.stringify(createMessage(SERVER_MSG.PLAYER_DISCONNECT, { playerId, reason: "client_disconnect" })));
 		removePlayer(playerId);
-		if (sequencer.isInLobbyWait()) {
-			sequencer.removePlayer(playerId);
-			usernames.delete(playerId);
-		}
+		sequencer.removePlayer(playerId);
+		usernames.delete(playerId);
 		if (sockets.size === 0) {
 			tick = 0;
 			sequencer.reset();

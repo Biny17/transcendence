@@ -47,14 +47,12 @@ export abstract class World {
 		if (!this.modules.has(ModuleKey.ui) && engineCtx.uiModule) {
 			this.modules.set(ModuleKey.ui, engineCtx.uiModule);
 		}
-		const seenNames = new Map<string, LoadWorldPlayer>();
+		const playerByName = new Map<string, LoadWorldPlayer>();
 		for (const p of players) {
 			const key = p.name ?? p.id;
-			if (!seenNames.has(key) || p.id === engineCtx.selfServerClient.id) {
-				seenNames.set(key, p);
-			}
+			playerByName.set(key, p);
 		}
-		for (const player of seenNames.values()) {
+		for (const player of playerByName.values()) {
 			this._objects.add({
 				id: player.id,
 				type: OBJECT_TYPE.PLAYER,

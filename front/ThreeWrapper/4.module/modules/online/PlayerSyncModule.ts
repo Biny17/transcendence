@@ -31,6 +31,10 @@ export class PlayerSyncModule implements Module {
 		if (payload.name) {
 			const existing = this.ctx.objects.get(payload.name, OBJECT_TYPE.PLAYER);
 			if (existing && existing.id !== payload.id) {
+				if (existing.id === this.ctx.selfServerClient.id) {
+					console.log("[PlayerSync] PLAYER_JOIN: duplicate name for self player, ignoring");
+					return;
+				}
 				console.log("[PlayerSync] PLAYER_JOIN: duplicate name, removing old player:", existing.id);
 				this.ctx.objects.remove(existing.id);
 				this.playerMeshes.delete(existing.id);
