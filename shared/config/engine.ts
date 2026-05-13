@@ -17,6 +17,7 @@ export type EngineConfig = {
   serverUrl?: string
   canvas?: HTMLCanvasElement
   debug?: DebugConfig | boolean
+  onEndGame?: (won: boolean) => void
 }
 export type WorldConfig = {
   id: string
