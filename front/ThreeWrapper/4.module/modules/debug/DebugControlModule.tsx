@@ -37,6 +37,7 @@ function makeTextSprite(text: string, color = "#ffffff"): THREE.Sprite {
 export class DebugControlModule implements Module {
 	readonly type = "debug_control";
 	private toggleKey: string;
+	private noclipToggleKey: string;
 	private ctx: WorldContext | null = null;
 	private _panelRoot: Root | null = null;
 	private _panelContainer: HTMLDivElement | null = null;
@@ -68,8 +69,9 @@ export class DebugControlModule implements Module {
 	private _hoverDistance = 0;
 	private _mouseClient = { x: 0, y: 0 };
 	private _onMouseMove: ((e: MouseEvent) => void) | null = null;
-	constructor(toggleKey = "F1") {
+	constructor(toggleKey = "F1", noclipToggleKey = "F3") {
 		this.toggleKey = toggleKey;
+		this.noclipToggleKey = noclipToggleKey;
 	}
 	init(ctx: WorldContext): void {
 		this.ctx = ctx;
@@ -1085,6 +1087,13 @@ export class DebugControlModule implements Module {
 		if (e.key === this.toggleKey) {
 			e.preventDefault();
 			this._ctrl.toggle();
+		}
+		if (e.key === this.noclipToggleKey) {
+			e.preventDefault();
+			const eng = window.__engine;
+			if (eng) {
+				eng.noclip = !eng.noclip;
+			}
 		}
 	};
 	private _cleanup: (() => void) | null = null;

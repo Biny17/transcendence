@@ -271,7 +271,7 @@ export function DebugPanel() {
 	}, [isDraggingPanel, dragOffset]);
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
-			if (e.key === "F1") {
+			if (e.key === "F1" || e.key === "F3") {
 				e.preventDefault();
 			}
 		};

@@ -117,7 +117,7 @@ export function EngineControlsSection({ engine, setEngineVal }: EngineControlsSe
         <input type="checkbox" className="dbg-checkbox" checked={engine.godMode} onChange={e => setEngineVal('godMode', e.target.checked)} />
       </div>
       <div className="dbg-control">
-        <label className="dbg-control-label">Noclip</label>
+		<label className="dbg-control-label">Noclip (F3)</label>
         <input type="checkbox" className="dbg-checkbox" checked={engine.noclip} onChange={e => setEngineVal('noclip', e.target.checked)} />
       </div>
       <div className="dbg-control">
