@@ -40,4 +40,5 @@ const (
 	ListGames               = "/api/games"
 	ListResults             = "/api/results"
 	GetGamesResults         = "/api/games/results"
+	SeeConfirm              = "/bonus/confirm/page"
 )

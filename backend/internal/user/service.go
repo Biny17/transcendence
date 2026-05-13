@@ -126,4 +126,9 @@ func (us *UserService) Register(api huma.API, m *mid.Middleware) {
 		Path:    routes.GetPicture,
 		Summary: "PICTURE USERID",
 	}, us.GetPicture)
+	huma.Register(api, huma.Operation{
+		Method:  http.MethodGet,
+		Path:    routes.SeeConfirm,
+		Summary: "CONFIRM PAGE",
+	}, SeeConfirmPage)
 }
