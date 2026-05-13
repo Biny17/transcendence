@@ -12,9 +12,16 @@ Fun Guys is a **real-time multiplayer 3D parkour battle royale** web game. Playe
 
 Fun Guys delivers a competitive online gaming experience where up to dozens of players race through parkour maps. Each round eliminates bottom performers, and the lobby loops until a single winner remains. The project demonstrates a full-stack architecture with real-time WebSocket communication, advanced 3D graphics, a custom game engine abstraction, and a comprehensive user management system.
 
+_Homepage — the main landing page with character preview and navigation_
 ![Homepage](HOMEPAGE.png)
+
+_Lobby — player waiting area before the match starts_
 ![Lobby](LOBBY.png)
+
+_Loading screen — shown during world and asset loading_
 ![Loading Screen](LOADINGSCREEN.png)
+
+_Gameplay — in-game 3D parkour action_
 ![Gameplay](GAMEPLAY.png)
 
 ### Key Features
