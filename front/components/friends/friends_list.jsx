@@ -7,7 +7,7 @@ export default function FriendList(props) {
   const [players, setPlayers] = useState([])
   const [friends, setFriends] = useState([])
   const [Img, setImg] = useState([])
-  const [Added, setAdded] = useState([])
+  const [Added, setAdded] = useState({})
   const [UserName,setUserName] = useState("")
   const [Requests,setRequests] = useState([])
   const [SentRequests,setSentRequests] = useState([])
@@ -36,7 +36,7 @@ export default function FriendList(props) {
   try {
     await api.delete('/api/friends/delete', { friend_id: id });
       setDeleted(!deleted)
-      setAdded([])
+      // setAdded([])
   } catch (error) {
 
   }
@@ -137,7 +137,7 @@ useEffect(() => {
 
 
 useEffect(() => {
-  setAdded([]);
+  // setAdded([]);
 }, [deleted]);
 
 useEffect(() => {
@@ -178,7 +178,7 @@ useEffect(() => {
               && !Requests.some((request) => request.id === player.id)
           )
           .map((player, idx) => {
-            const isPending = SentRequests.some((req) => req.id === player.id);
+            const isPending = SentRequests.some((req) => req.id === player.id) || Added[player.id];
             return (
           <div
             key={player.id}
@@ -201,6 +201,7 @@ useEffect(() => {
                   isAdded={isPending}
                   onClick={() => {
                     if (!isPending) {
+                      setAdded((prev) => ({ ...prev, [player.id]: true }));
                       fetchSendRequest(player.id);
                     }
                   }}

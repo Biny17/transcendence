@@ -2,17 +2,18 @@ FROM oven/bun:slim AS builder
 
 WORKDIR /app
 
-COPY package.json bun.lock ./
+COPY front/package.json front/bun.lock ./
 RUN bun install --frozen-lockfile
 
-COPY . .
+COPY front/ .
+COPY shared ./shared
 RUN bun run build
 
 FROM oven/bun:slim
 
 WORKDIR /app
 
-COPY package.json bun.lock ./
+COPY front/package.json front/bun.lock ./
 RUN bun install --frozen-lockfile --production
 
 COPY --from=builder /app/.next ./.next

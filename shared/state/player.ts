@@ -18,6 +18,8 @@ export type LoadWorldPlayer = {
   name?: string
   skin?: string
   cosmetics?: string[]
+  skinColor?: string
+  faceColor?: string
   lives: number
-  isSpectator: boolean   
+  isSpectator: boolean
 }
