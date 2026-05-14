@@ -4,7 +4,7 @@ import { Button } from "@/app/animations/Button.jsx";
 import { useEffect, useState } from "react";
 import { useRef } from "react";
 import { useRouter } from "next/navigation";
-import { api, API_BASE } from "@/lib/api";
+import { api } from "@/lib/api";
 
 export function Profile({ SetProfileOpen }) {
 	const [Profile, setProfile] = useState({ age: "", email: "", password: ".........", username: "" });

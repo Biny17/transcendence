@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 
-export const Button = ({ statement, onClick, isAdded, size = "default", className = "", type = "button" }) => {
-  const buttonClassName = `button ${isAdded ? "is-added" : ""} ${size === "compact" ? "is-compact" : ""}`.trim();
+export const Button = ({ statement, onClick, isAdded, pressed = false, size = "default", className = "", type = "button" }) => {
+  const buttonClassName = `button ${isAdded ? "is-added" : ""} ${pressed ? "is-pressed" : ""} ${size === "compact" ? "is-compact" : ""}`.trim();
 
   return (
     <StyledWrapper className={className}>
@@ -61,6 +61,16 @@ const StyledWrapper = styled.div`
     &:hover {
       transform: translate(0, 0);
       box-shadow: 0 0 0 2px var(--stone-50);
+    }
+
+    &.is-pressed {
+      transform: translate(0, 0);
+      box-shadow: 0 0 0 2px var(--stone-50);
+      cursor: default;
+    }
+
+    &.is-pressed > div > span {
+      transform: translateY(2px);
     }
 
     &:active,

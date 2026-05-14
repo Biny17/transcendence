@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "../../app/animations/Button.jsx";
 import { useState, useEffect} from "react";
-import { api, API_BASE } from "@/lib/api";
+import { api } from "@/lib/api";
 export default function FriendList(props) {
 
   const [players, setPlayers] = useState([])
@@ -79,19 +79,11 @@ export default function FriendList(props) {
 }
 
   async function fetchImg(id) {
-  const url = `${API_BASE}/api/users/${id}/picture`;
-  const options = {method: 'GET', credentials: 'include'};
   try {
-    const response = await fetch(url, options);
-    if (!response.ok) {
-      return;
-    }
-    const blob = await response.blob();
-    const imgUrl = URL.createObjectURL(blob);
-    return (imgUrl);
-
+    const blob = await api.getBlob(`/api/users/${id}/picture`);
+    if (!blob) return;
+    return URL.createObjectURL(blob);
   } catch (error) {
-
     setImg(null);
   }
 }

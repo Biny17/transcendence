@@ -9,8 +9,8 @@ services:
                 ports:
                         - "3001:3000"
                 environment:
-                        - NEXT_PUBLIC_API_URL=${API_PROTOCOL}://${API_HOST}
                         - NEXT_PUBLIC_GAME_SERVER_URL=${GAME_SERVER_PROTOCOL}://${GAME_SERVER_HOST}
+                        - NEXT_PUBLIC_BASE_URL=${API_PROTOCOL}://${API_HOST}
                         - NODE_ENV=development
                         - FRONT_HOST=${FRONT_HOST}
                 depends_on:

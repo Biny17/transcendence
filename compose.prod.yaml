@@ -1,102 +1,105 @@
 services:
-  web:
-    build:
-      context: .
-      dockerfile: front/Dockerfile
-    ports:
-      - "3001:3000"
-    environment:
-      - NEXT_PUBLIC_API_URL=${API_PROTOCOL}://${API_HOST}
-      - NEXT_PUBLIC_GAME_SERVER_URL=${GAME_SERVER_PROTOCOL}://${GAME_SERVER_HOST}
-      - NODE_ENV=production
-      - FRONT_HOST=${FRONT_HOST}
-    depends_on:
-      game-server:
-        condition: service_healthy
-    restart: unless-stopped
+        web:
+                build:
+                        context: .
+                        dockerfile: front/Dockerfile
+                        args:
+                                - NEXT_PUBLIC_GAME_SERVER_URL=${GAME_SERVER_PROTOCOL}://${GAME_SERVER_HOST}
+                                - NEXT_PUBLIC_BASE_URL=${API_PROTOCOL}://${API_HOST}
+                ports:
+                        - "3001:3000"
+                environment:
+                        - NEXT_PUBLIC_GAME_SERVER_URL=${GAME_SERVER_PROTOCOL}://${GAME_SERVER_HOST}
+                        - NEXT_PUBLIC_BASE_URL=${API_PROTOCOL}://${API_HOST}
+                        - NODE_ENV=production
+                        - FRONT_HOST=${FRONT_HOST}
+                depends_on:
+                        game-server:
+                                condition: service_healthy
+                restart: unless-stopped
 
-  game-server:
-    build:
-      context: .
-      dockerfile: server/Dockerfile
-    ports:
-      - "3002:3000"
-    environment:
-      - NODE_ENV=production
-      - LOBBY_CONFIG=${LOBBY_CONFIG:-one_game}
-      - API_URL=http://api:8080
-      - CREDENTIAL=${CREDENTIAL}
-    depends_on:
-      api:
-        condition: service_healthy
-    command: bun run start
-    healthcheck:
-      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/3000"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    restart: unless-stopped
+        game-server:
+                build:
+                        context: .
+                        dockerfile: server/Dockerfile
+                ports:
+                        - "3002:3000"
+                environment:
+                        - NODE_ENV=production
+                        - LOBBY_CONFIG=${LOBBY_CONFIG:-one_game}
+                        - API_URL=http://api:8080
+                        - CREDENTIAL=${CREDENTIAL}
+                depends_on:
+                        api:
+                                condition: service_healthy
+                command: bun run start
+                healthcheck:
+                        test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/3000"]
+                        interval: 5s
+                        timeout: 5s
+                        retries: 5
+                        start_period: 10s
+                restart: unless-stopped
 
-  api:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    environment:
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DB_USER=${POSTGRES_USER}
-      - DB_PWD=${POSTGRES_PASSWORD}
-      - DB_NAME=${POSTGRES_DB}
-      - API_PORT=8080
-      - API_HOST=${API_HOST}
-      - JWT_SECRET=${JWT_SECRET}
-      - GMAIL_ADDRESS=${GMAIL_ADDRESS}
-      - GMAIL_PASSWORD=${GMAIL_PASSWORD}
-      - ORIGINS=http://${FRONT_HOST},https://${FRONT_HOST}
-      - KEYPATH=${KEYPATH}
-      - COOKIE_DOMAIN=${COOKIE_DOMAIN}
-      - FORTYTWO_CLIENT_ID=${FORTYTWO_CLIENT_ID}
-      - FORTYTWO_CLIENT_SECRET=${FORTYTWO_CLIENT_SECRET}
-      - FORTYTWO_REDIRECT_URI=${FORTYTWO_REDIRECT_URI}
-      - CREDENTIAL=${CREDENTIAL}
-      - FRONTEND_URL=http://${FRONT_HOST}
-      - NODE_ENV=production
-      - GIN_MODE=release
-    volumes:
-      - ./secret:/app/secret
-      - img:/app/img
-    depends_on:
-      db:
-        condition: service_healthy
-    command: sh -c "go build -o /app/api ./cmd/api && /app/api"
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/docs"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-      start_period: 15s
-    restart: unless-stopped
+        api:
+                build:
+                        context: ./backend
+                        dockerfile: Dockerfile
+                ports:
+                        - "8080:8080"
+                environment:
+                        - DB_HOST=${DB_HOST}
+                        - DB_PORT=${DB_PORT}
+                        - DB_USER=${POSTGRES_USER}
+                        - DB_PWD=${POSTGRES_PASSWORD}
+                        - DB_NAME=${POSTGRES_DB}
+                        - API_PORT=8080
+                        - API_HOST=${API_HOST}
+                        - JWT_SECRET=${JWT_SECRET}
+                        - GMAIL_ADDRESS=${GMAIL_ADDRESS}
+                        - GMAIL_PASSWORD=${GMAIL_PASSWORD}
+                        - ORIGINS=http://${FRONT_HOST},https://${FRONT_HOST}
+                        - KEYPATH=${KEYPATH}
+                        - COOKIE_DOMAIN=${COOKIE_DOMAIN}
+                        - FORTYTWO_CLIENT_ID=${FORTYTWO_CLIENT_ID}
+                        - FORTYTWO_CLIENT_SECRET=${FORTYTWO_CLIENT_SECRET}
+                        - FORTYTWO_REDIRECT_URI=${FORTYTWO_REDIRECT_URI}
+                        - CREDENTIAL=${CREDENTIAL}
+                        - FRONTEND_URL=http://${FRONT_HOST}
+                        - NODE_ENV=production
+                        - GIN_MODE=release
+                volumes:
+                        - ./secret:/app/secret
+                        - img:/app/img
+                depends_on:
+                        db:
+                                condition: service_healthy
+                command: sh -c "go build -o /app/api ./cmd/api && /app/api"
+                healthcheck:
+                        test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/docs"]
+                        interval: 5s
+                        timeout: 5s
+                        retries: 5
+                        start_period: 15s
+                restart: unless-stopped
 
-  db:
-    image: postgres:17-alpine
-    ports:
-      - "${DB_PORT}:5432"
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
+        db:
+                image: postgres:17-alpine
+                ports:
+                        - "${DB_PORT}:5432"
+                environment:
+                        - POSTGRES_USER=${POSTGRES_USER}
+                        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+                        - POSTGRES_DB=${POSTGRES_DB}
+                volumes:
+                        - postgres_data:/var/lib/postgresql/data
+                healthcheck:
+                        test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+                        interval: 5s
+                        timeout: 5s
+                        retries: 5
+                restart: unless-stopped
 
 volumes:
-  postgres_data:
-  img:
+        postgres_data:
+        img:
