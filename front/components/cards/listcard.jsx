@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Badge } from "@material-tailwind/react";
-import { api, API_BASE } from "@/lib/api";
+import { api } from "@/lib/api";
 
 export default function ListCard({OptionsOpen}) {
   // const players = [
@@ -44,17 +44,10 @@ useEffect(() => {
 }, [players]);
 
 async function fetchImg(id) {
-  const url = `${API_BASE}/api/users/${id}/picture`;
-  const options = {method: 'GET', credentials: 'include'};
   try {
-    const response = await fetch(url, options);
-    if (!response.ok) {
-      return;
-    }
-    const blob = await response.blob();
-    const imgUrl = URL.createObjectURL(blob);
-    return (imgUrl);
-
+    const blob = await api.getBlob(`/api/users/${id}/picture`);
+    if (!blob) return;
+    return URL.createObjectURL(blob);
   } catch (error) {
     console.error(error);
     setImg(null);
@@ -99,14 +92,8 @@ useEffect(() => {
 useEffect(() => {
   async function fetchConnectedPlayers() {
     try {
-      const Response = await fetch(`${API_BASE}/api/chat/online`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: { Accept: 'application/json, application/problem+json' }
-      });
-      
-      if (!Response.ok) return;
-      const Data = await Response.json();
+      const Data = await api.get('/api/chat/online');
+      if (!Data) return;
       setConnectedPlayers(Data)
     } catch (error) {
       console.error(error);

@@ -29,7 +29,7 @@ import { ChatMessages } from "@/components/chat/chat-messages";
 import { PrimaryMessage } from "@/components/examples/primary-message";
 import { AdditionalMessage } from "@/components/examples/additional-message";
 import { DateItem } from "@/components/examples/date-item";
-import { api, API_BASE } from "@/lib/api";
+import { api } from "@/lib/api";
 
 // type Message = {
 //   id: string;
@@ -65,17 +65,10 @@ export default function Chat(OptionsOpen) {
 
 
 async function fetchImg(id) {
-  const url = `${API_BASE}/api/users/${id}/picture`;
-  const options = {method: 'GET', credentials: 'include'};
   try {
-    const response = await fetch(url, options);
-    if (!response.ok) {
-      return;
-    }
-    const blob = await response.blob();
-    const imgUrl = URL.createObjectURL(blob);
-    return (imgUrl);
-
+    const blob = await api.getBlob(`/api/users/${id}/picture`);
+    if (!blob) return;
+    return URL.createObjectURL(blob);
   } catch (error) {
     console.error(error);
     setImg(null);

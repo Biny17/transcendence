@@ -7,6 +7,8 @@ RUN bun install --frozen-lockfile
 
 COPY front/ .
 COPY shared ./shared
+ARG NEXT_PUBLIC_GAME_SERVER_URL
+ARG NEXT_PUBLIC_BASE_URL
 RUN bun run build
 
 FROM oven/bun:slim

@@ -10,29 +10,23 @@ import Options from "@/components/cards/Options";
 import { Avatar, Typography } from "@material-tailwind/react";
 import Sloth from "@/public/sloth-meditate.json";
 import lottie from "lottie-web";
-import { api, API_BASE } from "@/lib/api";
+import { api } from "@/lib/api";
 
 export const Navbar = ({OptionsOpen, setOptionsOpen}) => {
 const [dropdownOpen, setDropdownOpen] = useState(false);
 const [error, setError] = useState("");
 const [username, setUserName] = useState('');
 const [Img, setImg] = useState(null)
+const [leaving, setLeaving] = useState(false);
 const router = useRouter();
 const slothRef = useRef(null);
 
 
 async function fetchImg() {
-  const url = `${API_BASE}/api/users/me/profile-picture`;
-  const options = {method: 'GET',  credentials: 'include', headers: {Accept: 'application/json, application/problem+json'}};
   try {
-    const response = await fetch(url, options);
-    if (!response.ok) {
-      setImg(null);
-      return;
-    }
-    const blob = await response.blob();
-    const imgUrl = URL.createObjectURL(blob);
-    setImg(imgUrl);
+    const blob = await api.getBlob('/api/users/me/profile-picture');
+    if (!blob) { setImg(null); return; }
+    setImg(URL.createObjectURL(blob));
   } catch (error) {
     console.error(error);
     setImg(null);
@@ -129,8 +123,8 @@ useEffect(function(){
                   <path fillRule="evenodd" d="M19 10a.75.75 0 0 0-.75-.75H8.704l1.048-.943a.75.75 0 1 0-1.004-1.114l-2.5 2.25a.75.75 0 0 0 0 1.114l2.5 2.25a.75.75 0 1 0 1.004-1.114l-1.048-.943h9.546A.75.75 0 0 0 19 10Z" clipRule="evenodd" />
                 </svg>
             
-                <button className="text-slate-800 font-medium ml-2" onClick={() => window.location.href = "/login"}>
-                  Quitter
+                <button className={`text-slate-800 font-medium ml-2 ${leaving ? "opacity-50" : ""}`} disabled={leaving} onClick={() => { setLeaving(true); window.location.href = "/login"; }}>
+                  {leaving ? "Quitter..." : "Quitter"}
                 </button>
               </li>
             </ul>

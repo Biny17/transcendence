@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { useEffect, useState } from 'react';
-import { api, API_BASE } from "@/lib/api";
+import { api } from "@/lib/api";
 // @material-tailwind/react
 import {
   Button,
@@ -170,24 +170,12 @@ function KpiCard1() {
   useEffect(() => {
   async function fetchUserData() {
     try {
-      const idResponse = await fetch(`${API_BASE}/api/users/me`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: { Accept: 'application/json, application/problem+json' }
-      });
-      
-      if (!idResponse.ok) return;
-      const idData = await idResponse.json();
+      const idData = await api.get<{ id: number }[]>('/api/users/me');
+      if (!idData) return;
       const userId = idData[0].id;
       
-      const statsResponse = await fetch(`${API_BASE}/api/users/${userId}/stats`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: { Accept: 'application/json, application/problem+json' }
-      });
-      
-      if (!statsResponse.ok) return;
-      const statsData = await statsResponse.json();
+      const statsData = await api.get<{ stats: { games_played: number; wins: number; total_deaths: number } }>(`/api/users/${userId}/stats`);
+      if (!statsData) return;
       setDataUser(statsData.stats);
     } catch (error) {
       console.error(error);

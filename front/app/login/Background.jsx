@@ -9,7 +9,7 @@ import Mascot from "@/public/mascot.json";
 import MascotCartoon from "@/public/mascot-cartoon.json";
 import Celeb from "@/public/celebrations.json";
 import { useRouter } from 'next/navigation';
-import api, { API_BASE } from "@/lib/api";
+import api from "@/lib/api";
 
 export function Background({ signInOpen, setSignInOpen }) {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -20,6 +20,7 @@ export function Background({ signInOpen, setSignInOpen }) {
   const [Profile, setProfile] = useState([]);
   const [error, setError] = useState("");
   const [notification, setNotification] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   function showNotification(msg) {
@@ -39,19 +40,22 @@ export function Background({ signInOpen, setSignInOpen }) {
       setError(error instanceof Error ? error.message : "Invalid credentials");
       showNotification(error instanceof Error ? error.message : "Invalid credentials");
       setForm({ email: "", password: "", age: "", username: "" });
+      setLoading(false);
     }
   }
 
   function handle42Login() {
-    window.location.href = `${API_BASE}/api/auth/42/login`;
+    window.location.href = api.getUrl('/api/auth/42/login');
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = (e) => {
+    e?.preventDefault();
+    if (loading) return;
     if (!form.email || !form.password) { setError("Remplissez tous les champs !"); showNotification("Remplissez tous les champs !"); return; }
     if (isSignUpMode && !form.age) { setError("Remplissez tous les champs !"); showNotification("Remplissez tous les champs !"); return; }
     if (isSignUpMode && !form.username) { setError("Choisissez un pseudo !"); showNotification("Choisissez un pseudo !"); return; }
-    else if (isSignUpMode) { setIsSignUp(true); setSubmit(!Submit); return; }
-    else { fetchVerified(); return; }
+    else if (isSignUpMode) { setLoading(true); setIsSignUp(true); setSubmit(!Submit); return; }
+    else { setLoading(true); fetchVerified(); return; }
   };
 
   useEffect(() => {
@@ -74,11 +78,13 @@ export function Background({ signInOpen, setSignInOpen }) {
         setIsSignUp(false);
         setSubmit(false);
         if (isSignUpMode) {
+          setLoading(false);
           setisSignUpMode(false);
           setForm({ email: "", password: "", age: "", username: "" });
         } else if (Profile.verified) {
           router.push("/home");
         } else {
+          setLoading(false);
           setError("Mail not verified");
           showNotification("Mail not verified");
           setForm({ email: "", password: "", age: "", username: "" });
@@ -87,6 +93,7 @@ export function Background({ signInOpen, setSignInOpen }) {
         setError(error instanceof Error ? error.message : "Invalid credentials");
         showNotification(error instanceof Error ? error.message : "Invalid credentials");
         setForm({ email: "", password: "", age: "", username: "" });
+        setLoading(false);
         setIsSignUp(false);
         setIsSignIn(false);
         setSubmit(false);
@@ -228,7 +235,7 @@ useEffect(() => {
         </h3>
       </div>
       <div className="flex flex-col justify-between bg-[#05113a] px-4 py-5">
-        <div className="space-y-4">
+        <form className="space-y-4" onSubmit={handleSubmit}>
           {isSignUpMode && (
             <fieldset className="flex items-center gap-4">
               <label className="w-24 text-right text-[15px] text-slate-200">Pseudo</label>
@@ -278,9 +285,10 @@ useEffect(() => {
             <input type="checkbox" className="checkbox-input" id="check-2" />
             <label className="text-slate-200" htmlFor="check-2">Remember Me</label>
           </div> */}
-        </div>
+          <button type="submit" style={{ display: "none" }}>Submit</button>
+        </form>
         <div className="mt-6 flex flex-col gap-5 justify-end pr-1">
-          <Button statement={isSignUpMode ? "Sign Up" : "Sign In"} onClick={handleSubmit} />
+          <Button statement={loading ? (isSignUpMode ? "Signing Up..." : "Signing In...") : (isSignUpMode ? "Sign Up" : "Sign In")} pressed={loading} isAdded={loading} onClick={handleSubmit} />
           <Button
             statement={
               <span className="flex items-center gap-2">

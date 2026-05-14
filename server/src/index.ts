@@ -64,6 +64,7 @@ const server = Bun.serve<{ playerId: string }>({
 					console.log(`[Server] hasLives=${hasLives} existingId=${existingId} existingLives=${existingId ? sequencer.getLives(existingId) : "N/A"}`);
 					if (existingId && existingId !== playerId) {
 						console.log(`[Server] BRANCH: lobby_wait - duplicate username "${username}" — replacing old player ${existingId} with ${playerId}`);
+						sendTo(existingId, JSON.stringify(createMessage(SERVER_MSG.SESSION_STOLEN, { message: "Your account has been logged in from another location." })));
 						usernames.delete(existingId);
 						sequencer.removePlayer(existingId);
 						broadcast(JSON.stringify(createMessage(SERVER_MSG.PLAYER_DISCONNECT, { playerId: existingId, reason: "duplicate_username" })));
@@ -124,6 +125,7 @@ const server = Bun.serve<{ playerId: string }>({
 					} else {
 						if (existingId && existingId !== playerId) {
 							console.log(`[Server] BRANCH: spectator - duplicate username "${username}" — replacing old player ${existingId} with ${playerId}`);
+							sendTo(existingId, JSON.stringify(createMessage(SERVER_MSG.SESSION_STOLEN, { message: "Your account has been logged in from another location." })));
 							usernames.delete(existingId);
 							sequencer.removePlayer(existingId);
 							broadcast(JSON.stringify(createMessage(SERVER_MSG.PLAYER_DISCONNECT, { playerId: existingId, reason: "duplicate_username" })));
