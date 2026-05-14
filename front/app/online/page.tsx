@@ -13,7 +13,7 @@ export default function OnlineDemo() {
 			<EngineCanvas
 				config={{
 					mode: "online",
-					serverUrl: process.env.NEXT_PUBLIC_GAME_SERVER_URL || "wss://localhost/game/",
+					serverUrl: process.env.NEXT_PUBLIC_GAME_SERVER_URL || "wss://localhost/server/",
 					debug: { enabled: true }
 				}}
 				world={() => new ConnectingWorld()}

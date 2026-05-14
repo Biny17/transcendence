@@ -29,7 +29,7 @@ services:
       # These must now point at the nginx-facing URLs so
       # the browser (not the container) can reach them.
       - NEXT_PUBLIC_API_URL=${API_PROTOCOL}://${API_HOST}/api
-      - NEXT_PUBLIC_GAME_SERVER_URL=${GAME_SERVER_PROTOCOL}://${GAME_SERVER_HOST}/game/
+      - NEXT_PUBLIC_GAME_SERVER_URL=${GAME_SERVER_PROTOCOL}://${GAME_SERVER_HOST}/server/
       - NEXT_PUBLIC_BASE_URL=${API_PROTOCOL}://${API_HOST}
       - NODE_ENV=development
       - FRONT_HOST=${FRONT_HOST}
