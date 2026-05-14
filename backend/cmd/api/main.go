@@ -68,11 +68,20 @@ func ProvideRouter(i do.Injector) (*chi.Mux, error) {
 
 func ProvideApi(i do.Injector) (huma.API, error) {
 	config := huma.DefaultConfig("transcendence", "0.6.9")
+	config.DocsPath = "/api/docs"
+	config.OpenAPIPath = "/api/openapi"
+	config.SchemasPath = "/api/schemas"
 	config.Components.SecuritySchemes = map[string]*huma.SecurityScheme{
 		"cookieAuth": {
 			Type: "apiKey",
 			In:   "cookie",
 			Name: "auth_token",
+		},
+		"adminKey": {
+			Type:   "apiKey",
+			In:     "header",
+			Name:   "Authorization",
+			Scheme: "Basic",
 		},
 	}
 

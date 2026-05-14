@@ -1,116 +1,126 @@
 services:
-        web:
-                image: oven/bun:latest
-                working_dir: /app/front
-                volumes:
-                        - ./front:/app/front
-                        - ./shared:/app/front/shared
-                        - /app/front/node_modules
-                ports:
-                        - "3001:3000"
-                environment:
-                        - NEXT_PUBLIC_API_URL=${API_PROTOCOL}://${API_HOST}
-                        - NEXT_PUBLIC_GAME_SERVER_URL=${GAME_SERVER_PROTOCOL}://${GAME_SERVER_HOST}
-                        - NODE_ENV=development
-                        - FRONT_HOST=${FRONT_HOST}
-                depends_on:
-                        game-server:
-                                condition: service_healthy
-                entrypoint: sh -c "bun install --silent && bun dev"
-                restart: unless-stopped
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      web:
+        condition: service_started
+      game-server:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    restart: unless-stopped
 
-        game-server:
-                image: oven/bun:latest
-                working_dir: /app/server
-                volumes:
-                        - ./server:/app/server
-                        - ./shared:/app/server/shared
-                        - /app/server/node_modules
-                ports:
-                        - "3002:3000"
-                environment:
-                        - NODE_ENV=development
-                        - LOBBY_CONFIG=${LOBBY_CONFIG:-one_game}
-                        - API_URL=http://api:8080
-                        - CREDENTIAL=${CREDENTIAL}
-                depends_on:
-                        api:
-                                condition: service_healthy
-                entrypoint: sh -c "bun install --silent && bun --watch src/index.ts"
-                healthcheck:
-                        test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/3000"]
-                        interval: 5s
-                        timeout: 5s
-                        retries: 5
-                        start_period: 10s
-                restart: unless-stopped
+  web:
+    image: oven/bun:latest
+    working_dir: /app/front
+    volumes:
+      - ./front:/app/front
+      - ./shared:/app/front/shared
+      - /app/front/node_modules
+    expose:
+      - "3000"
+    environment:
+      # These must now point at the nginx-facing URLs so
+      # the browser (not the container) can reach them.
+      - NEXT_PUBLIC_API_URL=${API_PROTOCOL}://${API_HOST}/api
+      - NEXT_PUBLIC_GAME_SERVER_URL=${GAME_SERVER_PROTOCOL}://${GAME_SERVER_HOST}/game/
+      - NEXT_PUBLIC_BASE_URL=${API_PROTOCOL}://${API_HOST}
+      - NODE_ENV=development
+      - FRONT_HOST=${FRONT_HOST}
+    depends_on:
+      game-server:
+        condition: service_healthy
+    entrypoint: sh -c "bun install --silent && bun dev"
+    restart: unless-stopped
 
-        api:
-                build:
-                        context: ./backend
-                        dockerfile: Dockerfile
-                ports:
-                        - "8080:8080"
-                environment:
-                        - DB_HOST=${DB_HOST}
-                        - DB_PORT=${DB_PORT}
-                        - DB_USER=${POSTGRES_USER}
-                        - DB_PWD=${POSTGRES_PASSWORD}
-                        - DB_NAME=${POSTGRES_DB}
-                        - API_PORT=8080
-                        - API_HOST=${API_HOST}
-                        - JWT_SECRET=${JWT_SECRET}
-                        - GMAIL_ADDRESS=${GMAIL_ADDRESS}
-                        - GMAIL_PASSWORD=${GMAIL_PASSWORD}
-                        - ORIGINS=http://${FRONT_HOST},https://${FRONT_HOST}
-                        - KEYPATH=${KEYPATH}
-                        - COOKIE_DOMAIN=${COOKIE_DOMAIN}
-                        - FORTYTWO_CLIENT_ID=${FORTYTWO_CLIENT_ID}
-                        - FORTYTWO_CLIENT_SECRET=${FORTYTWO_CLIENT_SECRET}
-                        - FORTYTWO_REDIRECT_URI=${FORTYTWO_REDIRECT_URI}
-                        - CREDENTIAL=${CREDENTIAL}
-                        - FRONTEND_URL=http://${FRONT_HOST}
-                volumes:
-                        - ./backend:/app
-                        - ./secret:/app/secret
-                        - ./backend/img:/app/img
-                depends_on:
-                        db:
-                                condition: service_healthy
-                healthcheck:
-                        test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/docs"]
-                        interval: 5s
-                        timeout: 5s
-                        retries: 5
-                        start_period: 15s
-                restart: unless-stopped
+  game-server:
+    image: oven/bun:latest
+    working_dir: /app/server
+    volumes:
+      - ./server:/app/server
+      - ./shared:/app/server/shared
+      - /app/server/node_modules
+    # No host port: only reachable through nginx
+    expose:
+      - "3000"
+    environment:
+      - NODE_ENV=development
+      - LOBBY_CONFIG=${LOBBY_CONFIG:-one_game}
+      - API_URL=http://api:8080
+      - CREDENTIAL=${CREDENTIAL}
+    depends_on:
+      api:
+              condition: service_healthy
+    entrypoint: sh -c "bun install --silent && bun --watch src/index.ts"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/3000"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
 
-        db:
-                image: postgres:17-alpine
-                ports:
-                        - "${DB_PORT}:5432"
-                environment:
-                        - POSTGRES_USER=${POSTGRES_USER}
-                        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-                        - POSTGRES_DB=${POSTGRES_DB}
-                volumes:
-                        - postgres_data:/var/lib/postgresql/data
-                healthcheck:
-                        test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-                        interval: 5s
-                        timeout: 5s
-                        retries: 5
-                restart: unless-stopped
-        nginx:
-                image: nginx:alpine
-                ports:
-                        - "80:80"
-                        - "443:443"
-                volumes:
-                        - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-                        - ./nginx/certs:/etc/nginx/certs:ro
-               
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    # No host port: only reachable through nginx
+    expose:
+      - "8080"
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${POSTGRES_USER}
+      - DB_PWD=${POSTGRES_PASSWORD}
+      - DB_NAME=${POSTGRES_DB}
+      - API_PORT=8080
+      - API_HOST=${API_HOST}
+      - GMAIL_ADDRESS=${GMAIL_ADDRESS}
+      - GMAIL_PASSWORD=${GMAIL_PASSWORD}
+      # Both http and https because nginx can forward either scheme
+      - ORIGINS=http://${FRONT_HOST},https://${FRONT_HOST}
+      - KEYPATH=${KEYPATH}
+      - COOKIE_DOMAIN=${COOKIE_DOMAIN}
+      - FORTYTWO_CLIENT_ID=${FORTYTWO_CLIENT_ID}
+      - FORTYTWO_CLIENT_SECRET=${FORTYTWO_CLIENT_SECRET}
+      - FORTYTWO_REDIRECT_URI=${FORTYTWO_REDIRECT_URI}
+      - CREDENTIAL=${CREDENTIAL}
+      - FRONTEND_URL=https://${FRONT_HOST}
+    volumes:
+      - ./backend:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/api/docs"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+
+  db:
+    image: postgres:17-alpine
+    ports:
+      - "${DB_PORT}:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
 volumes:
-        postgres_data:
-        img:
+  postgres_data:

@@ -1,6 +1,6 @@
 all: up
 
-up: 
+up: nginx/certs/cert.key nginx/certs/cert.pem
 	docker compose up
 
 start:
@@ -21,11 +21,14 @@ ps:
 build:
 	docker compose build
 
-nginx/certs/cert.key: secrets
+nginx/certs:
+	mkdir -p $@
+
+nginx/certs/cert.key: nginx/certs
 	openssl genrsa -out $@ 4096
 
-nginx/certs/cert.pem: secrets secrets/cert.key
-	openssl req -x509 -key secrets/cert.key -out $@ \
+nginx/certs/cert.pem: nginx/certs nginx/certs/cert.key
+	openssl req -x509 -key nginx/certs/cert.key -out $@ \
 		-sha256 -days 365 -nodes \
 		-subj "/CN=localhost"
 
@@ -36,6 +39,7 @@ fclean: down clean
 
 clean:
 	rm -rf secrets
+	
 
 .PHONY: all up start down stop logs ps build re clean fclean
 

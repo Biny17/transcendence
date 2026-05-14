@@ -46,7 +46,7 @@ func (us *UserService) Register(api huma.API, m *mid.Middleware) {
 		DefaultStatus: 200,
 		Middlewares:   huma.Middlewares{m.Admin},
 		Security: []map[string][]string{
-			{"apiKey": {}},
+			{"adminKey": {}},
 		},
 	}, us.DelUser)
 	huma.Register(api, huma.Operation{

@@ -8,6 +8,6 @@ RUN bun install --frozen-lockfile
 COPY server ./server
 COPY shared ./shared
 
-EXPOSE 3002
+EXPOSE 3000
 
 CMD ["bun", "dev"]# start

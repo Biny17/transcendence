@@ -37,7 +37,7 @@ func (gs *GameService) Register(api huma.API, m *mid.Middleware) {
 		Summary:     "GAME ADD",
 		Middlewares: huma.Middlewares{m.Admin},
 		Security: []map[string][]string{
-			{"apiKey": {}},
+			{"adminKey": {}},
 		},
 	}, gs.GameResult)
 	huma.Register(api, huma.Operation{
