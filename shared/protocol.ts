@@ -46,13 +46,15 @@ export const SERVER_MSG = {
 	ERROR: "ERROR",
 	PHASE_CHANGED: "PHASE_CHANGED",
 	PHASE_EVENT: "PHASE_EVENT",
-	PLAYER_EMOTE: "PLAYER_EMOTE"
+	PLAYER_EMOTE: "PLAYER_EMOTE",
+	SESSION_STOLEN: "SESSION_STOLEN"
 } as const;
 export type ConnectedPayload = { playerId: string };
 export type LoadWorldPayload = { worldId: string; players: LoadWorldPlayer[]; extra?: Record<string, unknown> };
 export type StartWorldPayload = { initialState: WorldState };
 export type PlayerJoinPayload = LoadWorldPlayer;
 export type PlayerDisconnectPayload = { playerId: string; reason: string };
+export type SessionStolenPayload = { message: string };
 export type PlayerInteractEventPayload = { playerId: string; action: string; targetId?: string; data?: Record<string, unknown> };
 export type LoadGamemodePayload = { modeId: string; winCondition: unknown };
 export type LoadUiPayload = { uiId: string; data?: Record<string, unknown> };

@@ -64,6 +64,13 @@ export class PlayerSyncModule implements Module {
 		console.log("[PlayerSync] PLAYER_DISCONNECT: removing player:", payload.playerId);
 		this.ctx.objects.remove(payload.playerId);
 		this.playerMeshes.delete(payload.playerId);
+		if (this.ctx.selfWorldPlayer) return;
+		const remaining = this.ctx.objects.getByType(OBJECT_TYPE.PLAYER);
+		const allSpectators = remaining.every(p => p.extraData.serverData.isSpectator);
+		if (remaining.length === 0 || allSpectators) {
+			console.log("[PlayerSync] No active players remaining, redirecting to /home");
+			window.location.href = "/home";
+		}
 	}
 	update(_delta: number): void {}
 	dispose(): void {

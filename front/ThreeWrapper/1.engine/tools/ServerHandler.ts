@@ -1,6 +1,6 @@
 "use client";
 import type { GameEventMap } from "shared/events";
-import type { WSMessage, PlayerInputPayload, PlayerInteractPayload, PlayerChoosePayload, PlayerEmotePayload, ConnectedPayload, JoinPayload, PlayerJoinPayload, IncomingInterceptor, OutgoingInterceptor, InterceptorHandle } from "shared/protocol";
+import type { WSMessage, PlayerInputPayload, PlayerInteractPayload, PlayerChoosePayload, PlayerEmotePayload, ConnectedPayload, JoinPayload, PlayerJoinPayload, SessionStolenPayload, IncomingInterceptor, OutgoingInterceptor, InterceptorHandle } from "shared/protocol";
 import { SERVER_MSG, CLIENT_MSG, PHASE_EVENTS, createMessage, parseMessage } from "shared/protocol";
 import type { LoadWorldPlayer } from "shared/state";
 import type { World } from "@/ThreeWrapper/2.world/WorldClass";
@@ -295,6 +295,13 @@ export class ServerHandler {
 			this.pendingWorld = null;
 			this.pendingWorldId = null;
 			this.pendingPlayers = [];
+		});
+		this.on(SERVER_MSG.SESSION_STOLEN, (p: SessionStolenPayload) => {
+			this.logger.warn("Session stolen: " + p.message);
+			this.intentionalDisconnect = true;
+			this.ws?.close();
+			this.ws = null;
+			window.location.href = "/home";
 		});
 
 	}
