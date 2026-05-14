@@ -3,8 +3,8 @@
 USERS=("Lio" "Tommy" "Ella")
 
 for USER in "${USERS[@]}"; do
-  curl --request POST \
-    --url http://localhost:8080/api/users/add \
+  curl -k --request POST \
+    --url https://localhost:4443/api/users/add \
     --header 'Accept: application/problem+json' \
     --header 'Content-Type: application/json' \
     --data "{
