@@ -32,7 +32,7 @@ nginx/certs/cert.pem: nginx/certs nginx/certs/cert.key
 		-sha256 -days 365 -nodes \
 		-subj "/CN=localhost"
 
-re: fclean up
+re: fclean build up
 
 fclean: down clean
 	docker compose down --volumes --rmi all --remove-orphans
